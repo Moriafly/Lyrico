@@ -54,6 +54,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.data.model.entity.FolderEntity
 import com.lonx.lyrico.data.model.entity.SongEntity
 import com.lonx.lyrico.ui.components.bar.SongBatchSelectionActions
@@ -937,6 +938,14 @@ private fun FolderChildrenPage(
         contentPadding = PaddingValues(bottom = 12.dp),
         overscrollEffect = null
     ) {
+        if (folders.isEmpty()) {
+            item("empty") {
+                IllustratedEmptyState(
+                    title = stringResource(R.string.empty_folders_title),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+        }
         items(
             items = folders,
             key = { folder -> "folder-${folder.id}" }
@@ -993,6 +1002,14 @@ private fun FolderCurrentSongsPage(
         contentPadding = PaddingValues(bottom = 12.dp),
         overscrollEffect = null
     ) {
+        if (songs.isEmpty()) {
+            item("empty") {
+                IllustratedEmptyState(
+                    title = stringResource(R.string.empty_songs_title),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+        }
         items(
             items = songs,
             key = { song ->

@@ -56,6 +56,7 @@ import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lonx.audiotag.model.AudioPictureType
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.data.model.entity.AlbumEntity
 import com.lonx.lyrico.data.model.entity.SongEntity
 import com.lonx.lyrico.ui.components.album.AlbumListItem
@@ -557,6 +558,15 @@ private fun ArtistSongsPage(
         contentPadding = PaddingValues(bottom = 12.dp),
         overscrollEffect = null
     ) {
+        if (songs.isEmpty()) {
+            item("empty") {
+                IllustratedEmptyState(
+                    title = stringResource(R.string.empty_songs_title),
+                    compact = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+        }
         items(
             items = songs,
             key = { song -> song.uri.takeIf { it.isNotBlank() && it != "0" } ?: "song-${song.id}" }
@@ -602,6 +612,15 @@ private fun ArtistAlbumsPage(
         contentPadding = PaddingValues(bottom = 12.dp),
         overscrollEffect = null
     ) {
+        if (albums.isEmpty()) {
+            item("empty") {
+                IllustratedEmptyState(
+                    title = stringResource(R.string.empty_albums_title),
+                    compact = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+        }
         items(
             items = albums,
             key = { album -> album.id }

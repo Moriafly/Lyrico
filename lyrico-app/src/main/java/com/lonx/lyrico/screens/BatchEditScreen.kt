@@ -60,6 +60,7 @@ import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.data.editfield.toEditFieldBlocks
 import com.lonx.lyrico.data.editfield.EditFieldRegistry
 import com.lonx.lyrico.ui.components.rememberTintedPainter
@@ -592,19 +593,17 @@ fun BatchEditScreen(
         ) {
 
                 when {
-                    selectedValueOptionsLoading || selectedValueOptions.isEmpty() -> {
-                        Card(
-                            colors = CardDefaults.defaultColors(color = MiuixTheme.colorScheme.secondaryContainer)
-                        ) {
-                            BasicComponent(
-                                title = stringResource(
-                                    if (selectedValueOptionsLoading)
-                                        R.string.batch_edit_loading_selected_values
-                                    else
-                                        R.string.batch_edit_no_selected_values
-                                )
-                            )
+                    selectedValueOptionsLoading -> {
+                        Card(colors = CardDefaults.defaultColors(color = MiuixTheme.colorScheme.secondaryContainer)) {
+                            BasicComponent(title = stringResource(R.string.batch_edit_loading_selected_values))
                         }
+                    }
+                    selectedValueOptions.isEmpty() -> {
+                        IllustratedEmptyState(
+                            title = stringResource(R.string.batch_edit_no_selected_values),
+                            compact = true,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
                     }
 
                     else -> {
@@ -658,17 +657,16 @@ fun BatchEditScreen(
             overscrollEffect = null
         ) {
             if (selectedCoverOptionsLoading || selectedCoverOptions.isEmpty()) {
-                item {
-                    Card(
-                        colors = CardDefaults.defaultColors(color = MiuixTheme.colorScheme.secondaryContainer)
-                    ) {
-                        BasicComponent(
-                            title = stringResource(
-                                if (selectedCoverOptionsLoading)
-                                    R.string.batch_edit_loading_selected_values
-                                else
-                                    R.string.batch_edit_no_selected_covers
-                            )
+                item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }) {
+                    if (selectedCoverOptionsLoading) {
+                        Card(colors = CardDefaults.defaultColors(color = MiuixTheme.colorScheme.secondaryContainer)) {
+                            BasicComponent(title = stringResource(R.string.batch_edit_loading_selected_values))
+                        }
+                    } else {
+                        IllustratedEmptyState(
+                            title = stringResource(R.string.batch_edit_no_selected_covers),
+                            compact = true,
+                            modifier = Modifier.fillMaxWidth(),
                         )
                     }
                 }
@@ -1119,18 +1117,11 @@ private fun BatchEditPreviewTab(
     ) {
         if (previews.isEmpty()) {
             item {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.batch_edit_preview_empty),
-                        style = MiuixTheme.textStyles.footnote1,
-                        color = MiuixTheme.colorScheme.onSurfaceVariantActions,
-                        modifier = Modifier.padding(12.dp)
-                    )
-                }
+                IllustratedEmptyState(
+                    title = stringResource(R.string.batch_edit_preview_empty),
+                    compact = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }
         } else {
             items(

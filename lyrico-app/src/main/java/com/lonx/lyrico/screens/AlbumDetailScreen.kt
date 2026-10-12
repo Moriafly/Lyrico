@@ -40,6 +40,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.data.model.entity.SongEntity
 import com.lonx.lyrico.ui.components.bar.SongBatchSelectionActions
 import com.lonx.lyrico.ui.components.bar.SongSelectionTopAppBar
@@ -240,6 +241,15 @@ fun AlbumDetailScreen(
                         contentPadding = PaddingValues(bottom = 12.dp),
                         overscrollEffect = null
                     ) {
+                        if (songs.isEmpty()) {
+                            item("empty") {
+                                IllustratedEmptyState(
+                                    title = stringResource(R.string.empty_songs_title),
+                                    compact = true,
+                                    modifier = Modifier.fillMaxWidth(),
+                                )
+                            }
+                        }
                         items(
                             items = songs,
                             key = { song ->

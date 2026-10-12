@@ -21,6 +21,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.data.model.BatchTaskStatus
 import com.lonx.lyrico.data.model.entity.BatchTaskItemEntity
 import com.lonx.lyrico.ui.components.scaffoldTopHorizontalPadding
@@ -196,9 +197,11 @@ fun BatchTaskDetailScreen(
                 ) {
                     if (filteredItems.isEmpty()) {
                         item {
-                            Card(modifier = Modifier.padding(horizontal = 12.dp)) {
-                                BasicComponent(title = stringResource(R.string.batch_task_detail_no_records))
-                            }
+                            IllustratedEmptyState(
+                        title = stringResource(R.string.batch_task_detail_no_records),
+                        compact = true,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
                         }
                     } else {
                         items(

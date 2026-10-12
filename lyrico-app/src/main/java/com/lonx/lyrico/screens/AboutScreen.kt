@@ -31,6 +31,7 @@ import com.lonx.lyrico.ui.components.blur.BlurredTopBar
 import com.lonx.lyrico.ui.components.blur.blurSource
 import com.lonx.lyrico.ui.components.blur.rememberBarBlurBackdrop
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.ui.components.scaffoldContentPadding
 import com.lonx.lyrico.utils.UpdateEffect
 import com.lonx.lyrico.viewmodel.AboutViewModel
@@ -221,15 +222,11 @@ fun AboutScreen(
 
                 contributors.isEmpty() -> {
                     item {
-                        Card(
-                            modifier = Modifier
-                                .padding(horizontal = 12.dp, vertical = 6.dp)
-                                .fillMaxWidth()
-                        ) {
-                            BasicComponent(
-                                title = stringResource(R.string.about_no_contributors)
-                            )
-                        }
+                        IllustratedEmptyState(
+                            title = stringResource(R.string.about_no_contributors),
+                            compact = true,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
                     }
                 }
 

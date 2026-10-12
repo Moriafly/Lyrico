@@ -38,7 +38,7 @@ import com.lonx.lyrico.ui.components.blur.rememberBarBlurBackdrop
 import com.lonx.lyrico.ui.components.library.AlbumActionBottomSheet
 import com.lonx.lyrico.ui.components.library.AlbumGridItem
 import com.lonx.lyrico.ui.components.library.AlbumReplayGainProgressBottomSheet
-import com.lonx.lyrico.ui.components.library.LibraryEmptyState
+import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.ui.components.library.LocalLibraryBottomContentPadding
 import com.lonx.lyrico.ui.components.library.libraryOverlayInsets
 import com.lonx.lyrico.ui.components.library.libraryScrollbarOverlay
@@ -188,17 +188,11 @@ fun AlbumsPage(
                         .padding(scaffoldTopHorizontalPadding(paddingValues))
                         .fillMaxSize()
                 ) {
-                    LibraryEmptyState(
+                    IllustratedEmptyState(
                         title = stringResource(R.string.empty_albums_title),
-                        summary = stringResource(R.string.empty_library_index_summary),
                         modifier = Modifier.align(Alignment.Center),
-                        action = {
-                            TextButton(
-                                text = stringResource(R.string.refresh),
-                                onClick = { viewModel.refreshSongs() },
-                                colors = MiuixButtonDefaults.textButtonColorsPrimary()
-                            )
-                        }
+                        actionText = stringResource(R.string.refresh),
+                        onAction = { viewModel.refreshSongs() },
                     )
                 }
             } else {

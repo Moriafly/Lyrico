@@ -48,6 +48,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.data.model.entity.AlbumEntity
 import com.lonx.lyrico.data.model.entity.ArtistEntity
 import com.lonx.lyrico.data.model.entity.SongEntity
@@ -439,7 +440,11 @@ private fun LocalSearchResultsPage(
     ) {
         if (searchQuery.isNotBlank() && !hasResults) {
             item {
-                SearchEmptyCard()
+                IllustratedEmptyState(
+                    title = stringResource(R.string.search_empty),
+                    compact = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }
         }
 
@@ -743,23 +748,6 @@ private fun LocalSearchSongItem(
     )
 }
 
-@Composable
-private fun SearchEmptyCard() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .height(160.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Card(
-            modifier = Modifier.padding(horizontal = 12.dp)
-        ) {
-            BasicComponent(
-                title = stringResource(R.string.search_empty)
-            )
-        }
-    }
-}
 
 private fun localSearchSongKey(song: SongEntity): String {
     val stableId = song.uri.takeIf { it.isNotBlank() && it != "0" } ?: song.id.toString()

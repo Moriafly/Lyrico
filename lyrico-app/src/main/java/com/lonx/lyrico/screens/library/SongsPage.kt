@@ -47,7 +47,7 @@ import com.lonx.lyrico.ui.components.bar.rememberAlphabetSideBarScrollController
 import com.lonx.lyrico.ui.components.blur.BlurredTopBar
 import com.lonx.lyrico.ui.components.blur.blurSource
 import com.lonx.lyrico.ui.components.blur.rememberBarBlurBackdrop
-import com.lonx.lyrico.ui.components.library.LibraryEmptyState
+import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.ui.components.library.LocalLibraryBottomContentPadding
 import com.lonx.lyrico.ui.components.library.libraryOverlayInsets
 import com.lonx.lyrico.ui.components.library.libraryScrollbarOverlay
@@ -55,7 +55,6 @@ import com.lonx.lyrico.ui.components.scaffoldContentPadding
 import com.lonx.lyrico.ui.components.scaffoldTopHorizontalPadding
 import com.lonx.lyrico.ui.components.song.LibraryScanProgressText
 import com.lonx.lyrico.ui.components.song.SongActionSheets
-import com.lonx.lyrico.ui.components.song.SongListEmptyState
 import com.lonx.lyrico.ui.components.song.SongListItem
 import com.lonx.lyrico.ui.components.song.SongListItemActions
 import com.lonx.lyrico.utils.UriUtils
@@ -330,22 +329,18 @@ fun SongsPage(
                         }
 
                         !hasFolders -> {
-                            SongListEmptyState(
-                                onAddFolder = { folderPickerLauncher.launch(null) }
+                            IllustratedEmptyState(
+                                title = stringResource(R.string.song_list_empty_title),
+                                actionText = stringResource(R.string.action_add_folder),
+                                onAction = { folderPickerLauncher.launch(null) },
                             )
                         }
 
                         else -> {
-                            LibraryEmptyState(
+                            IllustratedEmptyState(
                                 title = stringResource(R.string.empty_songs_title),
-                                summary = stringResource(R.string.empty_library_index_summary),
-                                action = {
-                                    TextButton(
-                                        text = stringResource(R.string.refresh),
-                                        onClick = { viewModel.refreshSongs() },
-                                        colors = MiuixButtonDefaults.textButtonColorsPrimary()
-                                    )
-                                }
+                                actionText = stringResource(R.string.refresh),
+                                onAction = { viewModel.refreshSongs() },
                             )
                         }
                     }

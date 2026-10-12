@@ -30,6 +30,7 @@ import com.lonx.lyrico.ui.components.blur.BlurredTopBar
 import com.lonx.lyrico.ui.components.blur.blurSource
 import com.lonx.lyrico.ui.components.blur.rememberBarBlurBackdrop
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.data.model.BatchTaskStatus
 import com.lonx.lyrico.data.model.BatchTaskType
 import com.lonx.lyrico.data.model.entity.BatchTaskEntity
@@ -285,9 +286,11 @@ fun BatchTaskListScreen(
             }
             if (uiState.filteredTasks.isEmpty()) {
                 item {
-                    Card(modifier = Modifier.padding(horizontal = 12.dp)) {
-                        BasicComponent(title = stringResource(R.string.batch_task_no_tasks))
-                    }
+                    IllustratedEmptyState(
+                        title = stringResource(R.string.batch_task_no_tasks),
+                        compact = true,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
                 }
             } else {
                 items(

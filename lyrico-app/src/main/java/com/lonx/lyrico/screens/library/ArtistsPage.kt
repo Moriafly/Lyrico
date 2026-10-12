@@ -35,7 +35,7 @@ import com.lonx.lyrico.ui.components.bar.rememberAlphabetSideBarScrollController
 import com.lonx.lyrico.ui.components.blur.BlurredTopBar
 import com.lonx.lyrico.ui.components.blur.blurSource
 import com.lonx.lyrico.ui.components.blur.rememberBarBlurBackdrop
-import com.lonx.lyrico.ui.components.library.LibraryEmptyState
+import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.ui.components.library.LocalLibraryBottomContentPadding
 import com.lonx.lyrico.ui.components.library.libraryOverlayInsets
 import com.lonx.lyrico.ui.components.library.libraryScrollbarOverlay
@@ -165,17 +165,11 @@ fun ArtistsPage(
                         .padding(scaffoldTopHorizontalPadding(paddingValues))
                         .fillMaxSize()
                 ) {
-                    LibraryEmptyState(
+                    IllustratedEmptyState(
                         title = stringResource(R.string.empty_artists_title),
-                        summary = stringResource(R.string.empty_library_index_summary),
                         modifier = Modifier.align(Alignment.Center),
-                        action = {
-                            TextButton(
-                                text = stringResource(R.string.refresh),
-                                onClick = { viewModel.refreshSongs() },
-                                colors = MiuixButtonDefaults.textButtonColorsPrimary()
-                            )
-                        }
+                        actionText = stringResource(R.string.refresh),
+                        onAction = { viewModel.refreshSongs() },
                     )
                 }
             } else {

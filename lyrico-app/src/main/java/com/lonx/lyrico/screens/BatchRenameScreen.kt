@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.data.model.RenamePreview
 import com.lonx.lyrico.ui.components.scaffoldBottomPadding
 import com.lonx.lyrico.ui.components.scaffoldTopHorizontalPadding
@@ -435,18 +436,11 @@ private fun BatchRenamePreviewTab(
 
         if (uiState.previews.isEmpty()) {
             item {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
-                ) {
-                    Text(
-                        text = stringResource(id = R.string.preview_empty_tip),
-                        fontSize = MiuixTheme.textStyles.footnote1.fontSize,
-                        color = MiuixTheme.colorScheme.onSurfaceVariantActions,
-                        modifier = Modifier.padding(12.dp)
-                    )
-                }
+                IllustratedEmptyState(
+                    title = stringResource(R.string.preview_empty_tip),
+                    compact = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }
         } else {
             itemsIndexed(
