@@ -93,6 +93,7 @@ import com.lonx.lyrico.viewmodel.BatchRenameViewModel
 import com.lonx.lyrico.viewmodel.BatchReplayGainViewModel
 import com.lonx.lyrico.viewmodel.CoverSearchViewModel
 import com.lonx.lyrico.viewmodel.CharacterMappingViewModel
+import com.lonx.lyrico.viewmodel.FieldSongsViewModel
 import com.lonx.lyrico.viewmodel.EditFieldSettingsViewModel
 import com.lonx.lyrico.viewmodel.EditMetadataViewModel
 import com.lonx.lyrico.viewmodel.FolderManagerViewModel
@@ -313,7 +314,8 @@ val appModule = module {
     viewModel { CoverSearchViewModel(get(), get(), get(), get()) }
     viewModel { SearchSourceConfigViewModel(get(), get()) }
     viewModel { EditMetadataViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
-    viewModel { EditFieldSettingsViewModel(get(), get(), get(), get()) }
+    viewModel { EditFieldSettingsViewModel(get(), get()) }
+    viewModel { (fieldCode: String, component: Boolean) -> FieldSongsViewModel(fieldCode, component, get(), get(), get(), get()) }
     viewModel { BatchMatchViewModel(get(), get(), get(), get(), get(), get()) }
     viewModel { AppLogViewModel(get(),get()) }
     viewModel { PluginViewModel(get(), get(), get(), get(), get()) }

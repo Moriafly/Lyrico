@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="edit_field_songs_load_failed_hint">部分歌曲讀取失敗</string>
+    <string name="edit_field_songs_retry">重試</string>
+</resources>

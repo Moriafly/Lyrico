@@ -32,6 +32,9 @@ interface SongCustomTagKeyDao {
     )
     suspend fun getSongUrisByKey(key: String): List<String>
 
+    @Query("SELECT songUri FROM song_custom_tag_keys WHERE `key` = :key ORDER BY songUri ASC")
+    fun observeSongUrisByKey(key: String): Flow<List<String>>
+
     @Query("DELETE FROM song_custom_tag_keys WHERE songUri = :songUri")
     suspend fun deleteForSong(songUri: String)
 

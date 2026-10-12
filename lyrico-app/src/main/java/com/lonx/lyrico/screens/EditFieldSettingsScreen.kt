@@ -1,7 +1,6 @@
 package com.lonx.lyrico.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,7 +10,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -21,8 +19,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -40,7 +36,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -52,7 +47,6 @@ import com.lonx.lyrico.data.editfield.EditFieldDefinition
 import com.lonx.lyrico.data.editfield.EditFieldListItem
 import com.lonx.lyrico.data.editfield.EditFieldRegistry
 import com.lonx.lyrico.data.editfield.toEditFieldBlocks
-import com.lonx.lyrico.data.model.entity.SongEntity
 import com.lonx.lyrico.ui.components.FieldOrderState
 import com.lonx.lyrico.ui.components.ManagedChip
 import com.lonx.lyrico.ui.components.base.PillButton
@@ -62,14 +56,12 @@ import com.lonx.lyrico.ui.components.base.YesNoDialog
 import com.lonx.lyrico.ui.components.blur.BlurredTopBar
 import com.lonx.lyrico.ui.components.blur.blurSource
 import com.lonx.lyrico.ui.components.blur.rememberBarBlurBackdrop
-import com.lonx.lyrico.ui.components.library.LibraryEmptyState
 import com.lonx.lyrico.ui.components.scaffoldContentPadding
-import com.lonx.lyrico.ui.components.song.SongListItem
 import com.lonx.lyrico.viewmodel.CustomTagKeyError
 import com.lonx.lyrico.viewmodel.EditFieldSettingsViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
-import com.ramcosta.composedestinations.generated.destinations.EditMetadataDestination
+import com.ramcosta.composedestinations.generated.destinations.FieldSongsDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -78,7 +70,6 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
-import top.yukonga.miuix.kmp.basic.CircularProgressIndicator
 import top.yukonga.miuix.kmp.basic.DropdownImpl
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
@@ -89,7 +80,6 @@ import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.Switch
-import top.yukonga.miuix.kmp.basic.TabRowWithContour
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TextField
@@ -118,8 +108,6 @@ fun EditFieldSettingsScreen(
     var showAddDialog by remember { mutableStateOf(false) }
     var pendingDeleteKey by remember { mutableStateOf<String?>(null) }
     var showResetDialog by remember { mutableStateOf(false) }
-    var showSongsSheet by remember { mutableStateOf(false) }
-    var pendingOpenSongUri by remember { mutableStateOf<String?>(null) }
 
     var componentKey by remember { mutableStateOf<String?>(null) }
     var showComponentSheet by remember { mutableStateOf(false) }
@@ -240,14 +228,10 @@ fun EditFieldSettingsScreen(
                                     ?.let { pendingDeleteKey = it }
                             },
                             onOpenSongs = {
-                                // 上一次关闭动画没走完就再打开时，丢弃待跳转的歌曲
-                                pendingOpenSongUri = null
-                                val composite = block?.isComposite == true
-                                viewModel.showFieldSongs(
-                                    if (composite) item.field.copy(titleRes = R.string.group_replay_gain) else item.field,
-                                    component = composite,
-                                )
-                                showSongsSheet = true
+                                navigator.navigate(FieldSongsDestination(
+                                    fieldCode = item.field.code,
+                                    component = block?.isComposite == true,
+                                ))
                             },
                             dragHandleModifier = Modifier.longPressDraggableHandle(
                                 onDragStarted = {
@@ -320,39 +304,10 @@ fun EditFieldSettingsScreen(
             if (!showComponentSheet) {
                 componentKey = null
                 pendingFieldSongs?.let { field ->
-                    pendingOpenSongUri = null
-                    viewModel.showFieldSongs(field)
-                    showSongsSheet = true
+                    navigator.navigate(FieldSongsDestination(fieldCode = field.code))
                 }
                 pendingFieldSongs = null
             }
-        },
-    )
-
-    FieldSongsBottomSheet(
-        show = showSongsSheet,
-        sheetTitle = uiState.selectedField.songSheetTitle(),
-        songsWithField = uiState.songsWithField,
-        songsWithoutField = uiState.songsWithoutField,
-        isLoading = uiState.isLoadingSongs,
-        withTruncated = uiState.songsWithFieldTruncated,
-        withoutTruncated = uiState.songsWithoutFieldTruncated,
-        loadFailed = uiState.songsLoadFailed,
-        onDismissRequest = { showSongsSheet = false },
-        onDismissFinished = {
-            // 关闭动画没走完又重新打开了列表时不清理、不跳转
-            if (!showSongsSheet) {
-                viewModel.clearFieldSongs()
-                // 打开歌曲要等 sheet 收完，否则动画会被页面跳转打断
-                pendingOpenSongUri?.let {
-                    navigator.navigate(EditMetadataDestination(songFileUri = it))
-                }
-                pendingOpenSongUri = null
-            }
-        },
-        onSongClick = { song ->
-            pendingOpenSongUri = song.uri
-            showSongsSheet = false
         },
     )
 }
@@ -363,7 +318,7 @@ private fun EditFieldDefinition?.customTagKey(): String =
 
 /** 歌曲列表的标题：自定义标签用键名，标准字段用字段名。 */
 @Composable
-private fun EditFieldDefinition?.songSheetTitle(): String = when {
+private fun EditFieldDefinition?.displayTitle(): String = when {
     this == null -> ""
     custom -> customTagKey()
     else -> stringResource(titleRes)
@@ -400,7 +355,7 @@ private fun EditFieldRow(
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 Text(
-                    text = component?.title() ?: item.field.songSheetTitle(),
+                    text = component?.title() ?: item.field.displayTitle(),
                     modifier = Modifier.weight(1f, fill = false),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -539,93 +494,6 @@ private fun FieldTagChip(text: String) {
             .background(MiuixTheme.colorScheme.primary.copy(alpha = 0.12f))
             .padding(horizontal = 8.dp, vertical = 2.dp),
     )
-}
-
-/** 两类歌曲共用固定高度的 Pager，切换空列表、加载状态时保持 sheet 高度。 */
-@Composable
-private fun FieldSongsBottomSheet(
-    show: Boolean,
-    sheetTitle: String,
-    songsWithField: List<SongEntity>,
-    songsWithoutField: List<SongEntity>,
-    isLoading: Boolean,
-    withTruncated: Boolean,
-    withoutTruncated: Boolean,
-    loadFailed: Boolean,
-    onDismissRequest: () -> Unit,
-    onDismissFinished: () -> Unit,
-    onSongClick: (SongEntity) -> Unit,
-) {
-    val pagerHeight = (LocalConfiguration.current.screenHeightDp.dp * 0.55f).coerceAtMost(420.dp)
-    WindowBottomSheet(
-        show = show,
-        title = sheetTitle,
-        enableNestedScroll = false,
-        onDismissRequest = onDismissRequest,
-        onDismissFinished = onDismissFinished,
-    ) {
-        val pagerState = rememberPagerState(pageCount = { 2 })
-        val scope = rememberCoroutineScope()
-        LaunchedEffect(show, sheetTitle) {
-            if (show) pagerState.scrollToPage(0)
-        }
-        Column(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
-            TabRowWithContour(
-                tabs = listOf(
-                    stringResource(R.string.edit_field_songs_with),
-                    stringResource(R.string.edit_field_songs_without),
-                ),
-                selectedTabIndex = pagerState.currentPage,
-                onTabSelected = { index -> scope.launch { pagerState.animateScrollToPage(index) } },
-            )
-            Spacer(Modifier.height(12.dp))
-            HorizontalPager(
-                state = pagerState,
-                modifier = Modifier.fillMaxWidth().height(pagerHeight),
-                beyondViewportPageCount = 1,
-                key = { page -> "$sheetTitle:$page" },
-                verticalAlignment = Alignment.Top,
-            ) { page ->
-                val songs = if (page == 0) songsWithField else songsWithoutField
-                val truncated = if (page == 0) withTruncated else withoutTruncated
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    when {
-                        isLoading -> CircularProgressIndicator(size = 32.dp)
-                        songs.isEmpty() -> LibraryEmptyState(
-                            title = stringResource(if (loadFailed) R.string.load_failed else R.string.edit_field_songs_empty),
-                        )
-                        else -> Card(
-                            modifier = Modifier.fillMaxSize(),
-                            insideMargin = PaddingValues(0.dp),
-                        ) {
-                            LazyColumn(
-                                state = rememberLazyListState(),
-                                modifier = Modifier.fillMaxSize(),
-                                contentPadding = PaddingValues(bottom = 16.dp),
-                            ) {
-                                if (loadFailed) {
-                                    item { Text(stringResource(R.string.load_failed), modifier = Modifier.padding(16.dp)) }
-                                }
-                                items(songs, key = { it.uri }) { song ->
-                                    SongListItem(song = song, onClick = { onSongClick(song) })
-                                }
-                                if (truncated) {
-                                    item {
-                                        Text(
-                                            text = stringResource(R.string.edit_field_songs_truncated),
-                                            color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-                                            fontSize = MiuixTheme.textStyles.footnote1.fontSize,
-                                            modifier = Modifier.padding(16.dp),
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
 }
 
 @OptIn(ExperimentalLayoutApi::class)

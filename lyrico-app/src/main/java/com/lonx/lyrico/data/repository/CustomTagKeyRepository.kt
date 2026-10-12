@@ -33,6 +33,9 @@ class CustomTagKeyRepository(
         dao.clearAll()
     }
 
+    fun observeSongUrisByKey(key: String): Flow<List<String>> =
+        dao.observeSongUrisByKey(normalizeCustomTagKey(key).orEmpty())
+
     suspend fun getSongUrisByKey(key: String): List<String> {
         return dao.getSongUrisByKey(normalizeCustomTagKey(key) ?: return emptyList())
     }
