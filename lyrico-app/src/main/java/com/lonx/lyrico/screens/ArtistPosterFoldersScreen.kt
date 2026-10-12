@@ -22,6 +22,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.ui.components.blur.BlurredTopBar
 import com.lonx.lyrico.ui.components.blur.blurSource
 import com.lonx.lyrico.ui.components.blur.rememberBarBlurBackdrop
@@ -133,7 +134,8 @@ fun ArtistPosterFoldersScreen(navigator: DestinationsNavigator) {
                         CircularProgressIndicator()
                     }
                 } else {
-                    ArtistPosterEmptyState(
+                    IllustratedEmptyState(
+                        illustration = { ArtistPosterEmptyIllustration() },
                         title = stringResource(R.string.artist_poster_folder_not_selected),
                         summary = stringResource(if (state.error) R.string.artist_poster_folder_error else R.string.artist_poster_folders_empty),
                         actionText = stringResource(R.string.artist_poster_folder_add),
@@ -225,39 +227,7 @@ fun ArtistPosterFoldersScreen(navigator: DestinationsNavigator) {
 }
 
 @Composable
-internal fun ArtistPosterEmptyState(
-    title: String,
-    summary: String,
-    actionText: String,
-    onAction: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Box(modifier, contentAlignment = Alignment.Center) {
-        Column(
-            modifier = Modifier.widthIn(max = 420.dp).fillMaxWidth()
-                .verticalScroll(rememberScrollState()).padding(28.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            ArtistPosterEmptyIllustration()
-            Spacer(Modifier.height(28.dp))
-            Text(
-                title,
-                style = MiuixTheme.textStyles.title4,
-                textAlign = TextAlign.Center
-            )
-            Text(summary, style = MiuixTheme.textStyles.body2,
-                color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-                textAlign = TextAlign.Center, modifier = Modifier.padding(top = 8.dp))
-            Spacer(Modifier.height(20.dp))
-            TextButton(text = actionText, onClick = onAction,
-                modifier = Modifier.widthIn(min = 180.dp).heightIn(min = 48.dp),
-                colors = ButtonDefaults.textButtonColorsPrimary())
-        }
-    }
-}
-
-@Composable
-private fun ArtistPosterEmptyIllustration() {
+internal fun ArtistPosterEmptyIllustration() {
     val colors = MiuixTheme.colorScheme
     val frameShape = RoundedCornerShape(16.dp)
     Box(Modifier.size(width = 188.dp, height = 152.dp), contentAlignment = Alignment.Center) {
