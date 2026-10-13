@@ -27,6 +27,7 @@ import com.lonx.lyrico.viewmodel.ArtistPosterFoldersViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import com.ramcosta.composedestinations.generated.destinations.ArtistDetailDestination
 import dev.jeziellago.compose.markdowntext.MarkdownText
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.basic.*
@@ -62,6 +63,7 @@ fun ArtistPosterFoldersScreen(navigator: DestinationsNavigator) {
     var showFolderDetails by rememberSaveable { mutableStateOf(false) }
     var actionFile by remember { mutableStateOf<ArtistPosterFile?>(null) }
     var showFileMenu by remember { mutableStateOf(false) }
+    var previewUri by remember(state.folder?.uri) { mutableStateOf<String?>(null) }
     var showDeleteFile by remember { mutableStateOf(false) }
     var showRenameFile by remember { mutableStateOf(false) }
     var renameStem by remember { mutableStateOf("") }
@@ -131,11 +133,14 @@ fun ArtistPosterFoldersScreen(navigator: DestinationsNavigator) {
                 ArtistPosterFolderContents(
                     folder = folder,
                     revision = state.revision,
-                    isLoading = state.isLoading || state.isEditing,
+                    isLoading = state.isLoading,
+                    enabled = !state.isEditing,
                     hasError = state.error,
                     onChangeFolder = { picker.launch(null) },
                     onRefresh = viewModel::refresh,
-                    onFileMenu = { actionFile = it; showFileMenu = true },
+                    onFileMenu = { previewUri = null; actionFile = it; showFileMenu = true },
+                    previewUri = previewUri,
+                    onDismissPreview = { previewUri = null },
                     padding = scaffoldContentPadding(padding, horizontalExtra = 12.dp, bottomExtra = 12.dp),
                     scrollBehavior = scrollBehavior
                 )
@@ -162,6 +167,22 @@ fun ArtistPosterFoldersScreen(navigator: DestinationsNavigator) {
             show = showFileMenu, label = file?.name.orEmpty(), enableNestedScroll = false,
             onDismissRequest = { showFileMenu = false }
         ) {
+            ArrowPreference(
+                title = stringResource(R.string.poster_view_artwork),
+                enabled = file != null && !state.isEditing,
+                onClick = { showFileMenu = false; previewUri = file?.uri }
+            )
+            ArrowPreference(
+                title = stringResource(R.string.poster_artist_details),
+                summary = if (file?.artistId == null) stringResource(R.string.poster_artist_unmatched) else null,
+                enabled = file?.artistId != null && !state.isLoading && !state.isEditing,
+                onClick = {
+                    file?.artistId?.let { artistId ->
+                        showFileMenu = false
+                        navigator.navigate(ArtistDetailDestination(artistId = artistId))
+                    }
+                }
+            )
             ArrowPreference(title = stringResource(R.string.action_rename), enabled = !state.isEditing, onClick = {
                 renameStem = file?.name?.substringBeforeLast('.').orEmpty()
                 showFileMenu = false; showRenameFile = true

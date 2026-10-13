@@ -12,7 +12,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -31,7 +30,6 @@ import top.yukonga.miuix.kmp.basic.*
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.AddFolder
 import top.yukonga.miuix.kmp.icon.extended.Image
-import top.yukonga.miuix.kmp.icon.extended.More
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
@@ -41,18 +39,20 @@ internal fun ArtistPosterFolderContents(
     folder: ArtistPosterFolder,
     revision: Long,
     isLoading: Boolean,
+    enabled: Boolean,
     hasError: Boolean,
     onChangeFolder: () -> Unit,
     onRefresh: () -> Unit,
     onFileMenu: (ArtistPosterFile) -> Unit,
+    previewUri: String?,
+    onDismissPreview: () -> Unit,
     padding: PaddingValues,
     scrollBehavior: ScrollBehavior
 ) {
     val files = folder.posters.orEmpty()
-    var previewUri by remember(folder.uri) { mutableStateOf<String?>(null) }
     if (files.isEmpty()) {
         Column(Modifier.fillMaxSize().padding(padding)) {
-            ArtistPosterDirectoryCard(folder, !isLoading, onChangeFolder,
+            ArtistPosterDirectoryCard(folder, enabled && !isLoading, onChangeFolder,
                 Modifier.padding(top = 12.dp))
             if (isLoading) {
                 Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
@@ -83,7 +83,7 @@ internal fun ArtistPosterFolderContents(
         overscrollEffect = null
     ) {
         item(key = "folder", span = { GridItemSpan(maxLineSpan) }) {
-            ArtistPosterDirectoryCard(folder, !isLoading, onChangeFolder,
+            ArtistPosterDirectoryCard(folder, enabled && !isLoading, onChangeFolder,
                 Modifier.padding(top = 12.dp))
         }
         item(key = "count", span = { GridItemSpan(maxLineSpan) }) {
@@ -110,33 +110,27 @@ internal fun ArtistPosterFolderContents(
         items(files, key = { it.uri }) { file ->
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                onClick = { previewUri = file.uri },
+                onClick = if (enabled && !isLoading) { { onFileMenu(file) } } else null,
                 showIndication = true
             ) {
-                Box(Modifier.fillMaxWidth().aspectRatio(1f)) {
-                    PosterImage(file, revision, Modifier.fillMaxSize(), ContentScale.Crop)
-                    if (file.name.endsWith(".mp4", true)) {
-                        Text("MP4", color = Color.White, modifier = Modifier.align(Alignment.BottomEnd)
-                            .padding(6.dp).background(Color.Black.copy(alpha = .65f), RoundedCornerShape(4.dp))
-                            .padding(horizontal = 6.dp, vertical = 2.dp))
-                    }
-                }
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(start = 12.dp, end = 4.dp)
-                ) {
+                PosterImage(file, revision, Modifier.fillMaxWidth().aspectRatio(4f / 5f), ContentScale.Crop)
+                Column(Modifier.fillMaxWidth().padding(12.dp)) {
                     Text(
-                        file.name,
-                        minLines = 2,
-                        maxLines = 2,
+                        file.artistName ?: stringResource(R.string.label_artist_image_unmatched),
+                        maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         fontSize = MiuixTheme.textStyles.body2.fontSize,
                         color = MiuixTheme.colorScheme.onSurfaceContainer,
-                        modifier = Modifier.weight(1f).padding(vertical = 12.dp)
+                        modifier = Modifier.fillMaxWidth()
                     )
-                    IconButton(onClick = { onFileMenu(file) }, enabled = !isLoading) {
-                        Icon(MiuixIcons.More, stringResource(R.string.cd_more_actions))
-                    }
+                    Text(
+                        file.name,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        style = MiuixTheme.textStyles.footnote1,
+                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
                 }
             }
         }
@@ -144,8 +138,8 @@ internal fun ArtistPosterFolderContents(
     val previewIndex = files.indexOfFirst { it.uri == previewUri }
     if (previewIndex >= 0) {
         PosterPreview(files, previewIndex, revision,
-            onFileMenu = { file -> previewUri = null; onFileMenu(file) },
-            onDismiss = { previewUri = null })
+            onFileMenu = onFileMenu,
+            onDismiss = onDismissPreview)
     }
 }
 

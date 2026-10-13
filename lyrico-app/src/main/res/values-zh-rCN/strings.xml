@@ -825,6 +825,8 @@
     <string name="poster_edit_result">成功 %1$d 项，未修改 %2$d 项，失败 %3$d 项</string>
     <string name="poster_remove_artwork">移除艺术家海报</string>
     <string name="poster_view_artwork">查看海报大图</string>
+    <string name="poster_artist_details">艺术家详情</string>
+    <string name="poster_artist_unmatched">无法确定艺术家</string>
     <string name="poster_export_embedded">导出内嵌海报到文件夹</string>
     <string name="poster_export_confirm">导出 %1$d 位艺术家的内嵌海报到文件夹，同名海报将替换</string>
     <string name="poster_pick_folder">先选择海报文件夹</string>

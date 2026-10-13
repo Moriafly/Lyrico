@@ -11,6 +11,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lonx.lyrico.data.repository.LibraryIndexRepository
 import com.lonx.lyrico.data.repository.SettingsRepository
+import com.lonx.lyrico.data.model.entity.ArtistEntity
 import com.lonx.lyrico.utils.SafDocuments
 import com.lonx.lyrico.utils.UriUtils
 import com.lonx.lyrico.utils.coil.ArtistPosterMatcher
@@ -24,7 +25,13 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-data class ArtistPosterFile(val uri: String, val name: String, val lastModified: Long)
+data class ArtistPosterFile(
+    val uri: String,
+    val name: String,
+    val lastModified: Long,
+    val artistId: Long? = null,
+    val artistName: String? = null
+)
 
 data class ArtistPosterFolder(
     val uri: String,
@@ -65,7 +72,7 @@ class ArtistPosterFoldersViewModel(
                     val entry = withContext(Dispatchers.IO) {
                         folder?.let {
                             val uri = folder.toUri()
-                            val posters = readPosters(uri)
+                            val posters = readPosters(uri, artists)
                             ArtistPosterFolder(
                                 uri = folder,
                                 path = UriUtils.getFileAbsolutePath(application, uri)
@@ -88,12 +95,23 @@ class ArtistPosterFoldersViewModel(
         ArtistPosterMatcher.countMatchedFiles(posters.orEmpty().map { it.name }, artistNames)
 
     /** `null` when the folder cannot be queried any more (deleted or access revoked). */
-    private fun readPosters(uri: Uri): List<ArtistPosterFile>? =
-        SafDocuments.children(application, uri)
+    private fun readPosters(uri: Uri, artists: List<ArtistEntity>): List<ArtistPosterFile>? {
+        return SafDocuments.children(application, uri)
             ?.filterNot { it.isDirectory }
             ?.filter { ArtistPosterMatcher.isPosterFile(it.displayName) }
-            ?.map { ArtistPosterFile(uri = it.uri.toString(), name = it.displayName, lastModified = it.lastModified) }
+            ?.map { file ->
+                val matches = artists.mapNotNull { artist ->
+                    ArtistPosterMatcher.rank(file.displayName, artist.name)?.let { it to artist }
+                }
+                val bestRank = matches.minOfOrNull { it.first }
+                val owner = matches.filter { it.first == bestRank }.singleOrNull()?.second
+                ArtistPosterFile(
+                    uri = file.uri.toString(), name = file.displayName,
+                    lastModified = file.lastModified, artistId = owner?.id, artistName = owner?.name
+                )
+            }
             ?.sortedBy { it.name.lowercase() }
+    }
 
     private fun update(action: suspend () -> Unit) {
         viewModelScope.launch {

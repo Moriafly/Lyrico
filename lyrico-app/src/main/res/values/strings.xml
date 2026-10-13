@@ -818,6 +818,8 @@
     <string name="poster_edit_result">%1$d completed, %2$d unchanged, %3$d failed</string>
     <string name="poster_remove_artwork">Remove artist posters</string>
     <string name="poster_view_artwork">View artist poster</string>
+    <string name="poster_artist_details">Artist details</string>
+    <string name="poster_artist_unmatched">No unique artist match</string>
     <string name="poster_export_embedded">Export embedded posters</string>
     <string name="poster_export_confirm">Export embedded posters for %1$d artists to the poster folder? Matching posters will be replaced</string>
     <string name="poster_pick_folder">Select a poster folder first</string>
