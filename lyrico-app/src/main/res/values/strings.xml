@@ -811,4 +811,14 @@
     <string name="edit_field_component_hint">Long press to reorder fields; use switches to control visibility.</string>
     <string name="edit_field_component_short_tag">G</string>
     <string name="edit_field_custom_short_tag">C</string>
+    <string name="poster_remove_confirm">Remove posters for %1$d selected artists?</string>
+    <string name="poster_operation_failed">Operation failed</string>
+    <string name="poster_rename_hint">The file name determines the artist.</string>
+    <string name="poster_rename_invalid">Invalid or duplicate name</string>
+    <string name="poster_edit_result">%1$d completed, %2$d unchanged, %3$d failed</string>
+    <string name="poster_remove_artwork">Remove artist posters</string>
+    <string name="poster_view_artwork">View artist poster</string>
+    <string name="poster_export_embedded">Export embedded posters</string>
+    <string name="poster_export_confirm">Export embedded posters for %1$d artists to the poster folder? Matching posters will be replaced</string>
+    <string name="poster_pick_folder">Select a poster folder first</string>
 </resources>

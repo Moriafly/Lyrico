@@ -1,5 +1,6 @@
 package com.lonx.lyrico.screens.library
 
+import top.yukonga.miuix.kmp.icon.extended.Refresh
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -191,6 +192,7 @@ fun AlbumsPage(
                     IllustratedEmptyState(
                         title = stringResource(R.string.empty_albums_title),
                         modifier = Modifier.align(Alignment.Center),
+                        icon = MiuixIcons.Refresh,
                         actionText = stringResource(R.string.refresh),
                         onAction = { viewModel.refreshSongs() },
                     )

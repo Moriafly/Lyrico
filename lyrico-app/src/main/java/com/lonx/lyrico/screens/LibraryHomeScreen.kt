@@ -36,6 +36,7 @@ import com.lonx.lyrico.screens.library.ArtistsPage
 import com.lonx.lyrico.screens.library.LibraryTab
 import com.lonx.lyrico.screens.library.SongsPage
 import com.lonx.lyrico.ui.components.bar.SongBatchSelectionActions
+import com.lonx.lyrico.ui.components.artist.ArtistBatchSelectionActions
 import com.lonx.lyrico.ui.components.library.LibraryBlurBottomBar
 import com.lonx.lyrico.ui.components.library.LibraryBottomNavigationBar
 import com.lonx.lyrico.ui.components.library.LibraryNavigationRail
@@ -80,6 +81,10 @@ fun LibraryHomeScreen(
     val scope = rememberCoroutineScope()
     val viewModel: SongListViewModel = koinActivityViewModel()
     val selectionViewModel: SongSelectionViewModel = koinViewModel()
+    val artistSelectionViewModel: com.lonx.lyrico.viewmodel.ArtistSelectionViewModel = koinViewModel()
+    val artistEditor: com.lonx.lyrico.viewmodel.ArtistPosterEditViewModel = koinViewModel()
+    val artistSelectionMode by artistSelectionViewModel.isSelectionMode.collectAsState()
+
     val settingsRepository: SettingsRepository = koinInject()
     val floatingBottomBarEnabled by settingsRepository.floatingBottomBarEnabled
         .collectAsState(initial = true)
@@ -102,9 +107,11 @@ fun LibraryHomeScreen(
         val useNavigationRail = maxHeight < 520.dp
         val selectedTab = tabs[pagerState.targetPage]
 
-        BackHandler(enabled = isFabMenuExpanded || (isSelectionMode && selectedTab == LibraryTab.Songs)) {
+        BackHandler(enabled = isFabMenuExpanded || (isSelectionMode && selectedTab == LibraryTab.Songs) || (artistSelectionMode && selectedTab == LibraryTab.Artists)) {
             if (isFabMenuExpanded) {
                 isFabMenuExpanded = false
+            } else if (selectedTab == LibraryTab.Artists) {
+                artistSelectionViewModel.exitSelectionMode()
             } else {
                 selectionViewModel.exitSelectionMode()
             }
@@ -113,6 +120,8 @@ fun LibraryHomeScreen(
         fun selectTab(tab: LibraryTab) {
             scope.launch {
                 selectionViewModel.exitSelectionMode()
+                artistSelectionViewModel.exitSelectionMode()
+                isFabMenuExpanded = false
                 pagerState.animateScrollToPage(tab.ordinal)
             }
         }
@@ -144,6 +153,8 @@ fun LibraryHomeScreen(
                             tabs = tabs,
                             pagerState = pagerState,
                             navigator = navigator,
+                            artistSelectionViewModel = artistSelectionViewModel,
+                            artistEditor = artistEditor,
                             modifier = Modifier.fillMaxSize()
                         )
                     }
@@ -166,6 +177,8 @@ fun LibraryHomeScreen(
                             tabs = tabs,
                             pagerState = pagerState,
                             navigator = navigator,
+                            artistSelectionViewModel = artistSelectionViewModel,
+                            artistEditor = artistEditor,
                             modifier = Modifier.fillMaxSize()
                         )
                     }
@@ -210,6 +223,8 @@ fun LibraryHomeScreen(
                                 tabs = tabs,
                                 pagerState = pagerState,
                                 navigator = navigator,
+                                artistSelectionViewModel = artistSelectionViewModel,
+                                artistEditor = artistEditor,
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .padding(
@@ -221,6 +236,13 @@ fun LibraryHomeScreen(
                     }
                 }
             }
+
+            ArtistBatchSelectionActions(
+                selection = artistSelectionViewModel, editor = artistEditor,
+                visible = selectedTab == LibraryTab.Artists, expanded = isFabMenuExpanded,
+                modifier = Modifier.padding(bottom = bottomBarPadding),
+                onExpandedChange = { isFabMenuExpanded = it }
+            )
 
             SongBatchSelectionActions(
                 navigator = navigator,
@@ -243,6 +265,8 @@ private fun LibraryHomePager(
     tabs: List<LibraryTab>,
     pagerState: androidx.compose.foundation.pager.PagerState,
     navigator: DestinationsNavigator,
+    artistSelectionViewModel: com.lonx.lyrico.viewmodel.ArtistSelectionViewModel,
+    artistEditor: com.lonx.lyrico.viewmodel.ArtistPosterEditViewModel,
     modifier: Modifier = Modifier
 ) {
     HorizontalPager(
@@ -266,7 +290,7 @@ private fun LibraryHomePager(
         ) {
             when (tabs[page]) {
                 LibraryTab.Songs -> SongsPage(navigator = navigator)
-                LibraryTab.Artists -> ArtistsPage(navigator = navigator)
+                LibraryTab.Artists -> ArtistsPage(navigator = navigator, selectionViewModel = artistSelectionViewModel, editor = artistEditor)
                 LibraryTab.Albums -> AlbumsPage(navigator = navigator)
             }
         }

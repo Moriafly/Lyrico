@@ -818,4 +818,14 @@
     <string name="edit_field_component_hint">長按卡片調整內部順序，開關控制欄位顯示</string>
     <string name="edit_field_component_short_tag">組</string>
     <string name="edit_field_custom_short_tag">自</string>
+    <string name="poster_remove_confirm">移除所選 %1$d 位藝術家的海報？</string>
+    <string name="poster_operation_failed">操作失敗</string>
+    <string name="poster_rename_hint">檔名決定藝術家歸屬</string>
+    <string name="poster_rename_invalid">名稱無效或已存在</string>
+    <string name="poster_edit_result">成功 %1$d 項，未修改 %2$d 項，失敗 %3$d 項</string>
+    <string name="poster_remove_artwork">移除藝術家海報</string>
+    <string name="poster_view_artwork">查看海報大圖</string>
+    <string name="poster_export_embedded">匯出內嵌海報到資料夾</string>
+    <string name="poster_export_confirm">匯出 %1$d 位藝術家的內嵌海報到資料夾，同名海報將取代</string>
+    <string name="poster_pick_folder">先選擇海報資料夾</string>
 </resources>

@@ -107,7 +107,7 @@ fun ArtistPosterProgressSheet(
                 ) {
                     Text(
                         text = state.activeSong
-                            ?: stringResource(R.string.label_artist_poster_write_progress),
+                            ?: title,
                         style = MiuixTheme.textStyles.subtitle,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,

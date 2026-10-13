@@ -306,6 +306,7 @@ val appModule = module {
         )
     }
     viewModel { ArtistLibraryViewModel(get(), get(), get()) }
+    viewModel { com.lonx.lyrico.viewmodel.ArtistSelectionViewModel() }
     viewModel { ArtistSplitSettingsViewModel(get(), get()) }
     viewModel { AlbumLibraryViewModel(get(), get(), get()) }
     viewModel { SettingsViewModel(get(), get(), get()) }
@@ -322,6 +323,7 @@ val appModule = module {
 
     viewModel { FolderManagerViewModel(get(), get(), get(), get(), get(), get()) }
     viewModel { ArtistPosterFoldersViewModel(get(), get(), get()) }
+    viewModel { com.lonx.lyrico.viewmodel.ArtistPosterEditViewModel(get(), get(), get(), get(), get()) }
     viewModel { BatchRenameViewModel(get(), get(), get(), get(), get()) }
     viewModel { CharacterMappingViewModel(get()) }
     viewModel { BatchExportViewModel(get(), get(), get()) }

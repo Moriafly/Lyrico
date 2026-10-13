@@ -52,7 +52,6 @@ import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -100,8 +99,6 @@ import com.lonx.lyrico.data.editfield.EditFieldRegistry
 import com.lonx.lyrico.data.editfield.toEditFieldBlocks
 import com.lonx.lyrico.data.model.ConversionMode
 import com.lonx.lyrico.data.model.ExportDestination
-import com.lonx.lyrico.data.model.lyrics.LyricFormat
-import com.lonx.lyrico.data.model.lyrics.LyricsProcessingOptions
 import com.lonx.lyrico.data.model.plugin.PluginSourceType
 import com.lonx.lyrico.data.model.search.LyricsSearchResult
 import com.lonx.lyrico.data.utils.ArtistNameSplitter
@@ -116,8 +113,6 @@ import com.lonx.lyrico.ui.components.blur.BlurredTopBar
 import com.lonx.lyrico.ui.components.blur.blurSource
 import com.lonx.lyrico.ui.components.blur.rememberBarBlurBackdrop
 import com.lonx.lyrico.ui.components.cover.rememberArtistPosterSource
-import com.lonx.lyrico.ui.components.crop.ImageCropper
-import com.lonx.lyrico.ui.components.crop.rememberImageCropperState
 import com.lonx.lyrico.ui.components.fab.ExpandableFabMenu
 import com.lonx.lyrico.ui.components.fab.ExpandableFabMenuStyle
 import com.lonx.lyrico.ui.components.fab.FabMenuItem
@@ -129,7 +124,6 @@ import com.lonx.lyrico.ui.components.rememberTintedPainter
 import com.lonx.lyrico.ui.components.scaffoldTopHorizontalPadding
 import com.lonx.lyrico.ui.theme.LyricoColors
 import com.lonx.lyrico.utils.CoverSourceType
-import com.lonx.lyrico.utils.LyricDecoder
 import com.lonx.lyrico.utils.getCoverSourceType
 import com.lonx.lyrico.utils.coil.readExternalArtistPoster
 import com.lonx.lyrico.viewmodel.EditMetadataViewModel
@@ -177,13 +171,10 @@ import top.yukonga.miuix.kmp.icon.extended.Image
 import top.yukonga.miuix.kmp.icon.extended.Notes
 import top.yukonga.miuix.kmp.icon.extended.Ok
 import top.yukonga.miuix.kmp.icon.extended.Play
-import top.yukonga.miuix.kmp.icon.extended.Reset
 import top.yukonga.miuix.kmp.icon.extended.Search
 import top.yukonga.miuix.kmp.icon.extended.Settings
 import top.yukonga.miuix.kmp.icon.extended.Undo
 import top.yukonga.miuix.kmp.preference.ArrowPreference
-import top.yukonga.miuix.kmp.preference.CheckboxPreference
-import top.yukonga.miuix.kmp.preference.RadioButtonPreference
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
@@ -1596,67 +1587,18 @@ fun EditMetadataScreen(
         },
     )
     // 裁剪界面
-    val cropperState = bitmapToCrop?.let { rememberImageCropperState(it) }
-
-    WindowBottomSheet(
-        show = showCropSheet,
-        enableNestedScroll = false,
-        title = stringResource(
-            if (cropRequest is CropRequest.ArtistImage) R.string.label_crop_artist_image
-            else R.string.label_crop_cover
-        ),
-        endAction = {
-            if (cropperState != null) {
-                IconButton(
-                    onClick = {
-                        val croppedBitmap = cropperState.crop()
-                        when (val request = cropRequest) {
-                            CropRequest.Cover -> viewModel.updateCover(croppedBitmap)
-                            is CropRequest.ArtistImage ->
-                                viewModel.replaceArtistImage(croppedBitmap, request.target)
-                        }
-                        showCropSheet = false
-                        // 注意：这里不清空 bitmapToCrop，等动画结束再清
-                    }
-                ) {
-                    Icon(
-                        imageVector = MiuixIcons.Ok,
-                        contentDescription = null
-                    )
-                }
+    com.lonx.lyrico.ui.components.crop.ImageCropperSheet(
+        show = showCropSheet, bitmap = bitmapToCrop,
+        title = stringResource(if (cropRequest is CropRequest.ArtistImage) R.string.label_crop_artist_image else R.string.label_crop_cover),
+        onCrop = { bitmap ->
+            when (val request = cropRequest) {
+                CropRequest.Cover -> viewModel.updateCover(bitmap)
+                is CropRequest.ArtistImage -> viewModel.replaceArtistImage(bitmap, request.target)
             }
         },
-        onDismissRequest = {
-            showCropSheet = false
-            // 同样不在这里清空
-        },
-        onDismissFinished = {
-            // 动画完全结束后再清理，避免闪烁
-            bitmapToCrop = null
-        }
-    ) {
-        Column(
-            modifier = Modifier
-                .padding(bottom = 32.dp)
-                .fillMaxWidth()
-        ) {
-            if (cropperState != null) {
-                ImageCropper(
-                    state = cropperState,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            } else {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(300.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
-            }
-        }
-    }
+        onDismissRequest = { showCropSheet = false },
+        onDismissFinished = { if (!showCropSheet) bitmapToCrop = null }
+    )
     // 偏移调整 BottomSheet
     WindowBottomSheet(
         show = showOffsetSheet,

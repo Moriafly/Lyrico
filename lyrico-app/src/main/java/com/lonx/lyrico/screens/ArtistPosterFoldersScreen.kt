@@ -1,5 +1,6 @@
 package com.lonx.lyrico.screens
 
+import top.yukonga.miuix.kmp.icon.extended.AddFolder
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -18,7 +19,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lonx.lyrico.R
@@ -41,6 +41,9 @@ import top.yukonga.miuix.kmp.icon.extended.More
 import top.yukonga.miuix.kmp.menu.OverlayIconDropdownMenu
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.window.WindowDialog
+import top.yukonga.miuix.kmp.preference.ArrowPreference
+import com.lonx.lyrico.viewmodel.ArtistPosterFile
+import com.lonx.lyrico.ui.components.base.YesNoDialog
 
 @Composable
 @Destination<RootGraph>(route = "artist_poster_folders")
@@ -62,6 +65,18 @@ fun ArtistPosterFoldersScreen(navigator: DestinationsNavigator) {
     var showRemoveDialog by rememberSaveable { mutableStateOf(false) }
     var showHelp by rememberSaveable { mutableStateOf(false) }
     var showFolderDetails by rememberSaveable { mutableStateOf(false) }
+    var actionFile by remember { mutableStateOf<ArtistPosterFile?>(null) }
+    var showFileMenu by remember { mutableStateOf(false) }
+    var showDeleteFile by remember { mutableStateOf(false) }
+    var showRenameFile by remember { mutableStateOf(false) }
+    var renameStem by remember { mutableStateOf("") }
+    var cropFile by remember { mutableStateOf<ArtistPosterFile?>(null) }
+    var cropBitmap by remember { mutableStateOf<android.graphics.Bitmap?>(null) }
+    var showCrop by remember { mutableStateOf(false) }
+    LaunchedEffect(state.operationMessage) {
+        state.operationMessage?.let { android.widget.Toast.makeText(context, it, android.widget.Toast.LENGTH_LONG).show() }
+        viewModel.clearOperationMessage()
+    }
     val scrollBehavior = MiuixScrollBehavior()
     val topBarBackdrop = rememberBarBlurBackdrop()
 
@@ -105,7 +120,7 @@ fun ArtistPosterFoldersScreen(navigator: DestinationsNavigator) {
                                     }
                                 }
                             ),
-                            enabled = !state.isLoading
+                            enabled = !state.isLoading && !state.isEditing
                         ) {
                             Icon(MiuixIcons.More, stringResource(R.string.cd_more_actions))
                         }
@@ -121,10 +136,11 @@ fun ArtistPosterFoldersScreen(navigator: DestinationsNavigator) {
                 ArtistPosterFolderContents(
                     folder = folder,
                     revision = state.revision,
-                    isLoading = state.isLoading,
+                    isLoading = state.isLoading || state.isEditing,
                     hasError = state.error,
                     onChangeFolder = { picker.launch(null) },
                     onRefresh = viewModel::refresh,
+                    onFileMenu = { actionFile = it; showFileMenu = true },
                     padding = scaffoldContentPadding(padding, horizontalExtra = 12.dp, bottomExtra = 12.dp),
                     scrollBehavior = scrollBehavior
                 )
@@ -138,6 +154,7 @@ fun ArtistPosterFoldersScreen(navigator: DestinationsNavigator) {
                         illustration = { ArtistPosterEmptyIllustration() },
                         title = stringResource(R.string.artist_poster_folder_not_selected),
                         summary = stringResource(if (state.error) R.string.artist_poster_folder_error else R.string.artist_poster_folders_empty),
+                        icon = MiuixIcons.AddFolder,
                         actionText = stringResource(R.string.artist_poster_folder_add),
                         onAction = { picker.launch(null) },
                         modifier = Modifier.fillMaxSize().padding(scaffoldContentPadding(padding))
@@ -145,6 +162,59 @@ fun ArtistPosterFoldersScreen(navigator: DestinationsNavigator) {
                 }
             }
         }
+        val file = actionFile
+        com.lonx.lyrico.ui.components.base.ItemMenuBottomSheet(
+            show = showFileMenu, label = file?.name.orEmpty(), enableNestedScroll = false,
+            onDismissRequest = { showFileMenu = false }
+        ) {
+            ArrowPreference(title = stringResource(R.string.action_rename), enabled = !state.isEditing, onClick = {
+                renameStem = file?.name?.substringBeforeLast('.').orEmpty()
+                showFileMenu = false; showRenameFile = true
+            })
+            if (file?.name?.substringAfterLast('.')?.lowercase() in listOf("jpg", "jpeg", "png", "webp")) {
+                ArrowPreference(title = stringResource(R.string.label_crop_artist_image), enabled = !state.isEditing, onClick = {
+                    showFileMenu = false
+                    cropFile = file
+                    file?.let { viewModel.readBitmap(it) { bitmap -> cropBitmap = bitmap; showCrop = true } }
+                })
+            }
+            ArrowPreference(title = stringResource(R.string.action_delete), enabled = !state.isEditing,
+                titleColor = BasicComponentColors(MiuixTheme.colorScheme.error, MiuixTheme.colorScheme.disabledOnSecondaryVariant),
+                onClick = { showFileMenu = false; showDeleteFile = true })
+        }
+        YesNoDialog(
+            show = showDeleteFile && file != null, title = stringResource(R.string.dialog_delete_file_title),
+            summary = stringResource(R.string.dialog_delete_file_content, file?.name.orEmpty()),
+            onDismissRequest = { showDeleteFile = false },
+            onConfirm = { file?.let(viewModel::deleteFile) }
+        )
+        val proposedName = file?.let { target ->
+            com.lonx.lyrico.domain.poster.PosterFileEditNames.rename(target.name, renameStem,
+                state.folder?.posters.orEmpty().filter { it.uri != target.uri }.map { it.name })
+        }
+        YesNoDialog(
+            show = showRenameFile && file != null, title = stringResource(R.string.dialog_rename_title),
+            confirmEnabled = proposedName != null && proposedName != file?.name && !state.isEditing,
+            onDismissRequest = { showRenameFile = false },
+            onConfirm = { file?.let { viewModel.renameFile(it, renameStem) } },
+            content = {
+                TextField(value = renameStem, onValueChange = { renameStem = it }, maxLines = 1,
+                    modifier = Modifier.fillMaxWidth(), trailingIcon = {
+                        Text(".${file?.name?.substringAfterLast('.').orEmpty()}", modifier = Modifier.padding(horizontal = 12.dp))
+                    })
+                Text(stringResource(R.string.poster_rename_hint), style = MiuixTheme.textStyles.footnote1,
+                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary, modifier = Modifier.padding(top = 8.dp))
+                if (proposedName == null) Text(stringResource(R.string.poster_rename_invalid),
+                    style = MiuixTheme.textStyles.footnote1, color = MiuixTheme.colorScheme.error,
+                    modifier = Modifier.padding(top = 8.dp))
+            }
+        )
+        com.lonx.lyrico.ui.components.crop.ImageCropperSheet(
+            show = showCrop, bitmap = cropBitmap, title = stringResource(R.string.label_crop_artist_image),
+            onCrop = { bitmap -> cropFile?.let { viewModel.cropFile(it, bitmap) } },
+            onDismissRequest = { showCrop = false },
+            onDismissFinished = { if (!showCrop) { cropBitmap = null; cropFile = null } }
+        )
         WindowDialog(
             title = stringResource(R.string.artist_poster_naming),
             show = showHelp,

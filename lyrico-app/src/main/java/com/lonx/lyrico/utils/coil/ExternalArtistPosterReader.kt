@@ -25,7 +25,7 @@ internal inline fun <T> readArtworkSafely(block: () -> T): T? = try {
  * Poster files are user supplied, so an unreadable file must be skipped instead of shadowing a
  * working one in the same folder.
  */
-private fun ByteArray.validArtwork(): ByteArray? {
+internal fun ByteArray.validArtwork(): ByteArray? {
     if (isEmpty()) return null
     val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
     BitmapFactory.decodeByteArray(this, 0, size, options)

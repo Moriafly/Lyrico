@@ -20,14 +20,10 @@
     <string name="artist_poster_preview_error">无法预览</string>
 
     <string name="label_set_artist_poster">添加艺术家海报</string>
-    <string name="label_artist_poster_embed_to_songs">嵌入到歌曲</string>
-    <string name="label_artist_poster_embed_to_songs_summary">从本地选择图片嵌入到该艺术家的所有歌曲</string>
-    <string name="label_artist_poster_add_to_folder">添加到艺术家海报文件夹</string>
-    <string name="label_artist_poster_add_to_folder_summary">从本地选择图片添加到艺术家海报文件夹</string>
-    <string name="label_artist_poster_add_to_folder_no_folder">需先选择艺术家海报文件夹</string>
-    <string name="label_artist_poster_write_progress">正在嵌入艺术家海报</string>
+    <string name="label_artist_poster_embed_to_songs">写入歌曲内嵌海报</string>
+    <string name="label_artist_poster_add_to_folder">从本地添加海报到文件夹</string>
     <string name="label_artist_poster_write_count">%1$d / %2$d</string>
-    <string name="label_artist_poster_write_failed">%1$d 首失败</string>
+    <string name="label_artist_poster_write_failed">%1$d 项失败</string>
     <string name="msg_artist_poster_embedded">已将艺术家海报嵌入 %1$d 首歌曲</string>
     <string name="msg_artist_poster_embed_partial">%1$d 首完成，%2$d 首失败</string>
     <string name="msg_artist_poster_embed_failed">无法嵌入艺术家海报</string>
@@ -39,4 +35,15 @@
     <string name="action_grant_permission">授权</string>
     <string name="artist_poster_folder_details">文件夹详情</string>
     <string name="artist_poster_empty_hint">按艺术家名命名图片，放入此文件夹后刷新</string>
+    <string name="artist_poster_missing_title">暂无艺术家海报</string>
+    <string name="artist_poster_missing_summary">海报文件夹和歌曲中都没有艺术家图片</string>
+    <string name="artist_poster_read_error">无法读取艺术家海报</string>
+    <string name="artist_poster_video_crop_unavailable">视频海报不支持裁剪</string>
+    <string name="artist_poster_destination_title">海报保存位置</string>
+    <string name="artist_poster_add_local_summary">选择本地图片，内嵌到歌曲或保存到海报文件夹</string>
+    <string name="artist_poster_remove_summary">移除这位艺术家的内嵌海报和文件夹海报</string>
+    <string name="artist_poster_export_summary">按艺术家名称保存为图片文件</string>
+    <string name="artist_poster_embed_summary">写入这位艺术家的全部歌曲，海报随音频文件保存</string>
+    <string name="artist_poster_save_folder_summary">按艺术家名称保存图片，不修改歌曲文件</string>
+    <string name="artist_poster_select_folder_summary">先选择海报文件夹，再按艺术家名称保存图片</string>
 </resources>

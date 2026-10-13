@@ -19,7 +19,6 @@ import com.lonx.lyrico.data.repository.LibraryIndexRepository
 import com.lonx.lyrico.data.repository.SettingsRepository
 import com.lonx.lyrico.data.song.tag.AudioTagRepository
 import com.lonx.lyrico.data.utils.ArtistNameSplitter
-import com.lonx.lyrico.domain.poster.ArtistPosterEdits
 import com.lonx.lyrico.domain.poster.ArtistPosterEmbedding
 import com.lonx.lyrico.domain.song.usecase.OverwriteSongTagsUseCase
 import com.lonx.lyrico.domain.song.usecase.SaveAudioTagsResult
@@ -397,26 +396,15 @@ class ArtistDetailViewModel(
         artistName: String,
         source: AudioPicture
     ): SaveAudioTagsResult {
-        val current = audioTagRepository.read(song.uri)
+        val current = audioTagRepository.read(song.uri, com.lonx.lyrico.data.song.tag.AudioTagReadOptions(strict = true))
+        if (!current.supportsTypedPictures) return SaveAudioTagsResult.Failed(
+            IllegalArgumentException("Artist posters are unsupported by this format")
+        )
         val artistNames = ArtistNameSplitter.splitArtists(current.artist, artistSplitConfig.value)
-        val binding = ArtistPosterEmbedding.plan(
-            pictures = current.pictures,
-            artistNames = artistNames,
-            artistName = artistName,
-            data = source.data,
-            mimeType = source.mimeType
-        ) ?: return SaveAudioTagsResult.Success(song = song, tagData = current)
-
-        val picture = source.copy(
-            description = binding.description,
-            pictureType = AudioPictureType.Artist.tagLibName
+        val nextPictures = com.lonx.lyrico.domain.poster.ArtistPosterBatchEdit.apply(
+            current.pictures, artistNames, setOf(artistName), source
         )
-        val nextPictures = ArtistPosterEdits.setFor(
-            pictures = current.pictures,
-            artistNames = artistNames,
-            artistName = artistName,
-            picture = picture
-        )
+        if (nextPictures == current.pictures) return SaveAudioTagsResult.Success(song = song, tagData = current)
 
         return overwriteSongTagsUseCase(
             uri = song.uri,

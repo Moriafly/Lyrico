@@ -1,6 +1,8 @@
 package com.lonx.lyrico.utils
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.net.Uri
 import android.provider.DocumentsContract
 import android.util.Log
 import androidx.core.net.toUri
@@ -117,4 +119,43 @@ object ArtistPosterFileWriter {
         }.getOrNull()
         return if (renamed != null) desiredName else stagedName
     }
+    /** Replace an existing image only after a complete staged file has been written. */
+    fun replaceFile(context: Context, tree: Uri, uri: Uri, name: String, bitmap: Bitmap, expectedBytes: ByteArray? = null) {
+        val children = SafDocuments.children(context, tree) ?: error("Folder unavailable")
+        check(children.any { it.uri == uri && it.displayName == name }) { "Poster changed" }
+        if (expectedBytes != null) {
+            val current = context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
+            check(current != null && current.contentEquals(expectedBytes)) { "Poster changed" }
+        }
+        val extension = name.substringAfterLast('.').lowercase()
+        val format = when (extension) {
+            "jpg", "jpeg" -> Bitmap.CompressFormat.JPEG
+            "png" -> Bitmap.CompressFormat.PNG
+            "webp" -> if (android.os.Build.VERSION.SDK_INT >= 30) Bitmap.CompressFormat.WEBP_LOSSLESS else Bitmap.CompressFormat.WEBP
+            else -> error("Unsupported crop format")
+        }
+        val mime = when (extension) { "png" -> "image/png"; "webp" -> "image/webp"; else -> "image/jpeg" }
+        val resolver = context.contentResolver
+        val parent = DocumentsContract.buildDocumentUriUsingTree(tree, DocumentsContract.getTreeDocumentId(tree))
+        val token = java.util.UUID.randomUUID().toString()
+        val staged = checkNotNull(DocumentsContract.createDocument(resolver, parent, mime, ".lyrico-$token.$extension"))
+        var backup: Uri? = null
+        var committed = false
+        try {
+            check(resolver.openOutputStream(staged, "wt")?.use { output ->
+                bitmap.compress(format, 95, output).also { output.flush() }
+            } == true)
+            // Keep the original recoverable until the complete replacement has its final name.
+            backup = checkNotNull(DocumentsContract.renameDocument(resolver, uri, ".lyrico-$token.bak"))
+            checkNotNull(DocumentsContract.renameDocument(resolver, staged, name))
+            committed = true
+            runCatching { DocumentsContract.deleteDocument(resolver, backup) }
+        } finally {
+            if (!committed) {
+                backup?.let { runCatching { DocumentsContract.renameDocument(resolver, it, name) } }
+                runCatching { DocumentsContract.deleteDocument(resolver, staged) }
+            }
+        }
+    }
+
 }

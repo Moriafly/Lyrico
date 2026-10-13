@@ -53,6 +53,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.lonx.lyrico.ui.components.library.SelectableLibraryItem
 import com.lonx.lyrico.R
 import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.data.model.entity.FolderEntity
@@ -61,7 +62,7 @@ import com.lonx.lyrico.ui.components.bar.SongBatchSelectionActions
 import com.lonx.lyrico.ui.components.bar.SongSelectionTopAppBar
 import com.lonx.lyrico.ui.components.scaffoldTopHorizontalPadding
 import com.lonx.lyrico.ui.components.song.SongActionSheets
-import com.lonx.lyrico.ui.components.song.SongListItem
+import com.lonx.lyrico.ui.components.song.SongListItemContent
 import com.lonx.lyrico.ui.components.song.SongListItemActions
 import com.lonx.lyrico.utils.UriUtils
 import com.lonx.lyrico.viewmodel.FolderManagerViewModel
@@ -1016,8 +1017,8 @@ private fun FolderCurrentSongsPage(
                 song.uri.takeIf { it.isNotBlank() && it != "0" } ?: "song-${song.id}"
             }
         ) { song ->
-            SongListItem(
-                song = song,
+            SelectableLibraryItem(
+                itemKey = song.uri,
                 modifier = Modifier.animateItem(),
                 isSelectionMode = isSelectionMode,
                 isSelected = selectedSongUris.contains(song.uri),
@@ -1031,22 +1032,26 @@ private fun FolderCurrentSongsPage(
                 },
                 onSwipeSelection = {
                     onSwipeSelection(song)
-                },
-                trailingContent = {
-                    Box(modifier = Modifier.padding(end = 8.dp)) {
-                        SongListItemActions(
-                            isSelectionMode = isSelectionMode,
-                            isSelected = selectedSongUris.contains(song.uri),
-                            onToggleSelection = {
-                                onToggleSelection(song)
-                            },
-                            onShowMenu = {
-                                onShowSongMenu(song)
-                            }
-                        )
-                    }
                 }
-            )
+            ) {
+                SongListItemContent(
+                    song = song,
+                    trailingContent = {
+                        Box(modifier = Modifier.padding(end = 8.dp)) {
+                            SongListItemActions(
+                                isSelectionMode = isSelectionMode,
+                                isSelected = selectedSongUris.contains(song.uri),
+                                onToggleSelection = {
+                                    onToggleSelection(song)
+                                },
+                                onShowMenu = {
+                                    onShowSongMenu(song)
+                                }
+                            )
+                        }
+                    }
+                )
+            }
         }
     }
 }

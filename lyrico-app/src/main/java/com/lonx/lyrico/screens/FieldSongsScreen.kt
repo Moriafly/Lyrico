@@ -1,5 +1,6 @@
 package com.lonx.lyrico.screens
 
+import top.yukonga.miuix.kmp.icon.extended.Refresh
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -39,6 +40,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.lonx.lyrico.ui.components.library.SelectableLibraryItem
 import com.lonx.lyrico.R
 import com.lonx.lyrico.data.editfield.EditFieldRegistry
 import com.lonx.lyrico.data.model.entity.SongEntity
@@ -51,7 +53,7 @@ import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.ui.components.song.SongEmptyIllustration
 import com.lonx.lyrico.ui.components.scaffoldContentPadding
 import com.lonx.lyrico.ui.components.song.SongActionSheets
-import com.lonx.lyrico.ui.components.song.SongListItem
+import com.lonx.lyrico.ui.components.song.SongListItemContent
 import com.lonx.lyrico.ui.components.song.SongListItemActions
 import com.lonx.lyrico.viewmodel.FieldSongsViewModel
 import com.lonx.lyrico.viewmodel.SongSelectionViewModel
@@ -207,6 +209,7 @@ fun FieldSongsScreen(
                     pageSongs.isEmpty() -> IllustratedEmptyState(
                         title = stringResource(if (uiState.loadFailed) R.string.load_failed else R.string.edit_field_songs_empty),
                         summary = if (uiState.loadFailed) stringResource(R.string.edit_field_songs_load_failed_hint) else null,
+                        icon = MiuixIcons.Refresh,
                         actionText = if (uiState.loadFailed) stringResource(R.string.edit_field_songs_retry) else null,
                         onAction = viewModel::refresh,
                         illustration = { SongEmptyIllustration() },
@@ -241,8 +244,8 @@ fun FieldSongsScreen(
                             }
                         }
                         items(pageSongs, key = { it.id }) { song ->
-                            SongListItem(
-                                song = song,
+                            SelectableLibraryItem(
+                                itemKey = song.uri,
                                 modifier = Modifier.animateItem(),
                                 isSelectionMode = isSelectionMode,
                                 isSelected = song.uri in selectedSongUris,
@@ -250,21 +253,25 @@ fun FieldSongsScreen(
                                 swipeSelectionSecondaryLabel = swipeSecondaryLabel,
                                 onClick = { navigator.navigate(EditMetadataDestination(songFileUri = song.uri)) },
                                 onToggleSelection = { selectionViewModel.toggleSelection(song.uri) },
-                                onSwipeSelection = { selectionViewModel.swipeSelect(song, pageSongs) },
-                                trailingContent = {
-                                    Box(Modifier.padding(end = 8.dp)) {
-                                        SongListItemActions(
-                                            isSelectionMode = isSelectionMode,
-                                            isSelected = song.uri in selectedSongUris,
-                                            onToggleSelection = { selectionViewModel.toggleSelection(song.uri) },
-                                            onShowMenu = {
-                                                selectedSong = song
-                                                showMenu = true
-                                            },
-                                        )
+                                onSwipeSelection = { selectionViewModel.swipeSelect(song, pageSongs) }
+                            ) {
+                                SongListItemContent(
+                                    song = song,
+                                    trailingContent = {
+                                        Box(Modifier.padding(end = 8.dp)) {
+                                            SongListItemActions(
+                                                isSelectionMode = isSelectionMode,
+                                                isSelected = song.uri in selectedSongUris,
+                                                onToggleSelection = { selectionViewModel.toggleSelection(song.uri) },
+                                                onShowMenu = {
+                                                    selectedSong = song
+                                                    showMenu = true
+                                                },
+                                            )
+                                        }
                                     }
-                                },
-                            )
+                                )
+                            }
                         }
                     }
                 }

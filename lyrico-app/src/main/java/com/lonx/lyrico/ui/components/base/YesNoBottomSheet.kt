@@ -22,6 +22,7 @@ fun YesNoBottomSheet(
     onConfirm: () -> Unit,
     cancelText: String = stringResource(R.string.cancel),
     confirmText: String = stringResource(R.string.confirm),
+    confirmEnabled: Boolean = true,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     ActionBottomSheet(
@@ -49,6 +50,7 @@ fun YesNoBottomSheet(
         },
         endAction =  {
             TextButton(
+                enabled = confirmEnabled,
                 colors = ButtonColors(
                     containerColor = MiuixTheme.colorScheme.surface,
                     contentColor = MiuixTheme.colorScheme.primary,

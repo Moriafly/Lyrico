@@ -42,6 +42,15 @@ internal object ArtistPosterMatcher {
     fun isPosterFile(fileName: String?): Boolean =
         fileName != null && fileName.substringAfterLast('.', "").lowercase() in extensions
 
+    /** A suffixed match must not delete a file that matches an unselected artist more closely. */
+    fun ownedBySelection(fileName: String, selected: Set<String>, libraryArtists: List<String>): Boolean {
+        val selectedRank = selected.mapNotNull { rank(fileName, it) }.minOrNull() ?: return false
+        val selectedKeys = selected.map { it.normalizeName() }.toSet()
+        val otherRank = libraryArtists.filter { it.normalizeName() !in selectedKeys }
+            .mapNotNull { rank(fileName, it) }.minOrNull()
+        return otherRank == null || selectedRank < otherRank
+    }
+
     fun rank(fileName: String, artistName: String): Int? {
         if (!isPosterFile(fileName)) return null
         val artist = artistName.normalizeName()

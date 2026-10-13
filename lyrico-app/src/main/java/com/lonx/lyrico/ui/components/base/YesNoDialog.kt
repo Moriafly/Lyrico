@@ -27,7 +27,8 @@ fun YesNoDialog(
     onDismissFinished: () -> Unit = {},
     onConfirm: () -> Unit,
     cancelText: String = stringResource(R.string.cancel),
-    confirmText: String = stringResource(R.string.confirm)
+    confirmText: String = stringResource(R.string.confirm),
+    confirmEnabled: Boolean = true
 ) {
     WindowDialog(
         show = show,
@@ -56,6 +57,7 @@ fun YesNoDialog(
 
                 TextButton(
                     text = confirmText,
+                    enabled = confirmEnabled,
                     onClick = {
                         onConfirm()
                         onDismissRequest()

@@ -1,68 +1,65 @@
 package com.lonx.lyrico.ui.components.poster
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import com.lonx.lyrico.R
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.CardDefaults
+import top.yukonga.miuix.kmp.basic.BasicComponentColors
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.window.WindowBottomSheet
 
-/**
- * 点艺术家头像后选择本地图片的去向。
- *
- * 两个去向是两套不同的机制，不能合并：
- * - **内嵌**写进这位艺术家每一首歌的标签，随文件走，换设备也在；
- * - **海报文件夹**只写一个文件，不动音频，但要先有已授权的文件夹（没有时点进去会先带用户去添加）。
- *
- * 用户选完去向后，调用方再打开系统选图器选择本地图片。
- */
+/** Artist poster actions; local images share one entry and a separate destination choice. */
 @Composable
 fun ArtistPosterActionsSheet(
     show: Boolean,
-    hasPosterFolder: Boolean,
-    onEmbedToSongs: () -> Unit,
-    onSaveToFolder: () -> Unit,
-    onDismissRequest: () -> Unit
+    onAddLocalPoster: () -> Unit,
+    onDismissRequest: () -> Unit,
+    onRemoveFromSongs: () -> Unit,
+    onExportEmbedded: () -> Unit,
+    enabled: Boolean = true
 ) {
-    WindowBottomSheet(
-        show = show,
-        enableNestedScroll = false,
-        title = stringResource(R.string.label_set_artist_poster),
-        onDismissRequest = onDismissRequest
+    com.lonx.lyrico.ui.components.base.ItemMenuBottomSheet(
+        show = show, label = stringResource(R.string.label_artist_image_options),
+        enableNestedScroll = false, onDismissRequest = onDismissRequest
     ) {
-        Column(
-            modifier = Modifier
-                .padding(bottom = 32.dp)
-                .fillMaxWidth()
-                .verticalScroll(rememberScrollState()),
-        ) {
-            Card(
-                colors = CardDefaults.defaultColors(color = MiuixTheme.colorScheme.secondaryContainer)
-            ) {
-                ArrowPreference(
-                    title = stringResource(R.string.label_artist_poster_embed_to_songs),
-                    summary = stringResource(R.string.label_artist_poster_embed_to_songs_summary),
-                    onClick = onEmbedToSongs
-                )
-                ArrowPreference(
-                    title = stringResource(R.string.label_artist_poster_add_to_folder),
-                    summary = if (hasPosterFolder) {
-                        stringResource(R.string.label_artist_poster_add_to_folder_summary)
-                    } else {
-                        stringResource(R.string.label_artist_poster_add_to_folder_no_folder)
-                    },
-                    onClick = onSaveToFolder
-                )
-            }
-        }
+        ArrowPreference(
+            title = stringResource(R.string.label_change_artist_image),
+            summary = stringResource(R.string.artist_poster_add_local_summary),
+            enabled = enabled,
+            onClick = onAddLocalPoster
+        )
+        ArrowPreference(
+            title = stringResource(R.string.poster_remove_artwork),
+            summary = stringResource(R.string.artist_poster_remove_summary),
+            titleColor = BasicComponentColors(MiuixTheme.colorScheme.error, MiuixTheme.colorScheme.disabledOnSecondaryVariant),
+            enabled = enabled,
+            onClick = onRemoveFromSongs
+        )
+        ArrowPreference(
+            title = stringResource(R.string.poster_export_embedded),
+            summary = stringResource(R.string.artist_poster_export_summary),
+            enabled = enabled,
+            onClick = onExportEmbedded
+        )
     }
+}
+
+@Composable
+fun ArtistPosterDestinationPreferences(
+    hasPosterFolder: Boolean,
+    enabled: Boolean,
+    onEmbedToSongs: () -> Unit,
+    onSaveToFolder: () -> Unit
+) {
+    ArrowPreference(
+        title = stringResource(R.string.label_artist_poster_embed_to_songs),
+        summary = stringResource(R.string.artist_poster_embed_summary),
+        enabled = enabled,
+        onClick = onEmbedToSongs
+    )
+    ArrowPreference(
+        title = stringResource(R.string.label_artist_poster_add_to_folder),
+        enabled = enabled,
+        summary = stringResource(if (hasPosterFolder) R.string.artist_poster_save_folder_summary else R.string.artist_poster_select_folder_summary),
+        onClick = onSaveToFolder
+    )
 }

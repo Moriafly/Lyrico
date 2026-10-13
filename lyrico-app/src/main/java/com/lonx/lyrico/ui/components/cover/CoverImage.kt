@@ -36,7 +36,8 @@ fun CoverImage(
     fallbackPictureTypes: List<AudioPictureType> = emptyList(),
     fallbackToAny: Boolean = pictureType == AudioPictureType.FrontCover,
     candidates: List<CoverCandidate> = emptyList(),
-    artistName: String? = null
+    artistName: String? = null,
+    contentScale: ContentScale = ContentScale.Crop
 ) {
     val posterSource = rememberArtistPosterSource(enabled = artistName != null)
     val hasSource = (!uri.isNullOrBlank() && uri != "0") || artistName != null
@@ -85,7 +86,7 @@ fun CoverImage(
                 model = request,
                 contentDescription = contentDescription,
                 modifier = Modifier.matchParentSize(),
-                contentScale = ContentScale.Crop,
+                contentScale = contentScale,
                 onSuccess = { loadFailed = false },
                 onError = { loadFailed = true }
             )

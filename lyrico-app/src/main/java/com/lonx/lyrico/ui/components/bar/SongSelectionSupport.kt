@@ -69,7 +69,25 @@ fun SongSelectionTopAppBar(
     onClose: () -> Unit
 ) {
     val allSelected = songs.isNotEmpty() && selectedSongUris.containsAll(songs.map { it.uri })
+    SelectionTopAppBar(
+        selectedCount = selectedSongUris.size,
+        allSelected = allSelected,
+        scrollBehavior = scrollBehavior, color = color, applyInsets = applyInsets,
+        onToggleAll = { if (allSelected) onDeselectAll() else onSelectAll(songs) },
+        onClose = onClose
+    )
+}
 
+@Composable
+fun SelectionTopAppBar(
+    selectedCount: Int,
+    allSelected: Boolean,
+    scrollBehavior: ScrollBehavior,
+    color: Color = Color.Unspecified,
+    applyInsets: Boolean = true,
+    onToggleAll: () -> Unit,
+    onClose: () -> Unit
+) {
     BoxWithConstraints {
         val compactTopBar = maxWidth < 360.dp
 
@@ -87,20 +105,14 @@ fun SongSelectionTopAppBar(
                 Text(
                     text = stringResource(
                         R.string.selection_mode_selected_count,
-                        selectedSongUris.size
+                        selectedCount
                     )
                 )
             },
             actions = {
                 if (!compactTopBar) {
                     TextButton(
-                        onClick = {
-                            if (allSelected) {
-                                onDeselectAll()
-                            } else {
-                                onSelectAll(songs)
-                            }
-                        }
+                        onClick = onToggleAll
                     ) {
                         Text(
                             text = stringResource(

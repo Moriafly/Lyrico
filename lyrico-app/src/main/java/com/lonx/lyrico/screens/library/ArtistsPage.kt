@@ -1,11 +1,14 @@
 package com.lonx.lyrico.screens.library
 
+import top.yukonga.miuix.kmp.icon.extended.Refresh
+import top.yukonga.miuix.kmp.icon.extended.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -15,8 +18,36 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.FastOutSlowInEasing
+import com.lonx.lyrico.ui.components.library.SelectableLibraryItem
+import com.lonx.lyrico.data.model.entity.ArtistEntity
+import com.lonx.lyrico.ui.components.bar.SelectionTopAppBar
+import com.lonx.lyrico.ui.components.song.SongListItemActions
+import top.yukonga.miuix.kmp.basic.BasicComponentColors
+import top.yukonga.miuix.kmp.preference.ArrowPreference
+import com.lonx.lyrico.viewmodel.ArtistPosterEditViewModel
+import com.lonx.lyrico.ui.components.poster.ArtistPosterRemovalHost
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.key
 import androidx.compose.runtime.setValue
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import coil3.compose.AsyncImage
+import com.lonx.lyrico.domain.poster.ResolvedArtistPoster
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import top.yukonga.miuix.kmp.basic.CircularProgressIndicator
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -29,7 +60,7 @@ import com.lonx.lyrico.R
 import com.lonx.lyrico.data.model.ArtistSortBy
 import com.lonx.lyrico.data.model.ArtistSortInfo
 import com.lonx.lyrico.ui.components.CoverCandidate
-import com.lonx.lyrico.ui.components.artist.ArtistListItem
+import com.lonx.lyrico.ui.components.artist.ArtistListItemContent
 import com.lonx.lyrico.ui.components.bar.AlphabetSideBar
 import com.lonx.lyrico.ui.components.bar.rememberAlphabetSideBarScrollController
 import com.lonx.lyrico.ui.components.blur.BlurredTopBar
@@ -51,7 +82,6 @@ import my.nanihadesuka.compose.InternalLazyVerticalGridScrollbar
 import my.nanihadesuka.compose.ScrollbarSelectionMode
 import my.nanihadesuka.compose.ScrollbarSettings
 import org.koin.androidx.compose.koinViewModel
-import top.yukonga.miuix.kmp.basic.ButtonDefaults as MiuixButtonDefaults
 import top.yukonga.miuix.kmp.basic.DropdownEntry
 import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.Icon
@@ -60,7 +90,6 @@ import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.PullToRefresh
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
-import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Search
 import top.yukonga.miuix.kmp.icon.extended.Settings
@@ -76,15 +105,52 @@ private val SECTIONS_DESC = SECTIONS_ASC.asReversed()
 @Composable
 fun ArtistsPage(
     navigator: DestinationsNavigator,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    selectionViewModel: com.lonx.lyrico.viewmodel.ArtistSelectionViewModel = koinViewModel(),
+    editor: com.lonx.lyrico.viewmodel.ArtistPosterEditViewModel = koinViewModel()
 ) {
     val viewModel: ArtistLibraryViewModel = koinViewModel()
+    val removalViewModel = editor
+    val removalState by removalViewModel.state.collectAsStateWithLifecycle()
+    var menuArtist by remember { mutableStateOf<ArtistEntity?>(null) }
+    var showArtistMenu by remember { mutableStateOf(false) }
+    var addPosterArtist by remember { mutableStateOf<ArtistEntity?>(null) }
+    var showAddPoster by remember { mutableStateOf(false) }
+    val posterMenu by editor.menu.collectAsStateWithLifecycle()
+    var previewPoster by remember { mutableStateOf<ResolvedArtistPoster?>(null) }
+    var cropTarget by remember { mutableStateOf<ResolvedArtistPoster?>(null) }
+    var cropBitmap by remember { mutableStateOf<Bitmap?>(null) }
+    var showCrop by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    LaunchedEffect(cropTarget, showCrop) {
+        val target = cropTarget
+        if (showCrop && target != null) {
+            cropBitmap = withContext(Dispatchers.IO) {
+                BitmapFactory.decodeByteArray(target.bytes, 0, target.bytes.size)
+            }
+            if (cropBitmap == null) {
+                showCrop = false
+                android.widget.Toast.makeText(context, R.string.artist_poster_read_error, android.widget.Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+    val selecting by selectionViewModel.isSelectionMode.collectAsStateWithLifecycle()
+    val selectedIds by selectionViewModel.selectedIds.collectAsStateWithLifecycle()
+    val swipeAnchor by selectionViewModel.swipeAnchorId.collectAsStateWithLifecycle()
+    val swipeLabel = stringResource(if (!selecting) R.string.swipe_selection_enter_selection
+        else if (swipeAnchor == null) R.string.swipe_selection_range_start else R.string.swipe_selection_range_end)
+    val swipeSecondaryLabel = if (!selecting) stringResource(R.string.swipe_selection_range_start) else null
+    var pendingRemoval by remember { mutableStateOf<Set<Long>>(emptySet()) }
     val scanState by viewModel.scanState.collectAsStateWithLifecycle()
     var artistGridColumns by remember {
         mutableIntStateOf(1)
     }
     val artists by viewModel.artists.collectAsStateWithLifecycle()
+    LaunchedEffect(artists) { selectionViewModel.retainVisible(artists) }
     val artistCoverCandidates by viewModel.artistCoverCandidates.collectAsStateWithLifecycle()
+    fun coverCandidates(id: Long): List<CoverCandidate> = artistCoverCandidates[id].orEmpty().map {
+        CoverCandidate(uri = it.uri.toUri(), lastUpdate = it.lastModified)
+    }
     val sortInfo by viewModel.sortInfo.collectAsStateWithLifecycle()
     val topAppBarScrollBehavior = MiuixScrollBehavior()
     val topBarBackdrop = rememberBarBlurBackdrop()
@@ -118,39 +184,57 @@ fun ArtistsPage(
     Scaffold(
         topBar = {
             BlurredTopBar(backdrop = topBarBackdrop) {
-                SmallTopAppBar(
-                    title = stringResource(R.string.artist_list_title, artists.size),
-                    color = Color.Transparent,
-                    modifier = Modifier,
-                    scrollBehavior = topAppBarScrollBehavior,
-                    defaultWindowInsetsPadding = false,
-                    navigationIcon = {
-                        IconButton(onClick = { navigator.navigate(SettingsDestination()) }) {
-                            Icon(
-                                imageVector = MiuixIcons.Settings,
-                                contentDescription = null
-                            )
-                        }
-                    },
-                    actions = {
-                        IconButton(onClick = { navigator.navigate(LocalSearchDestination) }) {
-                            Icon(
-                                imageVector = MiuixIcons.Search,
-                                contentDescription = stringResource(R.string.cd_search)
-                            )
-                        }
-                        OverlayIconDropdownMenu(
-                            entries = listOf(
-                                artistSortDropdownEntry(sortInfo, viewModel::onSortChange),
-                            )
-                        ) {
-                            Icon(
-                                imageVector = MiuixIcons.Sort,
-                                contentDescription = stringResource(R.string.cd_sort)
-                            )
-                        }
+                AnimatedContent(
+                    targetState = selecting, label = "TopBarAnimation",
+                    transitionSpec = {
+                        val enter = fadeIn(tween(300)) + slideInVertically(tween(300, easing = FastOutSlowInEasing)) { -it / 3 }
+                        val exit = fadeOut(tween(300)) + slideOutVertically(tween(300, easing = FastOutSlowInEasing)) { -it / 3 }
+                        (enter togetherWith exit).using(SizeTransform(clip = false))
                     }
-                )
+                ) { selectionMode ->
+                    if (selectionMode) {
+                        SelectionTopAppBar(
+                            selectedCount = selectedIds.size,
+                            allSelected = artists.isNotEmpty() && selectedIds.size == artists.size,
+                            scrollBehavior = topAppBarScrollBehavior, color = Color.Transparent, applyInsets = false,
+                            onToggleAll = { if (selectedIds.size == artists.size) selectionViewModel.deselectAll() else selectionViewModel.selectAll(artists) },
+                            onClose = selectionViewModel::exitSelectionMode
+                        )
+                    } else SmallTopAppBar(
+                        title = stringResource(R.string.artist_list_title, artists.size),
+                        color = Color.Transparent,
+                        modifier = Modifier,
+                        scrollBehavior = topAppBarScrollBehavior,
+                        defaultWindowInsetsPadding = false,
+                        navigationIcon = {
+                            IconButton(onClick = { navigator.navigate(SettingsDestination()) }) {
+                                Icon(
+                                    imageVector = MiuixIcons.Settings,
+                                    contentDescription = null
+                                )
+                            }
+                        },
+                        actions = {
+                            IconButton(onClick = { navigator.navigate(LocalSearchDestination) }) {
+                                Icon(
+                                    imageVector = MiuixIcons.Search,
+                                    contentDescription = stringResource(R.string.cd_search)
+                                )
+                            }
+                            OverlayIconDropdownMenu(
+                                entries = listOf(
+                                    artistSortDropdownEntry(sortInfo, viewModel::onSortChange),
+                                )
+                            ) {
+                                Icon(
+                                    imageVector = MiuixIcons.Sort,
+                                    contentDescription = stringResource(R.string.cd_sort)
+                                )
+                            }
+
+                        }
+                    )
+                }
             }
         }
     ) { paddingValues ->
@@ -168,6 +252,7 @@ fun ArtistsPage(
                     IllustratedEmptyState(
                         title = stringResource(R.string.empty_artists_title),
                         modifier = Modifier.align(Alignment.Center),
+                        icon = MiuixIcons.Refresh,
                         actionText = stringResource(R.string.refresh),
                         onAction = { viewModel.refreshSongs() },
                     )
@@ -208,20 +293,32 @@ fun ArtistsPage(
                                 items = artists,
                                 key = { it.id }
                             ) { artist ->
-                                ArtistListItem(
-                                    artist = artist,
-                                    coverCandidates = artistCoverCandidates[artist.id]
-                                        .orEmpty()
-                                        .map { candidate ->
-                                            CoverCandidate(
-                                                uri = candidate.uri.toUri(),
-                                                lastUpdate = candidate.lastModified
+                                SelectableLibraryItem(
+                                    itemKey = artist.id,
+                                    onClick = { navigator.navigate(ArtistDetailDestination(artistId = artist.id)) },
+                                    isSelectionMode = selecting,
+                                    isSelected = artist.id.toString() in selectedIds,
+                                    swipeSelectionLabel = swipeLabel,
+                                    swipeSelectionSecondaryLabel = swipeSecondaryLabel,
+                                    onToggleSelection = { selectionViewModel.toggle(artist.id) },
+                                    onSwipeSelection = { selectionViewModel.swipeSelect(artist, artists) }
+                                ) {
+                                    ArtistListItemContent(
+                                        artist = artist,
+                                        coverCandidates = coverCandidates(artist.id),
+                                        trailingContent = {
+                                            SongListItemActions(
+                                                isSelectionMode = selecting, isSelected = artist.id.toString() in selectedIds,
+                                                onToggleSelection = { selectionViewModel.toggle(artist.id) },
+                                                onShowMenu = {
+                                                    menuArtist = artist
+                                                    editor.loadPoster(artist.id, coverCandidates(artist.id).map { it.uri.toString() })
+                                                    showArtistMenu = true
+                                                }
                                             )
-                                        },
-                                    onClick = {
-                                        navigator.navigate(ArtistDetailDestination(artistId = artist.id))
-                                    }
-                                )
+                                        }
+                                    )
+                                }
                             }
                         }
                     }
@@ -257,8 +354,90 @@ fun ArtistsPage(
                     )
                 }
             }
+
         }
     }
+    com.lonx.lyrico.ui.components.base.ItemMenuBottomSheet(
+        show = showArtistMenu, label = menuArtist?.name.orEmpty(), enableNestedScroll = false,
+        onDismissRequest = { showArtistMenu = false },
+        onDismissFinished = { if (!showArtistMenu) menuArtist = null }
+    ) {
+        val source = posterMenu.source
+        when {
+            posterMenu.loading -> Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+            posterMenu.error -> IllustratedEmptyState(
+                title = stringResource(R.string.artist_poster_read_error),
+                compact = true,
+                icon = MiuixIcons.Refresh,
+                actionText = stringResource(R.string.refresh),
+                onAction = { menuArtist?.let { editor.loadPoster(it.id, coverCandidates(it.id).map { it.uri.toString() }) } }
+            )
+            source == null -> IllustratedEmptyState(
+                title = stringResource(R.string.artist_poster_missing_title),
+                compact = true,
+                summary = stringResource(R.string.artist_poster_missing_summary),
+                icon = MiuixIcons.Image,
+                actionText = stringResource(R.string.label_select_artist_image),
+                onAction = {
+                    if (!removalState.isRunning) {
+                        addPosterArtist = menuArtist
+                        showAddPoster = true
+                        showArtistMenu = false
+                    }
+                },
+            )
+            else -> {
+                ArrowPreference(title = stringResource(R.string.poster_view_artwork), onClick = {
+                    previewPoster = source
+                    showArtistMenu = false
+                })
+                ArrowPreference(
+                    title = stringResource(R.string.label_crop_artist_image),
+                    summary = if (!source.canCrop) stringResource(R.string.artist_poster_video_crop_unavailable) else null,
+                    enabled = source.canCrop && !removalState.isRunning,
+                    onClick = { cropTarget = source; showCrop = true; showArtistMenu = false }
+                )
+                ArrowPreference(title = stringResource(R.string.poster_remove_artwork), enabled = !removalState.isRunning,
+                    titleColor = BasicComponentColors(MiuixTheme.colorScheme.error, MiuixTheme.colorScheme.disabledOnSecondaryVariant), onClick = {
+                        menuArtist?.let { pendingRemoval = setOf(it.id) }
+                        showArtistMenu = false
+                    })
+            }
+        }
+    }
+    addPosterArtist?.let { artist ->
+        key(artist.id) {
+            val addViewModel: com.lonx.lyrico.viewmodel.ArtistDetailViewModel = koinViewModel(
+                key = "artist-poster-add-${artist.id}",
+                parameters = { org.koin.core.parameter.parametersOf(artist.id) }
+            )
+            com.lonx.lyrico.ui.components.poster.ArtistPosterAddHost(
+                viewModel = addViewModel,
+                show = showAddPoster,
+                onDismissRequest = { showAddPoster = false },
+                enabled = !removalState.isRunning
+            )
+        }
+    }
+    previewPoster?.let { source ->
+        com.lonx.lyrico.ui.components.poster.ArtistPosterPreview(
+            pageCount = 1, title = { source.artistName }, pageKey = { source }, onDismiss = { previewPoster = null },
+            videoUri = { (source as? ResolvedArtistPoster.File)?.takeIf { !it.canCrop }?.uri },
+            imageContent = { _, modifier ->
+                AsyncImage(model = source.bytes, contentDescription = source.artistName,
+                    contentScale = ContentScale.Fit, modifier = modifier)
+            }
+        )
+    }
+    com.lonx.lyrico.ui.components.crop.ImageCropperSheet(
+        show = showCrop, bitmap = cropBitmap, title = stringResource(R.string.label_crop_artist_image),
+        onCrop = { bitmap -> cropTarget?.let { editor.cropPoster(it, bitmap) }; showCrop = false },
+        onDismissRequest = { showCrop = false },
+        onDismissFinished = { if (!showCrop) { cropTarget = null; cropBitmap = null } }
+    )
+    ArtistPosterRemovalHost(removalViewModel, pendingRemoval, { pendingRemoval = emptySet() }, showProgress = false)
 }
 
 @Composable

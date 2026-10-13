@@ -20,14 +20,10 @@
     <string name="artist_poster_preview_error">無法預覽</string>
 
     <string name="label_set_artist_poster">新增演出者海報</string>
-    <string name="label_artist_poster_embed_to_songs">內嵌至歌曲</string>
-    <string name="label_artist_poster_embed_to_songs_summary">從本機選擇圖片並內嵌至此演出者的所有歌曲</string>
-    <string name="label_artist_poster_add_to_folder">新增至演出者海報資料夾</string>
-    <string name="label_artist_poster_add_to_folder_summary">從本機選擇圖片並新增至演出者海報資料夾</string>
-    <string name="label_artist_poster_add_to_folder_no_folder">請先選擇演出者海報資料夾</string>
-    <string name="label_artist_poster_write_progress">正在內嵌演出者海報</string>
+    <string name="label_artist_poster_embed_to_songs">寫入歌曲內嵌海報</string>
+    <string name="label_artist_poster_add_to_folder">從本機加入海報到資料夾</string>
     <string name="label_artist_poster_write_count">%1$d / %2$d</string>
-    <string name="label_artist_poster_write_failed">%1$d 首失敗</string>
+    <string name="label_artist_poster_write_failed">%1$d 項失敗</string>
     <string name="msg_artist_poster_embedded">已將演出者海報內嵌至 %1$d 首歌曲</string>
     <string name="msg_artist_poster_embed_partial">%1$d 首完成，%2$d 首失敗</string>
     <string name="msg_artist_poster_embed_failed">無法內嵌演出者海報</string>
@@ -39,4 +35,15 @@
     <string name="action_grant_permission">授權</string>
     <string name="artist_poster_folder_details">資料夾詳情</string>
     <string name="artist_poster_empty_hint">以演出者姓名命名圖片，放入此資料夾後重新整理</string>
+    <string name="artist_poster_missing_title">暫無演出者海報</string>
+    <string name="artist_poster_missing_summary">海報資料夾和歌曲中都沒有演出者圖片</string>
+    <string name="artist_poster_read_error">無法讀取演出者海報</string>
+    <string name="artist_poster_video_crop_unavailable">影片海報不支援裁切</string>
+    <string name="artist_poster_destination_title">海報儲存位置</string>
+    <string name="artist_poster_add_local_summary">選擇本機圖片，內嵌到歌曲或儲存到海報資料夾</string>
+    <string name="artist_poster_remove_summary">移除這位藝術家的內嵌海報和資料夾海報</string>
+    <string name="artist_poster_export_summary">依藝術家名稱儲存為圖片檔案</string>
+    <string name="artist_poster_embed_summary">寫入這位藝術家的全部歌曲，海報隨音訊檔案儲存</string>
+    <string name="artist_poster_save_folder_summary">依藝術家名稱儲存圖片，不修改歌曲檔案</string>
+    <string name="artist_poster_select_folder_summary">先選擇海報資料夾，再依藝術家名稱儲存圖片</string>
 </resources>

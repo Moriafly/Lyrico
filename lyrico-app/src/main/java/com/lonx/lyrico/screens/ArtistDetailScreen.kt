@@ -1,14 +1,6 @@
 package com.lonx.lyrico.screens
 
-import android.app.Activity
-import android.content.Intent
-import android.net.Uri
-import android.widget.Toast
 import androidx.activity.compose.BackHandler
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.IntentSenderRequest
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -55,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lonx.audiotag.model.AudioPictureType
+import com.lonx.lyrico.ui.components.library.SelectableLibraryItem
 import com.lonx.lyrico.R
 import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.data.model.entity.AlbumEntity
@@ -67,14 +60,12 @@ import com.lonx.lyrico.ui.components.CoverCandidate
 import com.lonx.lyrico.ui.components.cover.CoverImage
 import com.lonx.lyrico.ui.components.library.AlbumActionBottomSheet
 import com.lonx.lyrico.ui.components.poster.ArtistPosterActionsSheet
-import com.lonx.lyrico.ui.components.poster.ArtistPosterProgressSheet
 import com.lonx.lyrico.ui.components.scaffoldTopHorizontalPadding
 import com.lonx.lyrico.ui.components.song.SongActionSheets
-import com.lonx.lyrico.ui.components.song.SongListItem
+import com.lonx.lyrico.ui.components.song.SongListItemContent
 import com.lonx.lyrico.ui.components.song.SongListItemActions
 import com.lonx.lyrico.viewmodel.AlbumActionsViewModel
 import com.lonx.lyrico.viewmodel.ArtistDetailViewModel
-import com.lonx.lyrico.viewmodel.ArtistImageSource
 import com.lonx.lyrico.viewmodel.SongSelectionViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
@@ -153,107 +144,13 @@ fun ArtistDetailScreen(
     var showRenameDialog by remember { mutableStateOf(false) }
 
     // 头像只是设置入口：用户选好去向后，再从系统选图器选本地图片。
-    val posterFolder by viewModel.artistPosterFolder.collectAsStateWithLifecycle()
     val artistPosterState by viewModel.artistPosterEmbedState.collectAsStateWithLifecycle()
     var showArtistPosterSheet by remember { mutableStateOf(false) }
-    var showArtistPosterProgress by remember { mutableStateOf(false) }
-    var pickedArtistImage by remember { mutableStateOf<ArtistImageSource?>(null) }
-    var pendingArtistPosterTarget by remember { mutableStateOf<ArtistPosterTarget?>(null) }
-
-    fun applyPickedArtistImage(target: ArtistPosterTarget, uri: Uri?) {
-        if (uri == null) return
-        viewModel.prepareArtistImage(context, uri) { source ->
-            pickedArtistImage = source
-            showArtistPosterProgress = true
-            when (target) {
-                ArtistPosterTarget.EmbedIntoSongs ->
-                    viewModel.embedArtistImageForAllSongs(artistName, songs, source)
-
-                ArtistPosterTarget.SaveToFolder ->
-                    viewModel.saveArtistImageToFolder(artistName, source)
-            }
-        }
-    }
-
-    val artistPhotoPickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickVisualMedia()
-    ) { uri ->
-        val target = pendingArtistPosterTarget
-        pendingArtistPosterTarget = null
-        if (target != null) applyPickedArtistImage(target, uri)
-    }
-
-    val message = stringResource(R.string.permission_denied_cannot_save)
-    // 还没有海报文件夹时先添加
-    val folderPickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.OpenDocumentTree()
-    ) { uri ->
-        if (uri == null) return@rememberLauncherForActivityResult
-        val permissionTaken = runCatching {
-            context.contentResolver.takePersistableUriPermission(
-                uri,
-                Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-            )
-        }.isSuccess
-        if (!permissionTaken) {
-            Toast.makeText(
-                context,
-                message,
-                Toast.LENGTH_SHORT
-            ).show()
-            return@rememberLauncherForActivityResult
-        }
-        viewModel.setArtistPosterFolder(uri) {
-            pendingArtistPosterTarget = ArtistPosterTarget.SaveToFolder
-            artistPhotoPickerLauncher.launch(
-                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-            )
-        }
-    }
-
-    val artistPosterPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartIntentSenderForResult()
-    ) { result ->
-        val source = pickedArtistImage
-        val name = artistName.trim()
-        if (result.resultCode == Activity.RESULT_OK && source != null && name.isNotEmpty()) {
-            showArtistPosterProgress = true
-            viewModel.embedArtistImageForAllSongs(name, songs, source)
-        } else {
-            viewModel.clearArtistPosterStatus()
-            Toast.makeText(
-                context,
-                message,
-                Toast.LENGTH_SHORT
-            ).show()
-        }
-    }
-
-    // 需要授权时拉起系统授权界面；只消费一次，重组不会重复弹窗
-    LaunchedEffect(artistPosterState.permissionIntentSender) {
-        val intentSender = artistPosterState.permissionIntentSender ?: return@LaunchedEffect
-        showArtistPosterProgress = true
-        artistPosterPermissionLauncher.launch(
-            IntentSenderRequest.Builder(intentSender).build()
-        )
-        viewModel.consumeArtistPosterPermissionRequest()
-    }
-
-    val artistPosterMessage = artistPosterState.message
-    LaunchedEffect(artistPosterMessage, showArtistPosterProgress) {
-        if (artistPosterMessage != null && !showArtistPosterProgress) {
-            Toast.makeText(context, artistPosterMessage, Toast.LENGTH_SHORT).show()
-            viewModel.clearArtistPosterMessage()
-        }
-    }
-
-    fun startArtistImagePick(target: ArtistPosterTarget) {
-        pendingArtistPosterTarget = target
-        artistPhotoPickerLauncher.launch(
-            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-        )
-    }
-
+    var showArtistPosterDestination by remember { mutableStateOf(false) }
+    val removalViewModel: com.lonx.lyrico.viewmodel.ArtistPosterEditViewModel = koinViewModel()
+    val removalState by removalViewModel.state.collectAsStateWithLifecycle()
+    var pendingPosterRemoval by remember { mutableStateOf<Set<Long>>(emptySet()) }
+    var pendingPosterExport by remember { mutableStateOf<Set<Long>>(emptySet()) }
     BackHandler(enabled = isSelectionMode) {
         if (isFabMenuExpanded) {
             isFabMenuExpanded = false
@@ -485,52 +382,38 @@ fun ArtistDetailScreen(
             onBatchShare = selectionViewModel::batchShare
         )
 
-        // 点头像后选去向：内嵌到该歌手的全部歌曲，或按艺术家名存进海报文件夹
+        // Both local image destinations share the picker and write workflow.
         ArtistPosterActionsSheet(
             show = showArtistPosterSheet,
-            hasPosterFolder = posterFolder != null,
-            onEmbedToSongs = {
+            onAddLocalPoster = {
                 showArtistPosterSheet = false
-                startArtistImagePick(ArtistPosterTarget.EmbedIntoSongs)
+                showArtistPosterDestination = true
             },
-            onSaveToFolder = {
+            onDismissRequest = { showArtistPosterSheet = false },
+            enabled = !artistPosterState.isRunning && !removalState.isRunning,
+            onRemoveFromSongs = {
                 showArtistPosterSheet = false
-                if (posterFolder == null) {
-                    folderPickerLauncher.launch(null)
-                } else {
-                    startArtistImagePick(ArtistPosterTarget.SaveToFolder)
-                }
+                pendingPosterRemoval = setOf(artistId)
             },
-            onDismissRequest = { showArtistPosterSheet = false }
-        )
-
-        ArtistPosterProgressSheet(
-            state = artistPosterState,
-            show = showArtistPosterProgress && artistPosterState.hasContent,
-            title = stringResource(R.string.label_set_artist_poster),
-            onDismissRequest = { showArtistPosterProgress = false },
-            onDismissFinished = {
-                // 动画走完才丢掉结果，否则面板会先空一下再消失
-                if (!artistPosterState.isRunning) {
-                    showArtistPosterProgress = false
-                    viewModel.clearArtistPosterStatus()
-                }
-            },
-            onCancel = viewModel::cancelArtistPosterWrite,
-            onGrantPermission = {
-                artistPosterState.permissionIntentSender?.let { intentSender ->
-                    artistPosterPermissionLauncher.launch(
-                        IntentSenderRequest.Builder(intentSender).build()
-                    )
-                }
+            onExportEmbedded = {
+                showArtistPosterSheet = false
+                pendingPosterExport = setOf(artistId)
             }
         )
-    }
-}
+        com.lonx.lyrico.ui.components.poster.ArtistPosterAddHost(
+            viewModel = viewModel,
+            show = showArtistPosterDestination,
+            onDismissRequest = { showArtistPosterDestination = false },
+            enabled = !removalState.isRunning
+        )
 
-private enum class ArtistPosterTarget {
-    EmbedIntoSongs,
-    SaveToFolder
+        com.lonx.lyrico.ui.components.poster.ArtistPosterRemovalHost(
+            removalViewModel, pendingPosterRemoval, { pendingPosterRemoval = emptySet() }
+        )
+        com.lonx.lyrico.ui.components.poster.ArtistPosterExportHost(
+            removalViewModel, pendingPosterExport, { pendingPosterExport = emptySet() }
+        )
+    }
 }
 
 @Composable
@@ -571,27 +454,31 @@ private fun ArtistSongsPage(
             items = songs,
             key = { song -> song.uri.takeIf { it.isNotBlank() && it != "0" } ?: "song-${song.id}" }
         ) { song ->
-            SongListItem(
-                song = song,
-                showTrackNumbers = true,
+            SelectableLibraryItem(
+                itemKey = song.uri,
                 isSelectionMode = isSelectionMode,
                 isSelected = selectedSongUris.contains(song.uri),
                 swipeSelectionLabel = swipeSelectionLabel,
                 swipeSelectionSecondaryLabel = swipeSelectionSecondaryLabel,
                 onClick = { onSongClick(song) },
                 onToggleSelection = { onToggleSelection(song) },
-                onSwipeSelection = { onSwipeSelection(song) },
-                trailingContent = {
-                    Box(modifier = Modifier.padding(end = 8.dp)) {
-                        SongListItemActions(
-                            isSelectionMode = isSelectionMode,
-                            isSelected = selectedSongUris.contains(song.uri),
-                            onToggleSelection = { onToggleSelection(song) },
-                            onShowMenu = { onShowSongMenu(song) }
-                        )
+                onSwipeSelection = { onSwipeSelection(song) }
+            ) {
+                SongListItemContent(
+                    song = song,
+                    showTrackNumbers = true,
+                    trailingContent = {
+                        Box(modifier = Modifier.padding(end = 8.dp)) {
+                            SongListItemActions(
+                                isSelectionMode = isSelectionMode,
+                                isSelected = selectedSongUris.contains(song.uri),
+                                onToggleSelection = { onToggleSelection(song) },
+                                onShowMenu = { onShowSongMenu(song) }
+                            )
+                        }
                     }
-                }
-            )
+                )
+            }
         }
     }
 }

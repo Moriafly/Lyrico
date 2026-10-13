@@ -39,6 +39,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.lonx.lyrico.ui.components.library.SelectableLibraryItem
 import com.lonx.lyrico.R
 import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.data.model.entity.SongEntity
@@ -49,7 +50,7 @@ import com.lonx.lyrico.ui.components.cover.CoverImage
 import com.lonx.lyrico.ui.components.library.AlbumReplayGainProgressBottomSheet
 import com.lonx.lyrico.ui.components.scaffoldTopHorizontalPadding
 import com.lonx.lyrico.ui.components.song.SongActionSheets
-import com.lonx.lyrico.ui.components.song.SongListItem
+import com.lonx.lyrico.ui.components.song.SongListItemContent
 import com.lonx.lyrico.ui.components.song.SongListItemActions
 import com.lonx.lyrico.viewmodel.AlbumActionsViewModel
 import com.lonx.lyrico.viewmodel.AlbumDetailViewModel
@@ -256,9 +257,8 @@ fun AlbumDetailScreen(
                                 song.uri.takeIf { it.isNotBlank() && it != "0" } ?: "song-${song.id}"
                             }
                         ) { song ->
-                            SongListItem(
-                                song = song,
-                                showTrackNumbers = true,
+                            SelectableLibraryItem(
+                                itemKey = song.uri,
                                 isSelectionMode = isSelectionMode,
                                 isSelected = selectedSongUris.contains(song.uri),
                                 swipeSelectionLabel = swipeSelectionLabel,
@@ -271,23 +271,28 @@ fun AlbumDetailScreen(
                                 },
                                 onSwipeSelection = {
                                     selectionViewModel.swipeSelect(song, songs)
-                                },
-                                trailingContent = {
-                                    Box(modifier = Modifier.padding(end = 8.dp)) {
-                                        SongListItemActions(
-                                            isSelectionMode = isSelectionMode,
-                                            isSelected = selectedSongUris.contains(song.uri),
-                                            onToggleSelection = {
-                                                selectionViewModel.toggleSelection(song.uri)
-                                            },
-                                            onShowMenu = {
-                                                selectedSong = song
-                                                showMenuSheet = true
-                                            }
-                                        )
-                                    }
                                 }
-                            )
+                            ) {
+                                SongListItemContent(
+                                    song = song,
+                                    showTrackNumbers = true,
+                                    trailingContent = {
+                                        Box(modifier = Modifier.padding(end = 8.dp)) {
+                                            SongListItemActions(
+                                                isSelectionMode = isSelectionMode,
+                                                isSelected = selectedSongUris.contains(song.uri),
+                                                onToggleSelection = {
+                                                    selectionViewModel.toggleSelection(song.uri)
+                                                },
+                                                onShowMenu = {
+                                                    selectedSong = song
+                                                    showMenuSheet = true
+                                                }
+                                            )
+                                        }
+                                    }
+                                )
+                            }
                         }
                     }
                 }
