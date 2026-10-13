@@ -38,6 +38,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -73,6 +74,7 @@ import com.lonx.lyrico.ui.components.base.YesNoDialog
 import com.lonx.lyrico.ui.components.library.EmptyStateKind
 import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.ui.components.plugin.PluginIcon
+import com.lonx.lyrico.ui.components.ItemOrderState
 import com.lonx.lyrico.ui.components.scaffoldTopHorizontalPadding
 import com.lonx.lyrico.ui.theme.isDarkTheme
 import com.lonx.lyrico.viewmodel.PluginViewModel
@@ -147,26 +149,35 @@ fun PluginManagerScreen(
             ).getBoolean(KEY_COMPACT_MODE, false)
         )
     }
-    var currentList by remember(plugins, selectedTypeTab) {
-        mutableStateOf(
-            plugins
-                .filter {
-                    it.capabilities.supportsSourceType(selectedTypeTab.sourceType)
-                }
-                .sortedWith(
-                    compareBy<SourcePluginEntity> {
-                        it.sortOrderFor(selectedTypeTab.sourceType)
-                    }.thenBy { it.displayName }
-                )
+    val savedPlugins = remember(plugins, selectedTypeTab) {
+        plugins
+            .filter {
+                it.capabilities.supportsSourceType(selectedTypeTab.sourceType)
+            }
+            .sortedWith(
+                compareBy<SourcePluginEntity> {
+                    it.sortOrderFor(selectedTypeTab.sourceType)
+                }.thenBy { it.displayName }
+            )
+    }
+    val savedOrder = savedPlugins.map { it.id }
+    val orderState = remember(selectedTypeTab) { ItemOrderState(savedOrder) }
+    val pluginsById = savedPlugins.associateBy { it.id }
+    val currentList = orderState.order.mapNotNull { pluginsById[it] }
+    LaunchedEffect(savedOrder) { orderState.updateSaved(savedOrder) }
+    // Long-lived pointer input callbacks must read the current state and category.
+    val saveOrder by rememberUpdatedState {
+        viewModel.setPluginOrder(
+            orderState.order.mapNotNull { pluginsById[it] },
+            selectedTypeTab.sourceType
         )
     }
     val lazyListState = rememberLazyListState()
     val haptic = LocalHapticFeedback.current
     val reorderableLazyColumnState = rememberReorderableLazyListState(lazyListState) { from, to ->
-        currentList = currentList.toMutableList().apply {
-            add(to.index, removeAt(from.index))
+        if (orderState.move(from.key, to.key)) {
+            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
         }
-        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
     }
     val topAppBarScrollBehavior = MiuixScrollBehavior()
     val importLauncher = rememberLauncherForActivityResult(
@@ -326,10 +337,7 @@ fun PluginManagerScreen(
                                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                     },
                                     onDragStopped = {
-                                        viewModel.setPluginOrder(
-                                            currentList,
-                                            selectedTypeTab.sourceType
-                                        )
+                                        saveOrder()
                                     },
                                     interactionSource = interactionSource
                                 ),

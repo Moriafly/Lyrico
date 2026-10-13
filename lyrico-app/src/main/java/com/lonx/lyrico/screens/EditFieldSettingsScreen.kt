@@ -47,7 +47,7 @@ import com.lonx.lyrico.data.editfield.EditFieldDefinition
 import com.lonx.lyrico.data.editfield.EditFieldListItem
 import com.lonx.lyrico.data.editfield.EditFieldRegistry
 import com.lonx.lyrico.data.editfield.toEditFieldBlocks
-import com.lonx.lyrico.ui.components.FieldOrderState
+import com.lonx.lyrico.ui.components.ItemOrderState
 import com.lonx.lyrico.ui.components.ManagedChip
 import com.lonx.lyrico.ui.components.base.PillButton
 import com.lonx.lyrico.ui.components.base.PillButtonDefaults
@@ -121,7 +121,7 @@ fun EditFieldSettingsScreen(
     val haptic = LocalHapticFeedback.current
 
     val savedOrder = blocks.map { it.key }
-    val orderState = remember { FieldOrderState(savedOrder) }
+    val orderState = remember { ItemOrderState(savedOrder) }
     val displayCodes = orderState.order
     val reorderableState = rememberReorderableLazyListState(lazyListState) { from, to ->
         if (orderState.move(from.key, to.key)) {
@@ -430,7 +430,7 @@ private fun ComponentFieldsBottomSheet(
         onDismissFinished = onDismissFinished,
     ) {
         val savedCodes = component?.fields?.map { it.code }.orEmpty()
-        val orderState = remember(component?.key) { FieldOrderState(savedCodes) }
+        val orderState = remember(component?.key) { ItemOrderState(savedCodes) }
         val displayCodes = orderState.order
         val latestOnOrderChange by rememberUpdatedState(onOrderChange)
         val listState = rememberLazyListState()

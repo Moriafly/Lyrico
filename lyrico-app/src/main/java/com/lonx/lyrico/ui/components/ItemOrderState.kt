@@ -5,7 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 
 /** 手势回调读取同一个状态对象，避免松手时写回手势开始前捕获的列表。 */
-internal class FieldOrderState(initialOrder: List<String>) {
+internal class ItemOrderState(initialOrder: List<String>) {
     private var savedOrder by mutableStateOf(initialOrder)
     private var pendingOrder by mutableStateOf<List<String>?>(null)
     val order: List<String> get() = pendingOrder ?: savedOrder
