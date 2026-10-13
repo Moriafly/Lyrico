@@ -125,7 +125,7 @@ import com.lonx.lyrico.ui.components.scaffoldTopHorizontalPadding
 import com.lonx.lyrico.ui.theme.LyricoColors
 import com.lonx.lyrico.utils.CoverSourceType
 import com.lonx.lyrico.utils.getCoverSourceType
-import com.lonx.lyrico.utils.coil.readExternalArtistPoster
+import com.lonx.lyrico.utils.coil.ArtistPosterReader
 import com.lonx.lyrico.viewmodel.EditMetadataViewModel
 import com.lonx.lyrico.viewmodel.isEqualIgnoringBlank
 import com.ramcosta.composedestinations.annotation.Destination
@@ -1838,6 +1838,7 @@ private fun CoverSection(
     val onSurface = MiuixTheme.colorScheme.onSurface
     val onSurfaceDim = MiuixTheme.colorScheme.onSurfaceVariantSummary
     val context = LocalContext.current
+    val posterReader: ArtistPosterReader = org.koin.compose.koinInject()
     val picturePages = pages
     val pagerScope = rememberCoroutineScope()
     val currentPage = pagerState.currentPage.coerceIn(0, picturePages.lastIndex)
@@ -1854,11 +1855,7 @@ private fun CoverSection(
                     if (currentImageSource is CoverRequest) {
                         // 外置海报是文件夹里的文件，UI 手里没有字节：按文件名读出来量一下尺寸。
                         // 只有当前这一页会走到这里，读的是与取图相同的那份文件。
-                        val bytes = readExternalArtistPoster(
-                            context = context,
-                            artist = currentImageSource.artistName,
-                            folders = currentImageSource.artistPosterFolders
-                        )
+                        val bytes = posterReader.resolve(currentImageSource)?.bytes
                         if (bytes != null && bytes.isNotEmpty()) {
                             BitmapFactory.decodeByteArray(bytes, 0, bytes.size, options)
                         }

@@ -1,7 +1,6 @@
 package com.lonx.lyrico.utils.coil
 
 import android.content.ContentResolver
-import android.net.Uri
 import coil3.ImageLoader
 import coil3.decode.DataSource
 import coil3.decode.ImageSource
@@ -19,32 +18,25 @@ import kotlinx.coroutines.withContext
 
 class AudioCoverFetcher(
     private val contentResolver: ContentResolver,
-    private val uri: Uri,
-    private val pictureType: AudioPictureType,
-    private val fallbackPictureTypes: List<AudioPictureType>,
-    private val fallbackToAny: Boolean,
-    private val candidates: List<CoverCandidate>,
-    private val artistName: String?,
-    private val artistPosterFolders: List<String>,
-    private val skipEmbeddedPictures: Boolean,
+    private val request: CoverRequest,
+    private val posterReader: ArtistPosterReader,
     private val options: Options
 ) : Fetcher {
 
     override suspend fun fetch(): FetchResult? {
-        val candidateList = candidates.takeIf { it.isNotEmpty() }
-            ?: listOf(CoverCandidate(uri, 0L))
+        val candidateList = request.candidates.takeIf { it.isNotEmpty() }
+            ?: listOf(CoverCandidate(request.uri, request.lastUpdate))
 
         val pictureBytes = withContext(Dispatchers.IO) {
-            if (skipEmbeddedPictures) {
-                // 调用方已经自己决定过内嵌海报归属，这里只查外置海报文件
-                readExternalArtistPoster(options.context, artistName, artistPosterFolders)
+            if (request.artistName != null) {
+                posterReader.resolve(request)?.bytes
+                    // Covers and other artists' images are display fallbacks, never edit targets.
+                    ?: if (!request.skipEmbeddedPictures && request.fallbackToAny) {
+                        readRequestedPicture(candidateList, includeOtherArtists = true)
+                            ?: readFallbackPicture(candidateList)
+                    } else null
             } else {
                 readRequestedPicture(candidateList)
-                    ?: readExternalArtistPoster(options.context, artistName, artistPosterFolders)
-                    // 只有描述对不上的内嵌图（例如整首歌只有别的艺术家的海报）时，也要显示出来，
-                    // 否则标签里明明有图却什么都不显示、用户也没法把它重新关联给某位艺术家。
-                    // 放在外置海报之后：它是兜底，不该挡住这位艺术家自己的海报文件。
-                    ?: readRequestedPicture(candidateList, includeOtherArtists = artistName != null)
                     ?: readFallbackPicture(candidateList)
             }
         } ?: return null
@@ -74,11 +66,10 @@ class AudioCoverFetcher(
                 contentResolver.openFileDescriptor(candidate.uri, "r")?.use { pfd ->
                     AudioTagReader.readPicture(
                         pfd = pfd,
-                        pictureType = pictureType,
-                        fallbackPictureTypes = fallbackPictureTypes,
+                        pictureType = request.pictureType,
+                        fallbackPictureTypes = request.fallbackPictureTypes,
                         fallbackToAny = includeOtherArtists,
-                        // 艺术家图片用描述记录归属：默认只认描述对得上（或没写描述）的那些
-                        description = artistName
+                        description = request.artistName
                     )
                 }
             }
@@ -90,7 +81,7 @@ class AudioCoverFetcher(
     private suspend fun readFallbackPicture(
         candidates: List<CoverCandidate>
     ): ByteArray? {
-        if (!fallbackToAny) return null
+        if (!request.fallbackToAny) return null
         val firstCandidate = candidates.firstOrNull() ?: return null
         return readArtworkSafely {
             contentResolver.openFileDescriptor(firstCandidate.uri, "r")?.use { pfd ->
@@ -103,7 +94,10 @@ class AudioCoverFetcher(
         }
     }
 
-    class Factory(private val contentResolver: ContentResolver) :
+    class Factory(
+        private val contentResolver: ContentResolver,
+        private val posterReader: ArtistPosterReader
+    ) :
         Fetcher.Factory<CoverRequest> {
         override fun create(
             data: CoverRequest,
@@ -111,14 +105,8 @@ class AudioCoverFetcher(
             imageLoader: ImageLoader
         ) = AudioCoverFetcher(
             contentResolver = contentResolver,
-            uri = data.uri,
-            pictureType = data.pictureType,
-            fallbackPictureTypes = data.fallbackPictureTypes,
-            fallbackToAny = data.fallbackToAny,
-            candidates = data.candidates,
-            artistName = data.artistName,
-            artistPosterFolders = data.artistPosterFolders,
-            skipEmbeddedPictures = data.skipEmbeddedPictures,
+            posterReader = posterReader,
+            request = data,
             options = options
         )
     }

@@ -21,11 +21,8 @@ data class CoverRequest(
     /**
      * 只查外置海报文件夹，跳过标签里的内嵌图片。
      *
-     * 单曲编辑页需要它：编辑页自己按归属规则（[com.lonx.lyrico.domain.poster.ArtistPosterGrouping]）
-     * 把每张内嵌海报分给了某位艺术家，而 `TagLib.getPicture` 的描述回退是另一套规则（描述为空
-     * 就当作通用图）。两边对同一张「没有描述」的图片会给出不同答案——多艺术家时编辑页认为它归属
-     * 不明，取图链路却把它当成任何一位艺术家的海报，于是几位艺术家显示同一张图、各自的海报文件
-     * 反而永远查不到。编辑页只用这个请求查文件，归属判断只保留一处。
+     * 单曲编辑页已经按 ArtistPosterGrouping 分配了内嵌图片；这里只为没有内嵌图片的
+     * 艺术家位查外置文件，避免重新读取已编辑的标签或显示其他艺术家的兜底图片。
      */
     val skipEmbeddedPictures: Boolean = false
 ) {

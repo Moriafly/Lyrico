@@ -117,7 +117,10 @@ class App : Application(), SingletonImageLoader.Factory {
             .components {
                 add(AudioCoverKeyer())
                 add(com.lonx.lyrico.utils.coil.PosterFileFetcherFactory())
-                add(AudioCoverFetcher.Factory(context.contentResolver))
+                add(AudioCoverFetcher.Factory(
+                    context.contentResolver,
+                    org.koin.core.context.GlobalContext.get().get()
+                ))
             }
             .diskCache {
                 // 磁盘缓存：最大 50 MB，目录为应用缓存目录

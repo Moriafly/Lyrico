@@ -314,7 +314,7 @@ fun ArtistsPage(
                                                 onToggleSelection = { selectionViewModel.toggle(artist.id) },
                                                 onShowMenu = {
                                                     menuArtist = artist
-                                                    editor.loadPoster(artist.id, coverCandidates(artist.id).map { it.uri.toString() })
+                                                    editor.loadPoster(artist.id, coverCandidates(artist.id))
                                                     showArtistMenu = true
                                                 }
                                             )
@@ -375,7 +375,7 @@ fun ArtistsPage(
                 compact = true,
                 icon = MiuixIcons.Refresh,
                 actionText = stringResource(R.string.refresh),
-                onAction = { menuArtist?.let { editor.loadPoster(it.id, coverCandidates(it.id).map { it.uri.toString() }) } }
+                onAction = { menuArtist?.let { editor.loadPoster(it.id, coverCandidates(it.id)) } }
             )
             source == null -> IllustratedEmptyState(
                 kind = EmptyStateKind.Cover,
@@ -427,7 +427,14 @@ fun ArtistsPage(
     }
     previewPoster?.let { source ->
         com.lonx.lyrico.ui.components.poster.ArtistPosterPreview(
-            pageCount = 1, title = { source.artistName }, pageKey = { source }, onDismiss = { previewPoster = null },
+            pageCount = 1, title = { source.artistName },
+            pageKey = {
+                when (source) {
+                    is ResolvedArtistPoster.File -> "file:${source.uri}"
+                    is ResolvedArtistPoster.Embedded -> "embedded:${source.songUri}\n${source.artistName}"
+                }
+            },
+            onDismiss = { previewPoster = null },
             videoUri = { (source as? ResolvedArtistPoster.File)?.takeIf { !it.canCrop }?.uri },
             imageContent = { _, modifier ->
                 AsyncImage(model = source.bytes, contentDescription = source.artistName,

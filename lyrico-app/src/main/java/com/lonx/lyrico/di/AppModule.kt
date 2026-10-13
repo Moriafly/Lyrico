@@ -242,6 +242,7 @@ val appModule = module {
     single { TagMapBuilder() }
     single { AudioTagMutationResolver(get(), get()) }
     single<AudioTagRepository> { AudioTagRepositoryImpl(androidContext(), get(), get(), get()) }
+    single { com.lonx.lyrico.utils.coil.ArtistPosterReader(androidContext(), get(), get(), get()) }
     single<SongFileRepository> { SongFileRepositoryImpl(androidContext(), get(), get()) }
     single { SortKeyUpdater() }
     single { SongMetadataMapper(get()) }
@@ -323,7 +324,7 @@ val appModule = module {
 
     viewModel { FolderManagerViewModel(get(), get(), get(), get(), get(), get()) }
     viewModel { ArtistPosterFoldersViewModel(get(), get(), get()) }
-    viewModel { com.lonx.lyrico.viewmodel.ArtistPosterEditViewModel(get(), get(), get(), get(), get()) }
+    viewModel { com.lonx.lyrico.viewmodel.ArtistPosterEditViewModel(get(), get(), get(), get(), get(), get()) }
     viewModel { BatchRenameViewModel(get(), get(), get(), get(), get()) }
     viewModel { CharacterMappingViewModel(get()) }
     viewModel { BatchExportViewModel(get(), get(), get()) }

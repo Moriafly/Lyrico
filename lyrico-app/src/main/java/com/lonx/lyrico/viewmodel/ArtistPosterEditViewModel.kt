@@ -9,7 +9,7 @@ import android.util.Log
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.lonx.audiotag.model.AudioPicture
+import com.lonx.audiotag.model.AudioPictureType
 import com.lonx.lyrico.R
 import com.lonx.lyrico.data.model.artist.ArtistSplitConfig
 import com.lonx.lyrico.data.model.entity.SongEntity
@@ -28,8 +28,9 @@ import com.lonx.lyrico.utils.ArtistPosterFileWriter
 import com.lonx.lyrico.utils.SafDocumentRow
 import com.lonx.lyrico.utils.SafDocuments
 import com.lonx.lyrico.utils.coil.ArtistPosterMatcher
-import com.lonx.lyrico.utils.coil.readPosterBytes
-import com.lonx.lyrico.utils.coil.validArtwork
+import com.lonx.lyrico.utils.coil.ArtistPosterReader
+import com.lonx.lyrico.ui.components.CoverCandidate
+import com.lonx.lyrico.ui.components.CoverRequest
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -55,7 +56,8 @@ class ArtistPosterEditViewModel(
     private val tags: AudioTagRepository,
     private val overwrite: OverwriteSongTagsUseCase,
     private val settings: SettingsRepository,
-    private val application: Application
+    private val application: Application,
+    private val posterReader: ArtistPosterReader
 ) : ViewModel() {
     private enum class Operation { Remove, Export }
     private data class Plan(
@@ -85,13 +87,13 @@ class ArtistPosterEditViewModel(
     private var cropBytes: ByteArray? = null
     private var cropPending = false
 
-    fun loadPoster(id: Long, candidateUris: List<String>) {
+    fun loadPoster(id: Long, candidates: List<CoverCandidate>) {
         val request = ++menuGeneration
         menuJob?.cancel()
         _menu.value = ArtistPosterMenuState(loading = true)
         menuJob = viewModelScope.launch(Dispatchers.IO) {
             val result = try {
-                ArtistPosterMenuState(source = resolvePoster(id, candidateUris))
+                ArtistPosterMenuState(source = resolvePoster(id, candidates))
             } catch (e: CancellationException) { throw e
             } catch (e: Exception) {
                 Log.w("ArtistPosterEdit", "Cannot resolve artist artwork", e)
@@ -101,43 +103,21 @@ class ArtistPosterEditViewModel(
         }
     }
 
-    private suspend fun resolvePoster(id: Long, candidateUris: List<String>): ResolvedArtistPoster? {
+    private suspend fun resolvePoster(id: Long, candidates: List<CoverCandidate>): ResolvedArtistPoster? {
         val artist = library.observeArtistById(id).first() ?: return null
-        val config = settings.artistSplitConfigFlow.first()
-        val songs = library.observeSongsByArtistId(id).first()
-        val byUri = songs.associateBy { it.uri }
-        val ordered = (candidateUris.mapNotNull { byUri[it] } + songs).distinctBy { it.uri }
-        val key = ArtistPosterGrouping.ownerKeyOf(artist.name)
-        var unreadable = false
-        for (song in ordered) {
-            coroutineContext.ensureActive()
-            try {
-                val tag = tags.read(song.uri, AudioTagReadOptions(strict = true))
-                val picture = ArtistPosterGrouping.entries(tag.pictures, ArtistNameSplitter.splitArtists(tag.artist, config))
-                    .firstOrNull { it.artist != null && it.ownerKey == key }?.picture
-                if (picture != null) {
-                    if (picture.data.validArtwork() != null) return ResolvedArtistPoster.Embedded(artist.name, song.uri, picture)
-                    unreadable = true
-                }
-            } catch (e: CancellationException) { throw e
-            } catch (e: Exception) { unreadable = true }
-        }
         val folder = settings.artistPosterFolder.first()
-        if (folder != null) {
-            val files = SafDocuments.children(application, folder.toUri()) ?: error("Folder unavailable")
-            val libraryNames = library.observeArtists().first().map { it.name }
-            val matches = files.filter { !it.isDirectory && ArtistPosterMatcher.ownedBySelection(it.displayName, setOf(artist.name), libraryNames) }.mapNotNull { file ->
-                ArtistPosterMatcher.rank(file.displayName, artist.name)?.let { it to file }
-            }.sortedWith(compareBy({ it.first }, { it.second.displayName.lowercase() }, { it.second.displayName }))
-            for ((_, file) in matches) {
-                coroutineContext.ensureActive()
-                val bytes = readPosterBytes(application, file.uri, file.displayName)
-                if (bytes != null) return ResolvedArtistPoster.File(artist.name, folder, file.uri.toString(), file.displayName, bytes)
-                unreadable = true
-            }
-        }
-        check(!unreadable) { "Some artwork sources could not be read" }
-        return null
+        return posterReader.resolve(
+            CoverRequest(
+                uri = artist.coverSongUri.orEmpty().toUri(),
+                lastUpdate = artist.coverSongLastModified,
+                pictureType = AudioPictureType.Artist,
+                fallbackPictureTypes = listOf(AudioPictureType.LeadArtist, AudioPictureType.Band),
+                candidates = candidates,
+                artistName = artist.name,
+                artistPosterFolders = listOfNotNull(folder)
+            ),
+            strict = true
+        )
     }
 
     fun cropPoster(target: ResolvedArtistPoster, bitmap: Bitmap) = runCrop(target, bitmap)
@@ -254,7 +234,9 @@ class ArtistPosterEditViewModel(
                         coroutineContext.ensureActive()
                         updateState { it.copy(done = index, activeSong = artist.key) }
                         try {
-                            val picture = findEmbeddedPoster(artist.key, artist.value, plan.config)
+                            val picture = posterReader.findEmbeddedPoster(
+                                artist.key, artist.value.map { it.uri }, plan.config
+                            )?.picture
                             if (picture == null) unchanged++
                             else if (ArtistPosterFileWriter.write(application, artist.key, picture.data, picture.mimeType, plan.folder) != null) changed++
                             else failures += artist.key
@@ -333,26 +315,6 @@ class ArtistPosterEditViewModel(
                     message = application.getString(R.string.poster_operation_failed)) }
             }
         }
-    }
-
-    private suspend fun findEmbeddedPoster(name: String, songs: List<SongEntity>, config: ArtistSplitConfig): AudioPicture? {
-        var readFailed = false
-        for (song in songs) {
-            coroutineContext.ensureActive()
-            try {
-                val tag = tags.read(song.uri, AudioTagReadOptions(strict = true))
-                val key = ArtistPosterGrouping.ownerKeyOf(name)
-                val picture = ArtistPosterGrouping.entries(tag.pictures, ArtistNameSplitter.splitArtists(tag.artist, config))
-                    .firstOrNull { it.artist != null && it.ownerKey == key }?.picture
-                if (picture != null) return picture
-            } catch (e: CancellationException) { throw e
-            } catch (e: Exception) {
-                readFailed = true
-                Log.w("ArtistPosterEdit", "Cannot read embedded poster: ${song.uri}", e)
-            }
-        }
-        check(!readFailed) { "Some songs could not be read" }
-        return null
     }
 
     private suspend fun preparePlan(action: Operation): Plan {

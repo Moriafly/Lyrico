@@ -7,8 +7,11 @@ import android.media.MediaMetadataRetriever
 import android.util.Log
 import androidx.core.net.toUri
 import com.lonx.lyrico.utils.SafDocuments
+import com.lonx.lyrico.domain.poster.ResolvedArtistPoster
 import java.io.ByteArrayOutputStream
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.ensureActive
+import kotlin.coroutines.coroutineContext
 
 private const val TAG = "ArtistPoster"
 
@@ -44,22 +47,37 @@ internal fun ByteArray.validArtwork(): ByteArray? {
  * Looks up an artist poster in the user's poster folders, in the order the folders were added.
  * Files named exactly after the artist win over suffixed ones inside each folder.
  */
-internal fun readExternalArtistPoster(context: Context, artist: String?, folders: List<String>): ByteArray? {
-    if (artist.isNullOrBlank() || folders.isEmpty()) return null
+internal suspend fun readExternalArtistPoster(
+    context: Context,
+    artist: String,
+    folders: List<String>,
+    libraryArtists: List<String>
+): ResolvedArtistPoster.File? {
+    if (artist.isBlank() || folders.isEmpty()) return null
+    var unreadable = false
     for (folder in folders) {
+        coroutineContext.ensureActive()
         // The same SAF query the poster folder screen uses, so both always agree on the files.
         val files = SafDocuments.children(context, folder.toUri())
             ?.filterNot { it.isDirectory }
-            ?.filter { ArtistPosterMatcher.isPosterFile(it.displayName) }
-            ?: continue
+            ?.filter { ArtistPosterMatcher.ownedBySelection(it.displayName, setOf(artist), libraryArtists) }
+        if (files == null) {
+            unreadable = true
+            continue
+        }
         val matches = files
             .mapNotNull { file -> ArtistPosterMatcher.rank(file.displayName, artist)?.let { rank -> rank to file } }
             .sortedWith(compareBy({ it.first }, { it.second.displayName.lowercase() }, { it.second.displayName }))
         for ((_, file) in matches) {
+            coroutineContext.ensureActive()
             val bytes = readPosterBytes(context, file.uri, file.displayName)
-            if (bytes != null && bytes.isNotEmpty()) return bytes
+            if (bytes != null && bytes.isNotEmpty()) {
+                return ResolvedArtistPoster.File(artist, folder, file.uri.toString(), file.displayName, bytes)
+            }
+            unreadable = true
         }
     }
+    check(!unreadable) { "Some poster files could not be read" }
     return null
 }
 

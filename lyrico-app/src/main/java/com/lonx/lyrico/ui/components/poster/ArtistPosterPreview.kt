@@ -35,7 +35,8 @@ fun ArtistPosterPreview(
     pageCount: Int,
     initialPage: Int = 0,
     title: (Int) -> String,
-    pageKey: (Int) -> Any,
+    // Pager keys must be Bundle-saveable; never use artwork objects or image bytes.
+    pageKey: (Int) -> String,
     videoUri: (Int) -> String? = { null },
     onMore: ((Int) -> Unit)? = null,
     onDismiss: () -> Unit,

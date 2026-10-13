@@ -1103,6 +1103,7 @@ class SettingsRepositoryImpl(private val context: Context) : SettingsRepository 
         context.settingsDataStore.edit { preferences ->
             preferences[PreferencesKeys.ARTIST_SPLIT_CONFIG] = jsonFormatter.encodeToString(config)
             preferences[PreferencesKeys.LIBRARY_INDEX_VERSION] = 0
+            preferences[artistPosterRevisionKey] = (preferences[artistPosterRevisionKey] ?: 0L) + 1L
         }
     }
 
