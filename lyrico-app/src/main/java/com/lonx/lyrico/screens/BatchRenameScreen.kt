@@ -440,7 +440,6 @@ private fun BatchRenamePreviewTab(
                 IllustratedEmptyState(
                     kind = EmptyStateKind.Tasks,
                     title = stringResource(R.string.preview_empty_tip),
-                    compact = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
             }

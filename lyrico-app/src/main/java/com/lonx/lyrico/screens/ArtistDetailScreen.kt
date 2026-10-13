@@ -447,7 +447,6 @@ private fun ArtistSongsPage(
                 IllustratedEmptyState(
                     kind = EmptyStateKind.Songs,
                     title = stringResource(R.string.empty_songs_title),
-                    compact = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
@@ -506,7 +505,6 @@ private fun ArtistAlbumsPage(
                 IllustratedEmptyState(
                     kind = EmptyStateKind.Albums,
                     title = stringResource(R.string.empty_albums_title),
-                    compact = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
             }

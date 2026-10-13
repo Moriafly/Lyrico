@@ -201,7 +201,6 @@ fun BatchTaskDetailScreen(
                             IllustratedEmptyState(
                                 kind = EmptyStateKind.Tasks,
                                 title = stringResource(R.string.batch_task_detail_no_records),
-                                compact = true,
                                 modifier = Modifier.fillMaxWidth(),
                             )
                         }

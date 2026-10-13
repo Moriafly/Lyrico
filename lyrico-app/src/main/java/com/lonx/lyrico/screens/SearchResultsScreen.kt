@@ -1093,7 +1093,6 @@ private fun SearchResultApplyDataPage(
                 IllustratedEmptyState(
                     kind = EmptyStateKind.Search,
                     title = stringResource(R.string.search_no_results),
-                    compact = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
             }

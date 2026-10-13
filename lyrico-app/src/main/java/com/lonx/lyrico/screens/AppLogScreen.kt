@@ -259,7 +259,6 @@ fun AppLogScreen(
                     IllustratedEmptyState(
                         kind = EmptyStateKind.Logs,
                         title = stringResource(R.string.app_log_empty),
-                        compact = true,
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }

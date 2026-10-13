@@ -445,7 +445,6 @@ private fun LocalSearchResultsPage(
                 IllustratedEmptyState(
                     kind = EmptyStateKind.Search,
                     title = stringResource(R.string.search_empty),
-                    compact = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
             }

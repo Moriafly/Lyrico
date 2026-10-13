@@ -199,7 +199,6 @@ fun PluginConfigScreen(
                 IllustratedEmptyState(
                     kind = EmptyStateKind.Plugins,
                     title = stringResource(R.string.source_config_empty),
-                    compact = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
                 return@Scaffold

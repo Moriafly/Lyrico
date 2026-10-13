@@ -248,7 +248,6 @@ fun AlbumDetailScreen(
                                 IllustratedEmptyState(
                                     kind = EmptyStateKind.Songs,
                                     title = stringResource(R.string.empty_songs_title),
-                                    compact = true,
                                     modifier = Modifier.fillMaxWidth(),
                                 )
                             }

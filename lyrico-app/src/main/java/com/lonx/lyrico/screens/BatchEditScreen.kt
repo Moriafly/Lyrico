@@ -1122,7 +1122,6 @@ private fun BatchEditPreviewTab(
                 IllustratedEmptyState(
                     kind = EmptyStateKind.Tasks,
                     title = stringResource(R.string.batch_edit_preview_empty),
-                    compact = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
             }

@@ -226,7 +226,6 @@ fun AboutScreen(
                         IllustratedEmptyState(
                             kind = EmptyStateKind.Artists,
                             title = stringResource(R.string.about_no_contributors),
-                            compact = true,
                             modifier = Modifier.fillMaxWidth(),
                         )
                     }
