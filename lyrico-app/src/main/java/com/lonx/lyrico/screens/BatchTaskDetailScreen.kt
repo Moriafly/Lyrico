@@ -21,6 +21,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.library.EmptyStateKind
 import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.data.model.BatchTaskStatus
 import com.lonx.lyrico.data.model.entity.BatchTaskItemEntity
@@ -198,10 +199,11 @@ fun BatchTaskDetailScreen(
                     if (filteredItems.isEmpty()) {
                         item {
                             IllustratedEmptyState(
-                        title = stringResource(R.string.batch_task_detail_no_records),
-                        compact = true,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
+                                kind = EmptyStateKind.Tasks,
+                                title = stringResource(R.string.batch_task_detail_no_records),
+                                compact = true,
+                                modifier = Modifier.fillMaxWidth(),
+                            )
                         }
                     } else {
                         items(

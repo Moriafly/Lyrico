@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lonx.lyrico.ui.components.library.SelectableLibraryItem
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.library.EmptyStateKind
 import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.data.model.entity.SongEntity
 import com.lonx.lyrico.ui.components.bar.SongBatchSelectionActions
@@ -245,6 +246,7 @@ fun AlbumDetailScreen(
                         if (songs.isEmpty()) {
                             item("empty") {
                                 IllustratedEmptyState(
+                                    kind = EmptyStateKind.Songs,
                                     title = stringResource(R.string.empty_songs_title),
                                     compact = true,
                                     modifier = Modifier.fillMaxWidth(),

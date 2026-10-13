@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.library.EmptyStateKind
 import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.data.model.metadata.MetadataFieldTarget
 import com.lonx.lyrico.data.model.search.LyricsSearchResult
@@ -206,6 +207,7 @@ fun SearchLyricsScreen(
 
                 uiState.availableSources.isEmpty() -> {
                     IllustratedEmptyState(
+                        kind = EmptyStateKind.Plugins,
                         title = stringResource(R.string.lyrics_source_empty),
                         modifier = Modifier.fillMaxSize(),
                     )
@@ -281,6 +283,7 @@ fun SearchLyricsScreen(
 
                     results.isEmpty() -> {
                         IllustratedEmptyState(
+                            kind = EmptyStateKind.Lyrics,
                             title = stringResource(R.string.search_no_results),
                             modifier = Modifier.fillMaxSize(),
                         )

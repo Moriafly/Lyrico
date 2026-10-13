@@ -66,6 +66,7 @@ import com.lonx.lyrico.ui.components.bar.rememberAlphabetSideBarScrollController
 import com.lonx.lyrico.ui.components.blur.BlurredTopBar
 import com.lonx.lyrico.ui.components.blur.blurSource
 import com.lonx.lyrico.ui.components.blur.rememberBarBlurBackdrop
+import com.lonx.lyrico.ui.components.library.EmptyStateKind
 import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.ui.components.library.LocalLibraryBottomContentPadding
 import com.lonx.lyrico.ui.components.library.libraryOverlayInsets
@@ -250,6 +251,7 @@ fun ArtistsPage(
                         .fillMaxSize()
                 ) {
                     IllustratedEmptyState(
+                        kind = EmptyStateKind.Artists,
                         title = stringResource(R.string.empty_artists_title),
                         modifier = Modifier.align(Alignment.Center),
                         icon = MiuixIcons.Refresh,
@@ -368,6 +370,7 @@ fun ArtistsPage(
                 CircularProgressIndicator()
             }
             posterMenu.error -> IllustratedEmptyState(
+                kind = EmptyStateKind.Cover,
                 title = stringResource(R.string.artist_poster_read_error),
                 compact = true,
                 icon = MiuixIcons.Refresh,
@@ -375,6 +378,7 @@ fun ArtistsPage(
                 onAction = { menuArtist?.let { editor.loadPoster(it.id, coverCandidates(it.id).map { it.uri.toString() }) } }
             )
             source == null -> IllustratedEmptyState(
+                kind = EmptyStateKind.Cover,
                 title = stringResource(R.string.artist_poster_missing_title),
                 compact = true,
                 summary = stringResource(R.string.artist_poster_missing_summary),

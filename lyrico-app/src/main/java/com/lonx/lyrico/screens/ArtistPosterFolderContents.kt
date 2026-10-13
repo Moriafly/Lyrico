@@ -23,6 +23,7 @@ import androidx.core.net.toUri
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.library.EmptyStateKind
 import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.viewmodel.ArtistPosterFile
 import com.lonx.lyrico.viewmodel.ArtistPosterFolder
@@ -60,7 +61,7 @@ internal fun ArtistPosterFolderContents(
             } else {
                 val unavailable = folder.posters == null
                 IllustratedEmptyState(
-                    illustration = { ArtistPosterEmptyIllustration() },
+                    kind = EmptyStateKind.Cover,
                     title = stringResource(if (unavailable) R.string.artist_poster_folder_unavailable else R.string.artist_poster_no_files),
                     summary = stringResource(if (hasError) R.string.artist_poster_folder_error else if (unavailable) R.string.artist_poster_folders_empty else R.string.artist_poster_empty_hint),
                     icon = if (unavailable) MiuixIcons.Folder else MiuixIcons.Refresh,

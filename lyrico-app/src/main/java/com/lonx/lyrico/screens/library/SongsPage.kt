@@ -50,6 +50,7 @@ import com.lonx.lyrico.ui.components.bar.rememberAlphabetSideBarScrollController
 import com.lonx.lyrico.ui.components.blur.BlurredTopBar
 import com.lonx.lyrico.ui.components.blur.blurSource
 import com.lonx.lyrico.ui.components.blur.rememberBarBlurBackdrop
+import com.lonx.lyrico.ui.components.library.EmptyStateKind
 import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.ui.components.library.LocalLibraryBottomContentPadding
 import com.lonx.lyrico.ui.components.library.libraryOverlayInsets
@@ -333,6 +334,7 @@ fun SongsPage(
 
                         !hasFolders -> {
                             IllustratedEmptyState(
+                                kind = EmptyStateKind.Songs,
                                 title = stringResource(R.string.song_list_empty_title),
                                 icon = MiuixIcons.AddFolder,
                                 actionText = stringResource(R.string.action_add_folder),
@@ -342,6 +344,7 @@ fun SongsPage(
 
                         else -> {
                             IllustratedEmptyState(
+                                kind = EmptyStateKind.Songs,
                                 title = stringResource(R.string.empty_songs_title),
                                 icon = MiuixIcons.Refresh,
                                 actionText = stringResource(R.string.refresh),

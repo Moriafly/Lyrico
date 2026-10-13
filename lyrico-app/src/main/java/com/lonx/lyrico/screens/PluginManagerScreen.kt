@@ -70,6 +70,7 @@ import com.lonx.lyrico.plugin.source.PluginInstallFailed
 import com.lonx.lyrico.plugin.source.PluginVersionConflict
 import com.lonx.lyrico.ui.components.base.YesNoBottomSheet
 import com.lonx.lyrico.ui.components.base.YesNoDialog
+import com.lonx.lyrico.ui.components.library.EmptyStateKind
 import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.ui.components.plugin.PluginIcon
 import com.lonx.lyrico.ui.components.scaffoldTopHorizontalPadding
@@ -284,6 +285,7 @@ fun PluginManagerScreen(
                 if (currentList.isEmpty()) {
                     item("empty") {
                         IllustratedEmptyState(
+                            kind = EmptyStateKind.Plugins,
                             title = if (plugins.isEmpty()) {
                                 stringResource(R.string.plugin_empty)
                             } else {

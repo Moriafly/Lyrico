@@ -39,8 +39,9 @@ fun IllustratedEmptyState(
     modifier: Modifier = Modifier,
     actionText: String? = null,
     onAction: () -> Unit = {},
-    illustration: @Composable () -> Unit = { EmptyStateIllustration(compact = compact) },
-    icon: ImageVector = MiuixIcons.Forward
+    illustration: (@Composable () -> Unit)? = null,
+    icon: ImageVector = MiuixIcons.Forward,
+    kind: EmptyStateKind = EmptyStateKind.List,
 ) {
     BoxWithConstraints(modifier, contentAlignment = Alignment.Center) {
         val scrollModifier = if (constraints.hasBoundedHeight) {
@@ -56,7 +57,7 @@ fun IllustratedEmptyState(
                 .padding(if (compact) 16.dp else 28.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            illustration()
+            if (illustration != null) illustration() else EmptyStateAnimation(kind, compact)
             Spacer(Modifier.height(if (compact) 12.dp else 24.dp))
 
             Text(

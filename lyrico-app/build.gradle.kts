@@ -149,6 +149,7 @@ dependencies {
     implementation(libs.compose.destinations.core)
     implementation(libs.miuix.preference.android)
     implementation(libs.miuix.ui.android)
+    implementation(libs.lottie.compose)
     implementation(libs.miuix.icons.android)
     implementation(libs.miuix.blur.android)
     implementation(libs.coil.compose)

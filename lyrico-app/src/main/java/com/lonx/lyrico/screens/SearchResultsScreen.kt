@@ -59,6 +59,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.library.EmptyStateKind
 import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.data.model.SearchSourceTabStyle
 import com.lonx.lyrico.data.model.lyrics.SongSearchResult
@@ -246,6 +247,7 @@ fun SearchResultsScreen(
 
             if (uiState.availableSources.isEmpty()) {
                 IllustratedEmptyState(
+                    kind = EmptyStateKind.Plugins,
                     title = stringResource(R.string.plugin_empty),
                     modifier = Modifier.fillMaxSize(),
                 )
@@ -341,6 +343,7 @@ fun SearchResultsScreen(
 
                     results.isEmpty() -> {
                         IllustratedEmptyState(
+                            kind = EmptyStateKind.Search,
                             title = stringResource(R.string.search_no_results),
                             modifier = Modifier.fillMaxSize(),
                         )
@@ -1088,6 +1091,7 @@ private fun SearchResultApplyDataPage(
         if (options.isEmpty()) {
             item("empty") {
                 IllustratedEmptyState(
+                    kind = EmptyStateKind.Search,
                     title = stringResource(R.string.search_no_results),
                     compact = true,
                     modifier = Modifier.fillMaxWidth(),

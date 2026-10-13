@@ -49,6 +49,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lonx.audiotag.model.AudioPictureType
 import com.lonx.lyrico.ui.components.library.SelectableLibraryItem
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.library.EmptyStateKind
 import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.data.model.entity.AlbumEntity
 import com.lonx.lyrico.data.model.entity.SongEntity
@@ -444,6 +445,7 @@ private fun ArtistSongsPage(
         if (songs.isEmpty()) {
             item("empty") {
                 IllustratedEmptyState(
+                    kind = EmptyStateKind.Songs,
                     title = stringResource(R.string.empty_songs_title),
                     compact = true,
                     modifier = Modifier.fillMaxWidth(),
@@ -502,6 +504,7 @@ private fun ArtistAlbumsPage(
         if (albums.isEmpty()) {
             item("empty") {
                 IllustratedEmptyState(
+                    kind = EmptyStateKind.Albums,
                     title = stringResource(R.string.empty_albums_title),
                     compact = true,
                     modifier = Modifier.fillMaxWidth(),

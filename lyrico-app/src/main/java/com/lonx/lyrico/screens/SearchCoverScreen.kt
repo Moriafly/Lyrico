@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.library.EmptyStateKind
 import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.ui.components.bar.SearchBar
 import com.lonx.lyrico.ui.components.rememberTintedPainter
@@ -275,6 +276,7 @@ fun SearchCoverScreen(
 
                     results.isEmpty() -> {
                         IllustratedEmptyState(
+                            kind = EmptyStateKind.Cover,
                             title = stringResource(R.string.search_no_results),
                             modifier = Modifier.fillMaxSize(),
                         )

@@ -35,6 +35,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.library.EmptyStateKind
 import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.data.model.plugin.PluginConfigField
 import com.lonx.lyrico.data.model.plugin.PluginConfigFieldType
@@ -196,6 +197,7 @@ fun PluginConfigScreen(
 
             if (!hasConfigContent) {
                 IllustratedEmptyState(
+                    kind = EmptyStateKind.Plugins,
                     title = stringResource(R.string.source_config_empty),
                     compact = true,
                     modifier = Modifier.fillMaxWidth(),

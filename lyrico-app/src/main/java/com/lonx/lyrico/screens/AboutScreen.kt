@@ -31,6 +31,7 @@ import com.lonx.lyrico.ui.components.blur.BlurredTopBar
 import com.lonx.lyrico.ui.components.blur.blurSource
 import com.lonx.lyrico.ui.components.blur.rememberBarBlurBackdrop
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.library.EmptyStateKind
 import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.ui.components.scaffoldContentPadding
 import com.lonx.lyrico.utils.UpdateEffect
@@ -223,6 +224,7 @@ fun AboutScreen(
                 contributors.isEmpty() -> {
                     item {
                         IllustratedEmptyState(
+                            kind = EmptyStateKind.Artists,
                             title = stringResource(R.string.about_no_contributors),
                             compact = true,
                             modifier = Modifier.fillMaxWidth(),

@@ -30,6 +30,7 @@ import com.lonx.lyrico.ui.components.blur.BlurredTopBar
 import com.lonx.lyrico.ui.components.blur.blurSource
 import com.lonx.lyrico.ui.components.blur.rememberBarBlurBackdrop
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.library.EmptyStateKind
 import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.data.model.BatchTaskStatus
 import com.lonx.lyrico.data.model.BatchTaskType
@@ -287,6 +288,7 @@ fun BatchTaskListScreen(
             if (uiState.filteredTasks.isEmpty()) {
                 item {
                     IllustratedEmptyState(
+                        kind = EmptyStateKind.Tasks,
                         title = stringResource(R.string.batch_task_no_tasks),
                         compact = true,
                         modifier = Modifier.fillMaxWidth(),

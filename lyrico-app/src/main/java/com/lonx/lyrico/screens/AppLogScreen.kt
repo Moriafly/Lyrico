@@ -45,6 +45,7 @@ import com.lonx.lyrico.ui.components.blur.BlurredTopBar
 import com.lonx.lyrico.ui.components.blur.blurSource
 import com.lonx.lyrico.ui.components.blur.rememberBarBlurBackdrop
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.library.EmptyStateKind
 import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.data.model.log.AppLogLevel
 import com.lonx.lyrico.data.model.log.AppLogType
@@ -256,6 +257,7 @@ fun AppLogScreen(
             if (filteredLogs.isEmpty()) {
                 item("empty") {
                     IllustratedEmptyState(
+                        kind = EmptyStateKind.Logs,
                         title = stringResource(R.string.app_log_empty),
                         compact = true,
                         modifier = Modifier.fillMaxWidth(),

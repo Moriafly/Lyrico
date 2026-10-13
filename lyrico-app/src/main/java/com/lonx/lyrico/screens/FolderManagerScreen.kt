@@ -55,6 +55,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.lonx.lyrico.ui.components.library.SelectableLibraryItem
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.library.EmptyStateKind
 import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.data.model.entity.FolderEntity
 import com.lonx.lyrico.data.model.entity.SongEntity
@@ -942,6 +943,7 @@ private fun FolderChildrenPage(
         if (folders.isEmpty()) {
             item("empty") {
                 IllustratedEmptyState(
+                    kind = EmptyStateKind.Folders,
                     title = stringResource(R.string.empty_folders_title),
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -1006,6 +1008,7 @@ private fun FolderCurrentSongsPage(
         if (songs.isEmpty()) {
             item("empty") {
                 IllustratedEmptyState(
+                    kind = EmptyStateKind.Songs,
                     title = stringResource(R.string.empty_songs_title),
                     modifier = Modifier.fillMaxWidth(),
                 )

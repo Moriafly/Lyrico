@@ -60,6 +60,7 @@ import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.library.EmptyStateKind
 import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.data.editfield.toEditFieldBlocks
 import com.lonx.lyrico.data.editfield.EditFieldRegistry
@@ -664,6 +665,7 @@ fun BatchEditScreen(
                         }
                     } else {
                         IllustratedEmptyState(
+                            kind = EmptyStateKind.Cover,
                             title = stringResource(R.string.batch_edit_no_selected_covers),
                             compact = true,
                             modifier = Modifier.fillMaxWidth(),
@@ -1118,6 +1120,7 @@ private fun BatchEditPreviewTab(
         if (previews.isEmpty()) {
             item {
                 IllustratedEmptyState(
+                    kind = EmptyStateKind.Tasks,
                     title = stringResource(R.string.batch_edit_preview_empty),
                     compact = true,
                     modifier = Modifier.fillMaxWidth(),

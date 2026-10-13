@@ -39,6 +39,7 @@ import com.lonx.lyrico.ui.components.blur.rememberBarBlurBackdrop
 import com.lonx.lyrico.ui.components.library.AlbumActionBottomSheet
 import com.lonx.lyrico.ui.components.library.AlbumGridItem
 import com.lonx.lyrico.ui.components.library.AlbumReplayGainProgressBottomSheet
+import com.lonx.lyrico.ui.components.library.EmptyStateKind
 import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.ui.components.library.LocalLibraryBottomContentPadding
 import com.lonx.lyrico.ui.components.library.libraryOverlayInsets
@@ -190,6 +191,7 @@ fun AlbumsPage(
                         .fillMaxSize()
                 ) {
                     IllustratedEmptyState(
+                        kind = EmptyStateKind.Albums,
                         title = stringResource(R.string.empty_albums_title),
                         modifier = Modifier.align(Alignment.Center),
                         icon = MiuixIcons.Refresh,

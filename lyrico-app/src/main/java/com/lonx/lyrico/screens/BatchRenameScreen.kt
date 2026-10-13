@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.library.EmptyStateKind
 import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.data.model.RenamePreview
 import com.lonx.lyrico.ui.components.scaffoldBottomPadding
@@ -437,6 +438,7 @@ private fun BatchRenamePreviewTab(
         if (uiState.previews.isEmpty()) {
             item {
                 IllustratedEmptyState(
+                    kind = EmptyStateKind.Tasks,
                     title = stringResource(R.string.preview_empty_tip),
                     compact = true,
                     modifier = Modifier.fillMaxWidth(),

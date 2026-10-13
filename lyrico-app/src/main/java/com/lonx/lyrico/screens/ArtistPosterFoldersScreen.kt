@@ -5,9 +5,6 @@ import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.*
@@ -15,13 +12,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.library.EmptyStateKind
 import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.ui.components.blur.BlurredTopBar
 import com.lonx.lyrico.ui.components.blur.blurSource
@@ -36,7 +32,6 @@ import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.basic.*
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Back
-import top.yukonga.miuix.kmp.icon.extended.Image
 import top.yukonga.miuix.kmp.icon.extended.More
 import top.yukonga.miuix.kmp.menu.OverlayIconDropdownMenu
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -151,7 +146,7 @@ fun ArtistPosterFoldersScreen(navigator: DestinationsNavigator) {
                     }
                 } else {
                     IllustratedEmptyState(
-                        illustration = { ArtistPosterEmptyIllustration() },
+                        kind = EmptyStateKind.Folders,
                         title = stringResource(R.string.artist_poster_folder_not_selected),
                         summary = stringResource(if (state.error) R.string.artist_poster_folder_error else R.string.artist_poster_folders_empty),
                         icon = MiuixIcons.AddFolder,
@@ -292,38 +287,6 @@ fun ArtistPosterFoldersScreen(navigator: DestinationsNavigator) {
                     }
                 }
             }
-        }
-    }
-}
-
-@Composable
-internal fun ArtistPosterEmptyIllustration() {
-    val colors = MiuixTheme.colorScheme
-    val frameShape = RoundedCornerShape(16.dp)
-    Box(Modifier.size(width = 188.dp, height = 152.dp), contentAlignment = Alignment.Center) {
-        Box(Modifier.offset(x = (-22).dp, y = 6.dp).graphicsLayer { rotationZ = -12f }
-            .size(width = 100.dp, height = 126.dp)
-            .background(colors.primary.copy(alpha = 0.08f), frameShape)
-            .border(1.dp, colors.primary.copy(alpha = 0.12f), frameShape))
-        Box(Modifier.offset(x = 22.dp, y = 6.dp).graphicsLayer { rotationZ = 12f }
-            .size(width = 100.dp, height = 126.dp)
-            .background(colors.primary.copy(alpha = 0.12f), frameShape)
-            .border(1.dp, colors.primary.copy(alpha = 0.16f), frameShape))
-        Column(
-            Modifier.size(width = 108.dp, height = 136.dp)
-                .shadow(4.dp, frameShape).background(colors.surfaceContainer, frameShape)
-                .border(1.dp, colors.primary.copy(alpha = 0.12f), frameShape).padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(9.dp)
-        ) {
-            Box(Modifier.fillMaxWidth().aspectRatio(1f)
-                .background(colors.primary.copy(alpha = 0.1f), RoundedCornerShape(8.dp)),
-                contentAlignment = Alignment.Center) {
-                Icon(MiuixIcons.Image, null, tint = colors.primary, modifier = Modifier.size(40.dp))
-            }
-            Box(Modifier.fillMaxWidth(0.7f).height(5.dp)
-                .background(colors.onSurface.copy(alpha = 0.16f), RoundedCornerShape(3.dp)))
-            Box(Modifier.fillMaxWidth(0.45f).height(4.dp)
-                .background(colors.onSurface.copy(alpha = 0.08f), RoundedCornerShape(3.dp)))
         }
     }
 }

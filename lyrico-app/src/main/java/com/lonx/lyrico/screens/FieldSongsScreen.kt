@@ -49,8 +49,8 @@ import com.lonx.lyrico.ui.components.bar.SongSelectionTopAppBar
 import com.lonx.lyrico.ui.components.blur.BlurredTopBar
 import com.lonx.lyrico.ui.components.blur.blurSource
 import com.lonx.lyrico.ui.components.blur.rememberBarBlurBackdrop
+import com.lonx.lyrico.ui.components.library.EmptyStateKind
 import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
-import com.lonx.lyrico.ui.components.song.SongEmptyIllustration
 import com.lonx.lyrico.ui.components.scaffoldContentPadding
 import com.lonx.lyrico.ui.components.song.SongActionSheets
 import com.lonx.lyrico.ui.components.song.SongListItemContent
@@ -207,12 +207,12 @@ fun FieldSongsScreen(
                         CircularProgressIndicator(size = 32.dp)
                     }
                     pageSongs.isEmpty() -> IllustratedEmptyState(
+                        kind = EmptyStateKind.Songs,
                         title = stringResource(if (uiState.loadFailed) R.string.load_failed else R.string.edit_field_songs_empty),
                         summary = if (uiState.loadFailed) stringResource(R.string.edit_field_songs_load_failed_hint) else null,
                         icon = MiuixIcons.Refresh,
                         actionText = if (uiState.loadFailed) stringResource(R.string.edit_field_songs_retry) else null,
                         onAction = viewModel::refresh,
-                        illustration = { SongEmptyIllustration() },
                         modifier = Modifier.fillMaxSize().padding(contentPadding),
                     )
                     else -> LazyColumn(

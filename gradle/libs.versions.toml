@@ -25,8 +25,10 @@ room = "2.8.5"
 work = "2.11.2"
 tinypinyin = "2.0.3"
 miuix = "0.9.4"
+lottie = "6.7.1"
 
 [libraries]
+lottie-compose = { module = "com.airbnb.android:lottie-compose", version.ref = "lottie" }
 aboutlibraries-compose-core = { module = "com.mikepenz:aboutlibraries-compose-core", version.ref = "aboutLibraries" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleRuntimeKtx" }

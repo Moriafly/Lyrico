@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lonx.lyrico.ui.components.library.SelectableLibraryItem
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.library.EmptyStateKind
 import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.data.model.entity.AlbumEntity
 import com.lonx.lyrico.data.model.entity.ArtistEntity
@@ -442,6 +443,7 @@ private fun LocalSearchResultsPage(
         if (searchQuery.isNotBlank() && !hasResults) {
             item {
                 IllustratedEmptyState(
+                    kind = EmptyStateKind.Search,
                     title = stringResource(R.string.search_empty),
                     compact = true,
                     modifier = Modifier.fillMaxWidth(),

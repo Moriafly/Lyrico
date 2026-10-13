@@ -23,6 +23,14 @@ val isDarkTheme: Boolean
         null -> false
     }
 object LyricoColors {
+    val emptyIllustrationWarm: Color
+        @Composable
+        get() = if (isDarkTheme) Color(0xFFFFBD7A) else Color(0xFFEBA15B)
+
+    val emptyIllustrationFresh: Color
+        @Composable
+        get() = if (isDarkTheme) Color(0xFF80D4C3) else Color(0xFF55B7A5)
+
     /**
      * Placeholder background color for album covers.
      * In light mode: light gray, in dark mode: darker gray.
