@@ -17,6 +17,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.lonx.lyrico.utils.UiMessage
+import com.lonx.lyrico.ui.components.library.EmptyStateKind
+import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import top.yukonga.miuix.kmp.basic.CircularProgressIndicator
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
@@ -68,10 +70,18 @@ fun LyricsPreviewPane(
                     )
                 }
 
+                lyricsText.isNullOrBlank() -> item("empty") {
+                    IllustratedEmptyState(
+                        kind = EmptyStateKind.Lyrics,
+                        title = emptyText,
+                        modifier = Modifier.fillParentMaxSize(),
+                    )
+                }
+
                 else -> item("lyrics") {
                     Text(
                         modifier = Modifier.padding(12.dp),
-                        text = lyricsText ?: emptyText,
+                        text = lyricsText,
                         style = MiuixTheme.textStyles.body2,
                         overflow = TextOverflow.Clip
                     )

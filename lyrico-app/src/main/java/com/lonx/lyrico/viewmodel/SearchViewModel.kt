@@ -660,9 +660,7 @@ class SearchViewModel(
                     it.copy(
                         lyricsResult = lyricsResult,
                         isLoading = false,
-                        error = if (lyricsResult == null) {
-                            UiMessage.StringResource(R.string.lyrics_empty)
-                        } else null
+                        error = null
                     )
                 }
             } catch (e: Exception) {

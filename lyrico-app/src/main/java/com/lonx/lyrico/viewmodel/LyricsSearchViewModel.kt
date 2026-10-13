@@ -299,17 +299,7 @@ class LyricsSearchViewModel(
                 )
             }
             try {
-                val loaded = source.getLyricsCandidates(candidate.song).firstOrNull()
-                if (loaded == null) {
-                    state.update {
-                        it.copy(
-                            candidateErrors = it.candidateErrors + (
-                                candidateKey to UiMessage.StringResource(R.string.lyrics_empty)
-                            )
-                        )
-                    }
-                    return@launch
-                }
+                val loaded = source.getLyricsCandidates(candidate.song).firstOrNull() ?: return@launch
 
                 updateCandidate(keyword, sourceId, candidate.song.id) {
                     LyricsSearchCandidateUi(
