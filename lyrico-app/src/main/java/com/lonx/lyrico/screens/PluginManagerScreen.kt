@@ -1,5 +1,6 @@
 package com.lonx.lyrico.screens
 
+import top.yukonga.miuix.kmp.icon.extended.Import
 import android.content.Context
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -294,6 +295,7 @@ fun PluginManagerScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(12.dp),
+                            icon = MiuixIcons.Import,
                             actionText = stringResource(R.string.plugin_import_archive),
                             onAction = {
                                 if (!uiState.isBusy) importLauncher.launch(arrayOf("*/*"))
