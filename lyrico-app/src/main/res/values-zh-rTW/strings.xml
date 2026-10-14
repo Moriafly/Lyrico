@@ -830,4 +830,8 @@
     <string name="poster_export_embedded">匯出內嵌海報到資料夾</string>
     <string name="poster_export_confirm">匯出 %1$d 位藝術家的內嵌海報到資料夾，同名海報將取代</string>
     <string name="poster_pick_folder">先選擇海報資料夾</string>
+    <string name="poster_preview_edit">裁切</string>
+    <string name="poster_preview_info">圖片資訊</string>
+    <string name="poster_preview_dimensions">尺寸</string>
+    <string name="poster_preview_format">格式</string>
 </resources>

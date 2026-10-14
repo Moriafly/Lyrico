@@ -139,6 +139,16 @@ fun ArtistPosterFoldersScreen(navigator: DestinationsNavigator) {
                     onChangeFolder = { picker.launch(null) },
                     onRefresh = viewModel::refresh,
                     onFileMenu = { previewUri = null; actionFile = it; showFileMenu = true },
+                    onCrop = viewModel::cropFile,
+                    onRename = { target ->
+                        actionFile = target
+                        renameStem = target.name.substringBeforeLast('.')
+                        showRenameFile = true
+                    },
+                    onArtistDetails = { target ->
+                        target.artistId?.let { navigator.navigate(ArtistDetailDestination(artistId = it)) }
+                    },
+                    onPreviewSelection = { previewUri = it },
                     previewUri = previewUri,
                     onDismissPreview = { previewUri = null },
                     padding = scaffoldContentPadding(padding, horizontalExtra = 12.dp, bottomExtra = 12.dp),
@@ -212,7 +222,12 @@ fun ArtistPosterFoldersScreen(navigator: DestinationsNavigator) {
             show = showRenameFile && file != null, title = stringResource(R.string.dialog_rename_title),
             confirmEnabled = proposedName != null && proposedName != file?.name && !state.isEditing,
             onDismissRequest = { showRenameFile = false },
-            onConfirm = { file?.let { viewModel.renameFile(it, renameStem) } },
+            onConfirm = { file?.let { target ->
+                viewModel.renameFile(target, renameStem) { renamed ->
+                    actionFile = renamed
+                    if (previewUri == target.uri) previewUri = renamed.uri
+                }
+            } },
             content = {
                 TextField(value = renameStem, onValueChange = { renameStem = it }, maxLines = 1,
                     modifier = Modifier.fillMaxWidth(), trailingIcon = {

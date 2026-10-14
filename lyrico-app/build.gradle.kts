@@ -153,6 +153,7 @@ dependencies {
     implementation(libs.miuix.icons.android)
     implementation(libs.miuix.blur.android)
     implementation(libs.coil.compose)
+    implementation(libs.zoomable)
     implementation(libs.coil.network.okhttp)
     implementation(libs.reorderable)
     implementation(libs.compose.markdown)

@@ -12,6 +12,10 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 fun ArtistPosterActionsSheet(
     show: Boolean,
     onAddLocalPoster: () -> Unit,
+    onViewPoster: () -> Unit,
+    canViewPoster: Boolean,
+    posterLoading: Boolean = false,
+    posterError: Boolean = false,
     onDismissRequest: () -> Unit,
     onRemoveFromSongs: () -> Unit,
     onExportEmbedded: () -> Unit,
@@ -21,6 +25,14 @@ fun ArtistPosterActionsSheet(
         show = show, label = stringResource(R.string.label_artist_image_options),
         enableNestedScroll = false, onDismissRequest = onDismissRequest
     ) {
+        ArrowPreference(
+            title = stringResource(R.string.poster_view_artwork),
+            summary = if (posterError) stringResource(R.string.artist_poster_read_error)
+                else if (!posterLoading && !canViewPoster) stringResource(R.string.artist_poster_missing_title) else null,
+            enabled = enabled && canViewPoster,
+            onClick = onViewPoster
+        )
+        if (posterLoading) top.yukonga.miuix.kmp.basic.CircularProgressIndicator()
         ArrowPreference(
             title = stringResource(R.string.label_change_artist_image),
             summary = stringResource(R.string.artist_poster_add_local_summary),

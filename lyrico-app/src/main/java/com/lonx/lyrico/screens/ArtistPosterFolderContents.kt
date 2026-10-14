@@ -44,6 +44,10 @@ internal fun ArtistPosterFolderContents(
     onChangeFolder: () -> Unit,
     onRefresh: () -> Unit,
     onFileMenu: (ArtistPosterFile) -> Unit,
+    onCrop: (ArtistPosterFile, android.graphics.Bitmap) -> Unit,
+    onRename: (ArtistPosterFile) -> Unit,
+    onArtistDetails: (ArtistPosterFile) -> Unit,
+    onPreviewSelection: (String) -> Unit,
     previewUri: String?,
     onDismissPreview: () -> Unit,
     padding: PaddingValues,
@@ -138,7 +142,8 @@ internal fun ArtistPosterFolderContents(
     val previewIndex = files.indexOfFirst { it.uri == previewUri }
     if (previewIndex >= 0) {
         PosterPreview(files, previewIndex, revision,
-            onFileMenu = onFileMenu,
+            onRename = onRename, onArtistDetails = onArtistDetails, onPreviewSelection = onPreviewSelection,
+            onCrop = onCrop, enabled = enabled,
             onDismiss = onDismissPreview)
     }
 }
@@ -207,11 +212,29 @@ private fun PosterImage(file: ArtistPosterFile, revision: Long, modifier: Modifi
 }
 
 @Composable
-private fun PosterPreview(files: List<ArtistPosterFile>, initialPage: Int, revision: Long, onFileMenu: (ArtistPosterFile) -> Unit, onDismiss: () -> Unit) {
+private fun PosterPreview(files: List<ArtistPosterFile>, initialPage: Int, revision: Long,
+    onRename: (ArtistPosterFile) -> Unit, onArtistDetails: (ArtistPosterFile) -> Unit,
+    onPreviewSelection: (String) -> Unit, onCrop: (ArtistPosterFile, android.graphics.Bitmap) -> Unit,
+    enabled: Boolean, onDismiss: () -> Unit) {
+    val renameLabel = stringResource(R.string.action_rename)
+    val detailsLabel = stringResource(R.string.poster_artist_details)
+    val unmatchedLabel = stringResource(R.string.poster_artist_unmatched)
     com.lonx.lyrico.ui.components.poster.ArtistPosterPreview(
-        pageCount = files.size, initialPage = initialPage, title = { files[it].name }, pageKey = { files[it].uri },
-        videoUri = { files[it].takeIf { file -> file.name.endsWith(".mp4", true) }?.uri },
-        onMore = { onFileMenu(files[it]) }, onDismiss = onDismiss,
-        imageContent = { index, modifier -> PosterImage(files[index], revision, modifier, ContentScale.Fit) }
+        items = remember(files, revision) { files.map { file ->
+            com.lonx.lyrico.ui.components.poster.PosterPreviewMedia(file.name, file.uri,
+                isVideo = file.name.endsWith(".mp4", true), revision = revision + file.lastModified)
+        } }, initialPage = initialPage,
+        editingEnabled = enabled,
+        onCrop = { index, bitmap -> onCrop(files[index], bitmap) },
+        menuEntry = { index ->
+            val file = files[index]
+            DropdownEntry(items = listOf(
+                DropdownItem(text = renameLabel, enabled = enabled, onClick = { onRename(file) }),
+                DropdownItem(text = detailsLabel, enabled = enabled && file.artistId != null,
+                    summary = if (file.artistId == null) unmatchedLabel else null,
+                    onClick = { onArtistDetails(file) })
+            ))
+        },
+        onCurrentChanged = { onPreviewSelection(files[it].uri) }, onDismiss = onDismiss
     )
 }

@@ -26,8 +26,10 @@ work = "2.11.2"
 tinypinyin = "2.0.3"
 miuix = "0.9.4"
 lottie = "6.7.1"
+zoomable = "2.16.0"
 
 [libraries]
+zoomable = { module = "net.engawapg.lib:zoomable", version.ref = "zoomable" }
 lottie-compose = { module = "com.airbnb.android:lottie-compose", version.ref = "lottie" }
 aboutlibraries-compose-core = { module = "com.mikepenz:aboutlibraries-compose-core", version.ref = "aboutLibraries" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }

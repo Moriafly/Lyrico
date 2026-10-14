@@ -823,4 +823,8 @@
     <string name="poster_export_embedded">Export embedded posters</string>
     <string name="poster_export_confirm">Export embedded posters for %1$d artists to the poster folder? Matching posters will be replaced</string>
     <string name="poster_pick_folder">Select a poster folder first</string>
+    <string name="poster_preview_edit">Crop</string>
+    <string name="poster_preview_info">Image info</string>
+    <string name="poster_preview_dimensions">Dimensions</string>
+    <string name="poster_preview_format">Format</string>
 </resources>

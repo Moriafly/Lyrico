@@ -140,7 +140,7 @@ class ArtistPosterFoldersViewModel(
 
     fun clearOperationMessage() { _uiState.update { it.copy(operationMessage = null) } }
 
-    private fun editFile(file: ArtistPosterFile, action: (Uri, List<com.lonx.lyrico.utils.SafDocumentRow>) -> Unit) {
+    private fun editFile(file: ArtistPosterFile, onSuccess: () -> Unit = {}, action: (Uri, List<com.lonx.lyrico.utils.SafDocumentRow>) -> Unit) {
         if (_uiState.value.isEditing) return
         val folder = _uiState.value.folder?.uri ?: return
         _uiState.update { it.copy(isEditing = true, operationMessage = null) }
@@ -152,6 +152,7 @@ class ArtistPosterFoldersViewModel(
                     check(children.any { it.uri.toString() == file.uri && it.displayName == file.name }) { "File changed" }
                     action(tree, children)
                 }
+                onSuccess()
                 settings.refreshArtistPosters()
             } catch (e: CancellationException) { throw e
             } catch (e: Exception) {
@@ -166,11 +167,24 @@ class ArtistPosterFoldersViewModel(
         check(DocumentsContract.deleteDocument(application.contentResolver, file.uri.toUri()))
     }
 
-    fun renameFile(file: ArtistPosterFile, stem: String) = editFile(file) { _, children ->
-        val name = com.lonx.lyrico.domain.poster.PosterFileEditNames.rename(
-            file.name, stem, children.filter { it.uri.toString() != file.uri }.map { it.displayName }
-        ) ?: error("Invalid or duplicate name")
-        if (name != file.name) checkNotNull(DocumentsContract.renameDocument(application.contentResolver, file.uri.toUri(), name))
+    fun renameFile(file: ArtistPosterFile, stem: String, onRenamed: (ArtistPosterFile) -> Unit = {}) {
+        var renamed: ArtistPosterFile? = null
+        editFile(file, onSuccess = {
+            renamed?.let { replacement ->
+                onRenamed(replacement)
+                _uiState.update { state -> state.copy(folder = state.folder?.let { folder ->
+                    folder.copy(posters = folder.posters?.map { if (it.uri == file.uri) replacement else it })
+                }) }
+            }
+        }) { _, children ->
+            val name = com.lonx.lyrico.domain.poster.PosterFileEditNames.rename(
+                file.name, stem, children.filter { it.uri.toString() != file.uri }.map { it.displayName }
+            ) ?: error("Invalid or duplicate name")
+            if (name != file.name) {
+                val uri = checkNotNull(DocumentsContract.renameDocument(application.contentResolver, file.uri.toUri(), name))
+                renamed = file.copy(uri = uri.toString(), name = name, artistId = null, artistName = null)
+            }
+        }
     }
 
     fun readBitmap(file: ArtistPosterFile, onReady: (Bitmap) -> Unit) {

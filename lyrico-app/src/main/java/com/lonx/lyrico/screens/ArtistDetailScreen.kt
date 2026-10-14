@@ -1,5 +1,6 @@
 package com.lonx.lyrico.screens
 
+import com.lonx.lyrico.ui.components.poster.previewMedia
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
@@ -144,12 +145,18 @@ fun ArtistDetailScreen(
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showRenameDialog by remember { mutableStateOf(false) }
 
-    // 头像只是设置入口：用户选好去向后，再从系统选图器选本地图片。
+    // Resolve the same artist artwork used by the list and cover renderer.
     val artistPosterState by viewModel.artistPosterEmbedState.collectAsStateWithLifecycle()
     var showArtistPosterSheet by remember { mutableStateOf(false) }
     var showArtistPosterDestination by remember { mutableStateOf(false) }
     val removalViewModel: com.lonx.lyrico.viewmodel.ArtistPosterEditViewModel = koinViewModel()
     val removalState by removalViewModel.state.collectAsStateWithLifecycle()
+    val posterMenu by removalViewModel.menu.collectAsStateWithLifecycle()
+    var previewPoster by remember { mutableStateOf<com.lonx.lyrico.domain.poster.ResolvedArtistPoster?>(null) }
+    LaunchedEffect(showArtistPosterSheet, artistId, songs) {
+        if (showArtistPosterSheet) removalViewModel.loadPoster(artistId,
+            songs.map { CoverCandidate(uri = it.uri.toUri(), lastUpdate = it.fileLastModified) })
+    }
     var pendingPosterRemoval by remember { mutableStateOf<Set<Long>>(emptySet()) }
     var pendingPosterExport by remember { mutableStateOf<Set<Long>>(emptySet()) }
     BackHandler(enabled = isSelectionMode) {
@@ -386,6 +393,10 @@ fun ArtistDetailScreen(
         // Both local image destinations share the picker and write workflow.
         ArtistPosterActionsSheet(
             show = showArtistPosterSheet,
+            canViewPoster = !posterMenu.loading && posterMenu.source?.artistName == artistName,
+            posterLoading = posterMenu.loading,
+            posterError = posterMenu.error,
+            onViewPoster = { previewPoster = posterMenu.source; showArtistPosterSheet = false },
             onAddLocalPoster = {
                 showArtistPosterSheet = false
                 showArtistPosterDestination = true
@@ -401,6 +412,13 @@ fun ArtistDetailScreen(
                 pendingPosterExport = setOf(artistId)
             }
         )
+        previewPoster?.let { source ->
+            com.lonx.lyrico.ui.components.poster.ArtistPosterPreview(
+                items = listOf(source.previewMedia()), title = { source.artistName }, editingEnabled = !removalState.isRunning && !artistPosterState.isRunning,
+                onCrop = { _, bitmap -> removalViewModel.cropPoster(source, bitmap) },
+                onDismiss = { previewPoster = null }
+            )
+        }
         com.lonx.lyrico.ui.components.poster.ArtistPosterAddHost(
             viewModel = viewModel,
             show = showArtistPosterDestination,

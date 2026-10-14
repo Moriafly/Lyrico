@@ -39,11 +39,10 @@ import com.lonx.lyrico.ui.components.poster.ArtistPosterRemovalHost
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.key
 import androidx.compose.runtime.setValue
+import com.lonx.lyrico.ui.components.poster.previewMedia
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import coil3.compose.AsyncImage
 import com.lonx.lyrico.domain.poster.ResolvedArtistPoster
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -427,19 +426,10 @@ fun ArtistsPage(
     }
     previewPoster?.let { source ->
         com.lonx.lyrico.ui.components.poster.ArtistPosterPreview(
-            pageCount = 1, title = { source.artistName },
-            pageKey = {
-                when (source) {
-                    is ResolvedArtistPoster.File -> "file:${source.uri}"
-                    is ResolvedArtistPoster.Embedded -> "embedded:${source.songUri}\n${source.artistName}"
-                }
-            },
+            items = listOf(source.previewMedia()), title = { source.artistName },
             onDismiss = { previewPoster = null },
-            videoUri = { (source as? ResolvedArtistPoster.File)?.takeIf { !it.canCrop }?.uri },
-            imageContent = { _, modifier ->
-                AsyncImage(model = source.bytes, contentDescription = source.artistName,
-                    contentScale = ContentScale.Fit, modifier = modifier)
-            }
+            editingEnabled = !removalState.isRunning,
+            onCrop = { _, bitmap -> editor.cropPoster(source, bitmap) }
         )
     }
     com.lonx.lyrico.ui.components.crop.ImageCropperSheet(
