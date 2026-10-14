@@ -1283,6 +1283,7 @@ class EditMetadataViewModel(
     private fun mapErrorToUiMessage(mimeType: String?, error: ReplayGainError): UiMessage {
         val format = when (mimeType?.lowercase()) {
             "audio/alac" -> "ALAC"
+            "audio/ape", "audio/x-ape" -> "APE"
             "audio/flac" -> "FLAC"
             "audio/mpeg" -> "MP3"
             "audio/mp4a-latm" -> "AAC"

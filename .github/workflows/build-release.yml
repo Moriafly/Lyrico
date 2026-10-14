@@ -12,6 +12,7 @@ on:
       - 'settings.gradle.kts'
       - 'gradle.properties'
       - 'gradlew'
+      - '.gitmodules'
       - '.github/workflows/build-release.yml'
   workflow_dispatch:
 

@@ -54,10 +54,18 @@ Lyrico 的在线音乐信息搜索采用插件化架构。搜索源插件以 Jav
 
 基础环境：
 
-- JDK 21
-- Android SDK
-- Android NDK 29
-- CMake 4.1.2
+- [JDK 21](https://adoptium.net/temurin/releases/?version=21)
+- [Android SDK](https://developer.android.com/studio)
+- [Android NDK 29](https://developer.android.com/ndk/downloads)
+- [CMake 4.1.2](https://cmake.org/download/)
+- [Git](https://git-scm.com/downloads/)（Windows 使用 [Git for Windows](https://gitforwindows.org/) 附带的 Bash）
+- [GNU Make 4.x](https://community.chocolatey.org/packages/make)
+
+首次构建前初始化源码子模块：
+
+```powershell
+git submodule update --init --recursive
+```
 
 常用命令：
 

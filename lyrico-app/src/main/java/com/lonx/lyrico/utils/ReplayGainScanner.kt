@@ -151,6 +151,69 @@ class ReplayGainScanner(private val context: Context) {
         peakMode: ReplayGainPeakMode,
         onProgress: suspend (Float) -> Unit
     ): ReplayGainDecodeResult {
+        try {
+            return decodeWithPlatform(uriString, peakMode, onProgress)
+        } catch (platformError: ReplayGainScanException) {
+            currentCoroutineContext().ensureActive()
+            // The platform state is already closed. Retry from the beginning with a new state.
+            var state: LibEbuR128? = null
+            var completed = false
+            var fallbackMimeType: String? = null
+            try {
+                FfmpegAudioDecoder(context, uriString).use { decoder ->
+                    fallbackMimeType = decoder.mimeType
+                    onProgress(0f)
+                    val analysisState = LibEbuR128(decoder.channels, decoder.sampleRate, peakMode)
+                    state = analysisState
+                    var lastProgress = 0.0
+                    while (true) {
+                        currentCoroutineContext().ensureActive()
+                        val pcm = decoder.read() ?: break
+                        analysisState.processDirect(pcm, true, pcm.remaining() / (decoder.channels * 4))
+                        if (decoder.durationUs > 0) {
+                            val progress = (analysisState.sampleCount.toDouble() / decoder.sampleRate * 1_000_000 / decoder.durationUs).coerceIn(0.0, 1.0)
+                            if (progress - lastProgress >= PROGRESS_UPDATE_THRESHOLD) {
+                                onProgress(progress.toFloat())
+                                lastProgress = progress
+                            }
+                        }
+                    }
+                    if (analysisState.sampleCount == 0L) {
+                        throw ReplayGainScanException(uriString, decoder.mimeType, ReplayGainError.ZeroSampleCount)
+                    }
+                    val result = ReplayGainDecodeResult(
+                        ReplayGainAnalysis(analysisState.loudness, analysisState.sampleCount, analysisState.peak),
+                        decoder.mimeType, analysisState
+                    )
+                    completed = true
+                    return result
+                }
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: UnsupportedOperationException) {
+                throw platformError
+            } catch (error: ReplayGainScanException) {
+                throw error
+            } catch (error: Exception) {
+                val failedMimeType = fallbackMimeType ?: platformError.mimeType?.takeIf {
+                    it.equals("audio/alac", true) || it.equals("audio/ape", true) || it.equals("audio/x-ape", true)
+                }
+                if (failedMimeType != null) {
+                    throw ReplayGainScanException(uriString, failedMimeType, ReplayGainError.GeneralException(error.message))
+                }
+                platformError.addSuppressed(error)
+                throw platformError
+            } finally {
+                if (!completed) runCatching { state?.close() }
+            }
+        }
+    }
+
+    private suspend fun decodeWithPlatform(
+        uriString: String,
+        peakMode: ReplayGainPeakMode,
+        onProgress: suspend (Float) -> Unit
+    ): ReplayGainDecodeResult {
         val extractor = MediaExtractor()
         var codec: MediaCodec? = null
         var mimeType: String? = null
