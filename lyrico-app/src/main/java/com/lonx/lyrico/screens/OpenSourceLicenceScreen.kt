@@ -1,6 +1,5 @@
 package com.lonx.lyrico.screens
 
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
@@ -10,11 +9,15 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.blur.BlurredTopBar
+import com.lonx.lyrico.ui.components.blur.blurSource
+import com.lonx.lyrico.ui.components.blur.rememberBarBlurBackdrop
 import com.lonx.lyrico.ui.components.scaffoldContentPadding
 import com.mikepenz.aboutlibraries.ui.compose.android.produceLibraries
 import com.ramcosta.composedestinations.annotation.Destination
@@ -47,34 +50,33 @@ fun OpenSourceLicenceScreen(
     val listState = rememberLazyListState()
     val uriHandler = LocalUriHandler.current
     val topAppBarScrollBehavior = MiuixScrollBehavior()
+    val topBarBackdrop = rememberBarBlurBackdrop()
     Scaffold(
         topBar = {
-            SmallTopAppBar(
-                title = stringResource(id = R.string.title_opensource_licence),
-                navigationIcon = {
-                    IconButton(
-                        onClick = {
-                            navigator.popBackStack()
+            BlurredTopBar(backdrop = topBarBackdrop) {
+                SmallTopAppBar(
+                    color = Color.Transparent,
+                    defaultWindowInsetsPadding = false,
+                    title = stringResource(id = R.string.title_opensource_licence),
+                    navigationIcon = {
+                        IconButton(
+                            onClick = {
+                                navigator.popBackStack()
+                            }
+                        ) {
+                            Icon(
+                                imageVector = MiuixIcons.Back,
+                                contentDescription = null
+                            )
                         }
-                    ) {
-                        Icon(
-                            imageVector = MiuixIcons.Back,
-                            contentDescription = null
-                        )
-                    }
-                },
-                scrollBehavior = topAppBarScrollBehavior
-            )
+                    },
+                    scrollBehavior = topAppBarScrollBehavior
+                )
+            }
         }
     ) { paddingValues ->
         LazyColumnScrollbar(
             state = listState,
-            modifier = Modifier.padding(
-                scaffoldContentPadding(
-                    paddingValues = paddingValues,
-                    bottomExtra = 12.dp
-                )
-            ),
             settings = ScrollbarSettings.Default.copy(
                 selectionMode = ScrollbarSelectionMode.Full,
                 thumbUnselectedColor = MiuixTheme.colorScheme.onSurfaceVariantActions,
@@ -84,11 +86,15 @@ fun OpenSourceLicenceScreen(
             LazyColumn(
                 state = listState,
                 modifier = Modifier
+                    .blurSource(topBarBackdrop)
                     .scrollEndHaptic()
                     .overScrollVertical()
                     .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
                     .fillMaxHeight(),
-
+                contentPadding = scaffoldContentPadding(
+                    paddingValues = paddingValues,
+                    bottomExtra = 12.dp
+                ),
                 overscrollEffect = null,
             ) {
                 libraries?.let { libs ->
