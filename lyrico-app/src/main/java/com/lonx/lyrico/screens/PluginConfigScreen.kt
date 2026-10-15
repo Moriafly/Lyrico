@@ -35,6 +35,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.icons.FilledIcons
 import com.lonx.lyrico.ui.components.library.EmptyStateKind
 import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.data.model.plugin.PluginConfigField
@@ -60,11 +61,6 @@ import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextField
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Back
-import top.yukonga.miuix.kmp.icon.extended.Hide
-import top.yukonga.miuix.kmp.icon.extended.Ok
-import top.yukonga.miuix.kmp.icon.extended.Show
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.preference.WindowDropdownPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -114,7 +110,7 @@ fun PluginConfigScreen(
                 navigationIcon = {
                     IconButton(onClick = { navigator.navigateUp() }) {
                         Icon(
-                            imageVector = MiuixIcons.Back,
+                            imageVector = FilledIcons.ArrowLeft,
                             contentDescription = stringResource(R.string.action_back)
                         )
                     }
@@ -126,7 +122,7 @@ fun PluginConfigScreen(
                         }
                     ) {
                         Icon(
-                            imageVector = MiuixIcons.Ok,
+                            imageVector = FilledIcons.Check,
                             contentDescription = stringResource(R.string.source_config_save)
                         )
                     }
@@ -380,9 +376,9 @@ private fun PluginConfigFormItem(
                             ) {
                                 Icon(
                                     imageVector = if (passwordVisible) {
-                                        MiuixIcons.Hide
+                                        FilledIcons.EyeOff
                                     } else {
-                                        MiuixIcons.Show
+                                        FilledIcons.Eye
                                     },
                                     contentDescription = if (passwordVisible) {
                                         stringResource(R.string.password_hide)

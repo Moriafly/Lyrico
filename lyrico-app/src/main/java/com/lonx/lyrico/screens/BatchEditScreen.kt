@@ -60,6 +60,9 @@ import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.icons.PreferenceIconTone
+import com.lonx.lyrico.ui.components.icons.PreferenceIcon
+import com.lonx.lyrico.ui.components.icons.FilledIcons
 import com.lonx.lyrico.ui.components.library.EmptyStateKind
 import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.data.editfield.toEditFieldBlocks
@@ -100,15 +103,6 @@ import top.yukonga.miuix.kmp.basic.TabRowWithContour
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TextField
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.basic.ArrowUpDown
-import top.yukonga.miuix.kmp.icon.extended.Add
-import top.yukonga.miuix.kmp.icon.extended.Back
-import top.yukonga.miuix.kmp.icon.extended.Close
-import top.yukonga.miuix.kmp.icon.extended.Info
-import top.yukonga.miuix.kmp.icon.extended.Ok
-import top.yukonga.miuix.kmp.icon.extended.Settings
-import top.yukonga.miuix.kmp.icon.extended.Undo
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
@@ -284,7 +278,7 @@ fun BatchEditScreen(
                             }
                         ) {
                             Icon(
-                                imageVector = MiuixIcons.Back,
+                                imageVector = FilledIcons.ArrowLeft,
                                 contentDescription = stringResource(R.string.action_back)
                             )
                         }
@@ -295,7 +289,7 @@ fun BatchEditScreen(
                             enabled = !uiState.isSaving
                         ) {
                             Icon(
-                                imageVector = MiuixIcons.Ok,
+                                imageVector = FilledIcons.Check,
                                 contentDescription = null
                             )
                         }
@@ -482,14 +476,14 @@ fun BatchEditScreen(
             expanded = expandedFabMenu,
             enabled = !uiState.isSaving,
             style = ExpandableFabMenuStyle.default().copy(
-                mainIcon = MiuixIcons.Add
+                mainIcon = FilledIcons.Plus
             ),
             itemCount = 3,
             onExpandedChange = { expandedFabMenu = it }
         ) {
             FabMenuItem(
                 label = stringResource(R.string.action_add_custom_tag),
-                icon = MiuixIcons.Add,
+                icon = FilledIcons.Plus,
                 enabled = !uiState.isSaving,
                 onClick = {
                     expandedFabMenu = false
@@ -498,7 +492,7 @@ fun BatchEditScreen(
             )
             FabMenuItem(
                 label = stringResource(R.string.edit_field_settings_title),
-                icon = MiuixIcons.Settings,
+                icon = FilledIcons.Settings,
                 enabled = !uiState.isSaving,
                 onClick = {
                     expandedFabMenu = false
@@ -507,7 +501,7 @@ fun BatchEditScreen(
             )
             FabMenuItem(
                 label = stringResource(R.string.batch_edit_info_summary),
-                icon = MiuixIcons.Info,
+                icon = FilledIcons.Info,
                 enabled = !uiState.isSaving,
                 onClick = {
                     expandedFabMenu = false
@@ -535,6 +529,7 @@ fun BatchEditScreen(
                     colors = CardDefaults.defaultColors(color = MiuixTheme.colorScheme.secondaryContainer)
                 ) {
                     ArrowPreference(
+                        startAction = { PreferenceIcon(FilledIcons.ImageAdd, PreferenceIconTone.Library) },
                         title = stringResource(R.string.batch_edit_cover_change),
                         onClick = {
                             showCoverOptionsSheet = false
@@ -546,6 +541,7 @@ fun BatchEditScreen(
                         }
                     )
                     ArrowPreference(
+                        startAction = { PreferenceIcon(FilledIcons.ImageLibrary, PreferenceIconTone.Library) },
                         title = stringResource(R.string.batch_edit_select_cover_from_selected_songs),
                         onClick = {
                             showCoverOptionsSheet = false
@@ -553,6 +549,7 @@ fun BatchEditScreen(
                         }
                     )
                     ArrowPreference(
+                        startAction = { PreferenceIcon(FilledIcons.Disc, PreferenceIconTone.Library) },
                         title = stringResource(R.string.label_select_same_album_cover),
                         onClick = {
                             showCoverOptionsSheet = false
@@ -560,6 +557,7 @@ fun BatchEditScreen(
                         }
                     )
                     ArrowPreference(
+                        startAction = { PreferenceIcon(FilledIcons.Trash, PreferenceIconTone.Danger) },
                         title = stringResource(R.string.batch_edit_cover_remove),
                         onClick = {
                             showCoverOptionsSheet = false
@@ -568,6 +566,7 @@ fun BatchEditScreen(
                     )
                     if (uiState.coverUri != null || uiState.removeCover) {
                         ArrowPreference(
+                            startAction = { PreferenceIcon(FilledIcons.Undo, PreferenceIconTone.Tools) },
                             title = stringResource(R.string.batch_edit_cover_revert),
                             onClick = {
                                 showCoverOptionsSheet = false
@@ -1269,7 +1268,7 @@ private fun BatchEditFieldItem(
                 }
                 IconButton(onClick = onSelectFromSongs) {
                     Icon(
-                        imageVector = MiuixIcons.Basic.ArrowUpDown,
+                        imageVector = FilledIcons.ArrowDownUp,
                         contentDescription = stringResource(R.string.batch_edit_select_from_selected_songs)
                     )
                 }
@@ -1298,7 +1297,7 @@ private fun BatchEditFieldItem(
                         onValueChange(if (isKeep) "" else "<keep>")
                     }) {
                         Icon(
-                            imageVector = if (isKeep) MiuixIcons.Close else MiuixIcons.Undo,
+                            imageVector = if (isKeep) FilledIcons.Close else FilledIcons.Undo,
                             contentDescription = null,
                             tint = if (isKeep)
                                 MiuixTheme.colorScheme.primary
@@ -1308,7 +1307,7 @@ private fun BatchEditFieldItem(
                     }
                     IconButton(onClick = onSelectFromSongs) {
                         Icon(
-                            imageVector = MiuixIcons.Basic.ArrowUpDown,
+                            imageVector = FilledIcons.ArrowDownUp,
                             contentDescription = stringResource(R.string.batch_edit_select_from_selected_songs)
                         )
                     }
@@ -1348,7 +1347,7 @@ private fun BatchEditCustomFieldItem(
                     }
                 }) {
                     Icon(
-                        imageVector = if (isKeep) MiuixIcons.Close else MiuixIcons.Undo,
+                        imageVector = if (isKeep) FilledIcons.Close else FilledIcons.Undo,
                         contentDescription = null,
                         tint = if (isKeep)
                             MiuixTheme.colorScheme.primary
@@ -1358,7 +1357,7 @@ private fun BatchEditCustomFieldItem(
                 }
                 IconButton(onClick = onSelectFromSongs) {
                     Icon(
-                        imageVector = MiuixIcons.Basic.ArrowUpDown,
+                        imageVector = FilledIcons.ArrowDownUp,
                         contentDescription = stringResource(R.string.batch_edit_select_from_selected_songs)
                     )
                 }

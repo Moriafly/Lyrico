@@ -1,6 +1,5 @@
 package com.lonx.lyrico.screens
 
-import top.yukonga.miuix.kmp.icon.extended.Import
 import android.content.Context
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -57,6 +56,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.icons.FilledIcons
 import com.lonx.lyrico.data.model.entity.SourcePluginEntity
 import com.lonx.lyrico.data.model.entity.capabilities
 import com.lonx.lyrico.data.model.entity.displaySourceTypes
@@ -102,14 +102,6 @@ import top.yukonga.miuix.kmp.basic.TabRowWithContour
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TextField
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Add
-import top.yukonga.miuix.kmp.icon.extended.Back
-import top.yukonga.miuix.kmp.icon.extended.Delete
-import top.yukonga.miuix.kmp.icon.extended.GridView
-import top.yukonga.miuix.kmp.icon.extended.ListView
-import top.yukonga.miuix.kmp.icon.extended.Rename
-import top.yukonga.miuix.kmp.icon.extended.Settings
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
@@ -210,7 +202,7 @@ fun PluginManagerScreen(
                 navigationIcon = {
                     IconButton(onClick = { navigator.navigateUp() }) {
                         Icon(
-                            imageVector = MiuixIcons.Back,
+                            imageVector = FilledIcons.ArrowLeft,
                             contentDescription = stringResource(R.string.action_back)
                         )
                     }
@@ -227,9 +219,9 @@ fun PluginManagerScreen(
                     ) {
                         Icon(
                             imageVector = if (compactMode) {
-                                MiuixIcons.GridView
+                                FilledIcons.LayoutGrid
                             } else {
-                                MiuixIcons.ListView
+                                FilledIcons.List
                             },
                             contentDescription = stringResource(
                                 if (compactMode) {
@@ -247,7 +239,7 @@ fun PluginManagerScreen(
                         }
                     ) {
                         Icon(
-                            imageVector = MiuixIcons.Add,
+                            imageVector = FilledIcons.Plus,
                             contentDescription = null
                         )
                     }
@@ -308,7 +300,7 @@ fun PluginManagerScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(12.dp),
-                            icon = MiuixIcons.Import,
+                            icon = FilledIcons.FileDown,
                             actionText = stringResource(R.string.plugin_import_archive),
                             onAction = {
                                 if (!uiState.isBusy) importLauncher.launch(arrayOf("*/*"))
@@ -993,14 +985,14 @@ fun PluginItem(
         ) {
             PluginActionChip(
                 text = stringResource(R.string.plugin_config),
-                icon = MiuixIcons.Settings,
+                icon = FilledIcons.Settings,
                 tint = actionIconTint,
                 background = secondaryContainer,
                 onClick = onConfig
             )
             PluginActionChip(
                 text = stringResource(R.string.plugin_custom_name),
-                icon = MiuixIcons.Rename,
+                icon = FilledIcons.Pencil,
                 tint = actionIconTint,
                 background = secondaryContainer,
                 onClick = onRename
@@ -1010,7 +1002,7 @@ fun PluginItem(
 
             PluginActionChip(
                 text = stringResource(R.string.plugin_uninstall),
-                icon = MiuixIcons.Delete,
+                icon = FilledIcons.Trash,
                 tint = colorScheme.error,
                 background = colorScheme.errorContainer.copy(alpha = 0.45f),
                 onClick = onUninstall
@@ -1111,21 +1103,21 @@ private fun CompactPluginItem(
         ) {
             Spacer(modifier = Modifier.weight(1f))
             CompactPluginActionButton(
-                icon = MiuixIcons.Settings,
+                icon = FilledIcons.Settings,
                 contentDescription = stringResource(R.string.plugin_config),
                 tint = neutralActionTint,
                 background = neutralActionBackground,
                 onClick = onConfig
             )
             CompactPluginActionButton(
-                icon = MiuixIcons.Rename,
+                icon = FilledIcons.Pencil,
                 contentDescription = stringResource(R.string.plugin_custom_name),
                 tint = neutralActionTint,
                 background = neutralActionBackground,
                 onClick = onRename
             )
             CompactPluginActionButton(
-                icon = MiuixIcons.Delete,
+                icon = FilledIcons.Trash,
                 contentDescription = stringResource(R.string.plugin_uninstall),
                 tint = colorScheme.error,
                 background = colorScheme.errorContainer.copy(alpha = 0.45f),

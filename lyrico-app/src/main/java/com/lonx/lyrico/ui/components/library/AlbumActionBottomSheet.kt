@@ -11,6 +11,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.icons.PreferenceIconTone
+import com.lonx.lyrico.ui.components.icons.PreferenceIcon
+import com.lonx.lyrico.ui.components.icons.FilledIcons
 import top.yukonga.miuix.kmp.basic.BasicComponentColors
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
@@ -52,7 +55,9 @@ fun AlbumActionBottomSheet(
                 )
             ) {
                 ArrowPreference(
+                    startAction = { PreferenceIcon(FilledIcons.Volume2, PreferenceIconTone.Library, enabled = !isCalculatingReplayGain) },
                     title = stringResource(R.string.menu_action_calculate_album_replay_gain),
+                    enabled = !isCalculatingReplayGain,
                     onClick = {
                         if (!isCalculatingReplayGain) {
                             onCalculateReplayGain()
@@ -60,10 +65,12 @@ fun AlbumActionBottomSheet(
                     }
                 )
                 ArrowPreference(
+                    startAction = { PreferenceIcon(FilledIcons.Share2, PreferenceIconTone.Tools) },
                     title = stringResource(R.string.menu_action_share_album),
                     onClick = onShare
                 )
                 ArrowPreference(
+                    startAction = { PreferenceIcon(FilledIcons.Trash, PreferenceIconTone.Danger) },
                     title = stringResource(R.string.menu_action_delete_album),
                     summary = stringResource(R.string.menu_action_delete_album_sub),
                     titleColor = BasicComponentColors(

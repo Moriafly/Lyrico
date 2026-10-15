@@ -30,6 +30,9 @@ import com.lonx.lyrico.ui.components.blur.BlurredTopBar
 import com.lonx.lyrico.ui.components.blur.blurSource
 import com.lonx.lyrico.ui.components.blur.rememberBarBlurBackdrop
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.icons.FilledIcons
+import com.lonx.lyrico.ui.components.icons.PreferenceIcon
+import com.lonx.lyrico.ui.components.icons.PreferenceIconTone
 import com.lonx.lyrico.ui.components.library.EmptyStateKind
 import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.data.model.BatchTaskStatus
@@ -51,9 +54,6 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Back
-import top.yukonga.miuix.kmp.icon.extended.Delete
 import top.yukonga.miuix.kmp.preference.WindowDropdownPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
@@ -208,7 +208,7 @@ fun BatchTaskListScreen(
                             onClick = { navigator.popBackStack() }
                         ) {
                             Icon(
-                                imageVector = MiuixIcons.Back,
+                                imageVector = FilledIcons.ArrowLeft,
                                 contentDescription = stringResource(R.string.action_back)
                             )
                         }
@@ -224,7 +224,7 @@ fun BatchTaskListScreen(
                             }
                         ) {
                             Icon(
-                                MiuixIcons.Delete,
+                                FilledIcons.Trash,
                                 contentDescription = stringResource(R.string.batch_task_clear_title),
                                 tint = if (canClearFinishedTasks) {
                                     MiuixTheme.colorScheme.error
@@ -256,6 +256,7 @@ fun BatchTaskListScreen(
             item {
                 Card(modifier = Modifier.padding(horizontal = 12.dp)) {
                     WindowDropdownPreference(
+                        startAction = { PreferenceIcon(FilledIcons.ListFilter, PreferenceIconTone.Tools) },
                         title = stringResource(R.string.batch_task_filter_type),
                         items = listOf(stringResource(R.string.batch_task_filter_all)) + typeItems.map {
                             stringResource(
@@ -270,6 +271,7 @@ fun BatchTaskListScreen(
                         }
                     )
                     WindowDropdownPreference(
+                        startAction = { PreferenceIcon(FilledIcons.ListChecks, PreferenceIconTone.Tools) },
                         title = stringResource(R.string.batch_task_filter_status),
                         items = listOf(stringResource(R.string.batch_task_filter_all)) + statusItems.map {
                             stringResource(
@@ -356,7 +358,7 @@ private fun BatchTaskCard(
                 } else {
                     IconButton(onClick = onDeleteClick) {
                         Icon(
-                            MiuixIcons.Delete,
+                            FilledIcons.Trash,
                             contentDescription = stringResource(R.string.common_delete),
                             tint = MiuixTheme.colorScheme.error
                         )

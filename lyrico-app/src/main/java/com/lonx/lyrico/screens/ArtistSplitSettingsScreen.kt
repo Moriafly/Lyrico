@@ -41,6 +41,9 @@ import com.lonx.lyrico.ui.components.blur.BlurredTopBar
 import com.lonx.lyrico.ui.components.blur.blurSource
 import com.lonx.lyrico.ui.components.blur.rememberBarBlurBackdrop
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.icons.FilledIcons
+import com.lonx.lyrico.ui.components.icons.PreferenceIcon
+import com.lonx.lyrico.ui.components.icons.PreferenceIconTone
 import com.lonx.lyrico.data.model.artist.ArtistSplitDefaults
 import com.lonx.lyrico.data.model.artist.CustomArtistSeparator
 import com.lonx.lyrico.data.model.artist.CustomNoSplitArtist
@@ -53,6 +56,7 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
+import top.yukonga.miuix.kmp.basic.Button
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
@@ -64,9 +68,6 @@ import top.yukonga.miuix.kmp.basic.Switch
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TextField
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Back
-import top.yukonga.miuix.kmp.icon.extended.Delete
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -122,7 +123,7 @@ fun ArtistSplitSettingsScreen(
                     title = stringResource(R.string.artist_split_settings_title),
                     navigationIcon = {
                         IconButton(onClick = { navigator.popBackStack() }) {
-                            Icon(MiuixIcons.Back, contentDescription = stringResource(R.string.action_back))
+                            Icon(FilledIcons.ArrowLeft, contentDescription = stringResource(R.string.action_back))
                         }
                     },
                     scrollBehavior = topAppBarScrollBehavior
@@ -147,12 +148,14 @@ fun ArtistSplitSettingsScreen(
                 SmallTitle(text = stringResource(R.string.artist_split_general_section))
                 Card(modifier = Modifier.padding(horizontal = 12.dp)) {
                     SwitchPreference(
+                        startAction = { PreferenceIcon(FilledIcons.Split, PreferenceIconTone.Library) },
                         title = stringResource(R.string.artist_split_enabled),
                         summary = stringResource(R.string.artist_split_enabled_summary),
                         checked = uiState.config.enabled,
                         onCheckedChange = viewModel::setEnabled
                     )
                     ArrowPreference(
+                        startAction = { PreferenceIcon(FilledIcons.RefreshCw, PreferenceIconTone.Library) },
                         title = stringResource(
                             if (uiState.hasPendingIndexRebuild) {
                                 R.string.rebuild_artist_index_now
@@ -218,17 +221,25 @@ fun ArtistSplitSettingsScreen(
                             .padding(horizontal = 12.dp, vertical = 8.dp),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        TextButton(
-                            text = stringResource(R.string.add_custom_separator),
+                        Button(
                             onClick = { addingSeparator = true },
                             modifier = Modifier.weight(1f),
-                            colors = ButtonDefaults.textButtonColorsPrimary()
-                        )
-                        TextButton(
-                            text = stringResource(R.string.reset_to_default),
+                            colors = ButtonDefaults.buttonColorsPrimary()
+                        ) {
+                            Icon(FilledIcons.Plus, null, Modifier.size(18.dp), tint = MiuixTheme.colorScheme.onPrimary)
+                            Spacer(Modifier.width(8.dp))
+                            Text(stringResource(R.string.add_custom_separator), color = MiuixTheme.colorScheme.onPrimary,
+                                style = MiuixTheme.textStyles.button)
+                        }
+                        Button(
                             onClick = viewModel::resetSeparators,
                             modifier = Modifier.weight(1f)
-                        )
+                        ) {
+                            Icon(FilledIcons.RotateCcw, null, Modifier.size(18.dp), tint = MiuixTheme.colorScheme.onSecondaryContainer)
+                            Spacer(Modifier.width(8.dp))
+                            Text(stringResource(R.string.reset_to_default), color = MiuixTheme.colorScheme.onSecondaryContainer,
+                                style = MiuixTheme.textStyles.button)
+                        }
                     }
                 }
             }
@@ -256,6 +267,7 @@ fun ArtistSplitSettingsScreen(
                         }
                     }
                     ArrowPreference(
+                        startAction = { PreferenceIcon(FilledIcons.UserPlus, PreferenceIconTone.Library) },
                         title = stringResource(R.string.add_no_split_artist),
                         onClick = { addingNoSplitArtist = true }
                     )
@@ -438,7 +450,7 @@ private fun RuleChip(
             overflow = TextOverflow.Ellipsis
         )
         Icon(
-            imageVector = MiuixIcons.Delete,
+            imageVector = FilledIcons.Trash,
             contentDescription = stringResource(R.string.common_delete),
             modifier = Modifier
                 .size(18.dp)

@@ -56,6 +56,9 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.icons.PreferenceIconTone
+import com.lonx.lyrico.ui.components.icons.PreferenceIcon
+import com.lonx.lyrico.ui.components.icons.FilledIcons
 import com.lonx.lyrico.data.model.ArtistSortBy
 import com.lonx.lyrico.data.model.ArtistSortInfo
 import com.lonx.lyrico.ui.components.CoverCandidate
@@ -392,17 +395,20 @@ fun ArtistsPage(
                 },
             )
             else -> {
-                ArrowPreference(title = stringResource(R.string.poster_view_artwork), onClick = {
+                ArrowPreference(startAction = { PreferenceIcon(FilledIcons.Image, PreferenceIconTone.Library) },
+                    title = stringResource(R.string.poster_view_artwork), onClick = {
                     previewPoster = source
                     showArtistMenu = false
                 })
                 ArrowPreference(
+                    startAction = { PreferenceIcon(FilledIcons.Crop, PreferenceIconTone.Library, enabled = source.canCrop && !removalState.isRunning) },
                     title = stringResource(R.string.label_crop_artist_image),
                     summary = if (!source.canCrop) stringResource(R.string.artist_poster_video_crop_unavailable) else null,
                     enabled = source.canCrop && !removalState.isRunning,
                     onClick = { cropTarget = source; showCrop = true; showArtistMenu = false }
                 )
-                ArrowPreference(title = stringResource(R.string.poster_remove_artwork), enabled = !removalState.isRunning,
+                ArrowPreference(startAction = { PreferenceIcon(FilledIcons.Trash, PreferenceIconTone.Danger, enabled = !removalState.isRunning) },
+                    title = stringResource(R.string.poster_remove_artwork), enabled = !removalState.isRunning,
                     titleColor = BasicComponentColors(MiuixTheme.colorScheme.error, MiuixTheme.colorScheme.disabledOnSecondaryVariant), onClick = {
                         menuArtist?.let { pendingRemoval = setOf(it.id) }
                         showArtistMenu = false

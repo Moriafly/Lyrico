@@ -1,7 +1,5 @@
 package com.lonx.lyrico.screens
 
-import top.yukonga.miuix.kmp.icon.extended.Refresh
-import top.yukonga.miuix.kmp.icon.extended.Folder
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -22,14 +20,14 @@ import androidx.core.net.toUri
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.icons.PreferenceIconTone
+import com.lonx.lyrico.ui.components.icons.PreferenceIcon
+import com.lonx.lyrico.ui.components.icons.FilledIcons
 import com.lonx.lyrico.ui.components.library.EmptyStateKind
 import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.viewmodel.ArtistPosterFile
 import com.lonx.lyrico.viewmodel.ArtistPosterFolder
 import top.yukonga.miuix.kmp.basic.*
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.AddFolder
-import top.yukonga.miuix.kmp.icon.extended.Image
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
@@ -68,7 +66,7 @@ internal fun ArtistPosterFolderContents(
                     kind = EmptyStateKind.Cover,
                     title = stringResource(if (unavailable) R.string.artist_poster_folder_unavailable else R.string.artist_poster_no_files),
                     summary = stringResource(if (hasError) R.string.artist_poster_folder_error else if (unavailable) R.string.artist_poster_folders_empty else R.string.artist_poster_empty_hint),
-                    icon = if (unavailable) MiuixIcons.Folder else MiuixIcons.Refresh,
+                    icon = if (unavailable) FilledIcons.Folder else FilledIcons.RefreshCw,
                     actionText = stringResource(if (unavailable) R.string.artist_poster_folder_change else R.string.action_refresh_folder),
                     onAction = if (unavailable) onChangeFolder else onRefresh,
                     modifier = Modifier.fillMaxWidth().weight(1f)
@@ -170,7 +168,7 @@ private fun ArtistPosterDirectoryCard(
                     MiuixTheme.colorScheme.primary.copy(alpha = 0.1f), RoundedCornerShape(12.dp)
                 ), contentAlignment = Alignment.Center
             ) {
-                Icon(MiuixIcons.AddFolder, null, tint = MiuixTheme.colorScheme.primary,
+                Icon(FilledIcons.FolderPlus, null, tint = MiuixTheme.colorScheme.primary,
                     modifier = Modifier.size(24.dp))
             }
             Column(Modifier.weight(1f)) {
@@ -205,7 +203,7 @@ private fun PosterImage(file: ArtistPosterFile, revision: Long, modifier: Modifi
             onSuccess = { loading = false; failed = false }, onError = { loading = false; failed = true })
         if (loading) CircularProgressIndicator(size = 24.dp)
         if (failed) Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(MiuixIcons.Image, null)
+            Icon(FilledIcons.Image, null)
             Text(stringResource(R.string.artist_poster_preview_error), fontSize = MiuixTheme.textStyles.body2.fontSize)
         }
     }
@@ -229,8 +227,12 @@ private fun PosterPreview(files: List<ArtistPosterFile>, initialPage: Int, revis
         menuEntry = { index ->
             val file = files[index]
             DropdownEntry(items = listOf(
-                DropdownItem(text = renameLabel, enabled = enabled, onClick = { onRename(file) }),
-                DropdownItem(text = detailsLabel, enabled = enabled && file.artistId != null,
+                DropdownItem(
+                    icon = { modifier -> PreferenceIcon(FilledIcons.Pencil, PreferenceIconTone.Tools, modifier = modifier, enabled = enabled) },
+                    text = renameLabel, enabled = enabled, onClick = { onRename(file) }),
+                DropdownItem(
+                    icon = { modifier -> PreferenceIcon(FilledIcons.Users, PreferenceIconTone.Library, modifier = modifier, enabled = enabled && file.artistId != null) },
+                    text = detailsLabel, enabled = enabled && file.artistId != null,
                     summary = if (file.artistId == null) unmatchedLabel else null,
                     onClick = { onArtistDetails(file) })
             ))

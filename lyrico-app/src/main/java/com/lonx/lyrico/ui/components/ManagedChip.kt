@@ -21,10 +21,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.icons.FilledIcons
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Delete
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /** 胶囊换行网格，规则类页面共用。 */
@@ -127,7 +126,7 @@ fun ManagedChip(
 
         if (onDelete != null) {
             Icon(
-                imageVector = MiuixIcons.Delete,
+                imageVector = FilledIcons.Trash,
                 contentDescription = stringResource(R.string.common_delete),
                 modifier = Modifier
                     .size(18.dp)

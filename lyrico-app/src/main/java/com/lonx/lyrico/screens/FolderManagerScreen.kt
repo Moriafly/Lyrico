@@ -55,6 +55,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.lonx.lyrico.ui.components.library.SelectableLibraryItem
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.icons.PreferenceIconTone
+import com.lonx.lyrico.ui.components.icons.PreferenceIcon
+import com.lonx.lyrico.ui.components.icons.FilledIcons
 import com.lonx.lyrico.ui.components.library.EmptyStateKind
 import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.data.model.entity.FolderEntity
@@ -92,10 +95,6 @@ import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.TabRowWithContour
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.AddFolder
-import top.yukonga.miuix.kmp.icon.extended.Back
-import top.yukonga.miuix.kmp.icon.extended.Sort
 import top.yukonga.miuix.kmp.menu.OverlayIconDropdownMenu
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
@@ -304,7 +303,7 @@ fun FolderManagerScreen(
                                     }
                                 ) {
                                     Icon(
-                                        imageVector = MiuixIcons.Back,
+                                        imageVector = FilledIcons.ArrowLeft,
                                         contentDescription = null
                                     )
                                 }
@@ -315,7 +314,7 @@ fun FolderManagerScreen(
                                         onClick = { folderPickerLauncher.launch(null) }
                                     ) {
                                         Icon(
-                                            imageVector = MiuixIcons.AddFolder,
+                                            imageVector = FilledIcons.FolderPlus,
                                             contentDescription = null
                                         )
                                     }
@@ -370,7 +369,7 @@ fun FolderManagerScreen(
                                         entries = listOf(sortEntries)
                                     ) {
                                         Icon(
-                                            imageVector = MiuixIcons.Sort,
+                                            imageVector = FilledIcons.ArrowDownUp,
                                             contentDescription = stringResource(R.string.cd_sort)
                                         )
                                     }
@@ -1142,6 +1141,7 @@ private fun FolderListItem(
     val actionItems = buildList {
         add(
             DropdownItem(
+                icon = { modifier -> PreferenceIcon(if (folder.isIgnored) FilledIcons.Eye else FilledIcons.EyeOff, PreferenceIconTone.Tools, modifier = modifier) },
                 text = if (folder.isIgnored) {
                     stringResource(R.string.folder_action_show)
                 } else {
@@ -1155,6 +1155,7 @@ private fun FolderListItem(
 
         add(
             DropdownItem(
+                icon = { modifier -> PreferenceIcon(FilledIcons.RefreshCw, PreferenceIconTone.Tools, modifier = modifier) },
                 text = stringResource(R.string.action_refresh_folder),
                 onClick = {
                     if (!isBusy) {
@@ -1167,6 +1168,7 @@ private fun FolderListItem(
         if (canRemove) {
             add(
                 DropdownItem(
+                    icon = { modifier -> PreferenceIcon(FilledIcons.Folder, PreferenceIconTone.Tools, modifier = modifier) },
                     text = stringResource(R.string.folder_action_remove),
                     onClick = {
                         if (!isBusy) {

@@ -41,6 +41,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lonx.lyrico.ui.components.library.SelectableLibraryItem
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.icons.PreferenceIconTone
+import com.lonx.lyrico.ui.components.icons.PreferenceIcon
+import com.lonx.lyrico.ui.components.icons.FilledIcons
 import com.lonx.lyrico.ui.components.library.EmptyStateKind
 import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.data.model.entity.SongEntity
@@ -368,7 +371,9 @@ private fun albumActionsDropdownEntry(
     return DropdownEntry(
         items = listOf(
             DropdownItem(
+                icon = { modifier -> PreferenceIcon(FilledIcons.Volume2, PreferenceIconTone.Library, modifier = modifier, enabled = !isCalculatingReplayGain) },
                 text = stringResource(R.string.menu_action_calculate_album_replay_gain),
+                enabled = !isCalculatingReplayGain,
                 onClick = {
                     if (!isCalculatingReplayGain) {
                         onCalculateReplayGain()
@@ -376,10 +381,12 @@ private fun albumActionsDropdownEntry(
                 }
             ),
             DropdownItem(
+                icon = { modifier -> PreferenceIcon(FilledIcons.Share2, PreferenceIconTone.Tools, modifier = modifier) },
                 text = stringResource(R.string.menu_action_share_album),
                 onClick = onShare
             ),
             DropdownItem(
+                icon = { modifier -> PreferenceIcon(FilledIcons.Trash, PreferenceIconTone.Danger, modifier = modifier) },
                 text = stringResource(R.string.menu_action_delete_album),
                 onClick = onDelete
             )

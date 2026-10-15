@@ -26,6 +26,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.icons.PreferenceIconTone
+import com.lonx.lyrico.ui.components.icons.PreferenceIcon
+import com.lonx.lyrico.ui.components.icons.FilledIcons
 import com.lonx.lyrico.data.model.BatchMatchConfig
 import com.lonx.lyrico.data.model.metadata.MetadataFieldTarget
 import com.lonx.lyrico.data.model.metadata.MetadataWriteMode
@@ -200,6 +203,7 @@ fun BatchMatchConfigBottomSheet(
                         insideMargin = PaddingValues(12.dp)
                     )
                     ArrowPreference(
+                        startAction = { PreferenceIcon(FilledIcons.Parallel, PreferenceIconTone.Tools) },
                         title = stringResource(R.string.batch_match_config_concurrency),
                         endActions = {
                             Text(

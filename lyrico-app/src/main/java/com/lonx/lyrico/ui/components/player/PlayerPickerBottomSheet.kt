@@ -25,6 +25,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.icons.PreferenceIconTone
+import com.lonx.lyrico.ui.components.icons.PreferenceIcon
+import com.lonx.lyrico.ui.components.icons.FilledIcons
 import com.lonx.lyrico.data.player.FriendlyPlayer
 import com.lonx.lyrico.data.player.FriendlyPlayerRegistry
 import com.lonx.lyrico.data.player.FriendlyPlayerUiState
@@ -133,6 +136,7 @@ fun PlayerPickerBottomSheet(
                 )
             ) {
                 ArrowPreference(
+                    startAction = { PreferenceIcon(FilledIcons.OpenInNew, PreferenceIconTone.Tools) },
                     title = stringResource(R.string.open_with_system_picker),
                     onClick = {
                         val playUri = uri ?: return@ArrowPreference

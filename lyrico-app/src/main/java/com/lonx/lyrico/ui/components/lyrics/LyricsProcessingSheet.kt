@@ -13,13 +13,14 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.icons.PreferenceIconTone
+import com.lonx.lyrico.ui.components.icons.PreferenceIcon
+import com.lonx.lyrico.ui.components.icons.FilledIcons
 import com.lonx.lyrico.data.model.lyrics.*
 import com.lonx.lyrico.ui.components.base.ActionBottomSheet
 import com.lonx.lyrico.ui.components.base.PillButton
 import com.lonx.lyrico.ui.components.base.PillButtonDefaults
 import com.lonx.lyrico.ui.components.base.PillButtonSize
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.basic.ArrowUpDown
 import top.yukonga.miuix.kmp.basic.*
 import top.yukonga.miuix.kmp.preference.RadioButtonPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -54,7 +55,20 @@ fun LyricsOrganizationMenu(onSelect: (LyricsOperation) -> Unit, anchor: @Composa
             ListPopupColumn {
                 val actions = listOf(LyricsOperation.SORT, LyricsOperation.REMOVE_EMPTY, LyricsOperation.REMOVE_TAGS)
                 actions.forEachIndexed { index, action ->
-                    DropdownImpl(text = stringResource(action.titleRes), isSelected = false,
+                    DropdownImpl(item = DropdownItem(
+                        text = stringResource(action.titleRes),
+                        icon = { modifier ->
+                            PreferenceIcon(
+                                when (action) {
+                                    LyricsOperation.SORT -> FilledIcons.Sort
+                                    LyricsOperation.REMOVE_EMPTY -> FilledIcons.RemoveLines
+                                    else -> FilledIcons.FilterLyrics
+                                },
+                                PreferenceIconTone.Lyrics,
+                                modifier = modifier,
+                            )
+                        },
+                    ), isSelected = false,
                         optionSize = actions.size, index = index,
                         onSelectedIndexChange = { expanded = false; onSelect(action) })
                 }
@@ -70,7 +84,7 @@ fun LyricsChoice(label: String, items: List<String>, selected: Int, modifier: Mo
         PillButton(text = label, onClick = { expanded = true },
             modifier = Modifier.widthIn(max = 240.dp).minimumInteractiveComponentSize().semantics { role = Role.Button },
             style = PillButtonDefaults.style(PillButtonSize.Large),
-            trailing = { Icon(MiuixIcons.Basic.ArrowUpDown, null, Modifier.size(16.dp)) })
+            trailing = { Icon(FilledIcons.ArrowDownUp, null, Modifier.size(16.dp)) })
         WindowListPopup(show = expanded,
             popupPositionProvider = ListPopupDefaults.DropdownPositionProvider,
             onDismissRequest = { expanded = false }, alignment = PopupPositionProvider.Align.End) {
@@ -130,6 +144,7 @@ fun LyricsConcurrency(value: Int, onChange: (Int) -> Unit, header: (@Composable 
         colors = CardDefaults.defaultColors(color = MiuixTheme.colorScheme.secondaryContainer)) {
         header?.invoke()
         top.yukonga.miuix.kmp.preference.WindowDropdownPreference(
+            startAction = { PreferenceIcon(FilledIcons.Parallel, PreferenceIconTone.Tools) },
             title = stringResource(R.string.batch_replay_gain_concurrency), items = (1..5).map { it.toString() },
             selectedIndex = value - 1, onSelectedIndexChange = { onChange(it + 1) })
     }

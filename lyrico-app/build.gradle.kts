@@ -8,6 +8,12 @@ plugins {
     id("kotlin-parcelize")
     alias(libs.plugins.aboutLibraries)
 }
+
+aboutLibraries {
+    collect {
+        configPath = file("config")
+    }
+}
 // 记得在发布版本时更新此处的值
 val baseVersionName = "1.6.0"
 val baseVersionCode = 20

@@ -45,6 +45,9 @@ import com.lonx.lyrico.ui.components.blur.BlurredTopBar
 import com.lonx.lyrico.ui.components.blur.blurSource
 import com.lonx.lyrico.ui.components.blur.rememberBarBlurBackdrop
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.icons.FilledIcons
+import com.lonx.lyrico.ui.components.icons.PreferenceIcon
+import com.lonx.lyrico.ui.components.icons.PreferenceIconTone
 import com.lonx.lyrico.ui.components.library.EmptyStateKind
 import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.data.model.log.AppLogLevel
@@ -71,11 +74,6 @@ import top.yukonga.miuix.kmp.basic.SnackbarHost
 import top.yukonga.miuix.kmp.basic.SnackbarHostState
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Back
-import top.yukonga.miuix.kmp.icon.extended.Copy
-import top.yukonga.miuix.kmp.icon.extended.Delete
-import top.yukonga.miuix.kmp.icon.extended.Share
 import top.yukonga.miuix.kmp.preference.WindowDropdownPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
@@ -164,7 +162,7 @@ fun AppLogScreen(
                     navigationIcon = {
                         IconButton(onClick = { navigator.popBackStack() }) {
                             Icon(
-                                imageVector = MiuixIcons.Back,
+                                imageVector = FilledIcons.ArrowLeft,
                                 contentDescription = stringResource(R.string.action_back)
                             )
                         }
@@ -178,7 +176,7 @@ fun AppLogScreen(
                             }
                         ) {
                             Icon(
-                                imageVector = MiuixIcons.Share,
+                                imageVector = FilledIcons.Share2,
                                 contentDescription = stringResource(R.string.action_export_logs)
                             )
                         }
@@ -190,7 +188,7 @@ fun AppLogScreen(
                             }
                         ) {
                             Icon(
-                                imageVector = MiuixIcons.Delete,
+                                imageVector = FilledIcons.Trash,
                                 contentDescription = stringResource(R.string.action_delete),
                                 tint = MiuixTheme.colorScheme.error
                             )
@@ -219,6 +217,7 @@ fun AppLogScreen(
             item("filters") {
                 Card(modifier = Modifier.padding(horizontal = 12.dp)) {
                     WindowDropdownPreference(
+                        startAction = { PreferenceIcon(FilledIcons.ListFilter, PreferenceIconTone.Tools) },
                         title = stringResource(R.string.app_log_filter_level),
                         items = listOf(stringResource(R.string.app_log_filter_all)) + levelItems.map {
                             stringResource(
@@ -231,6 +230,7 @@ fun AppLogScreen(
                         }
                     )
                     WindowDropdownPreference(
+                        startAction = { PreferenceIcon(FilledIcons.Logs, PreferenceIconTone.Tools) },
                         title = stringResource(R.string.app_log_filter_type),
                         items = listOf(stringResource(R.string.app_log_filter_all)) + typeItems.map {
                             stringResource(
@@ -243,6 +243,7 @@ fun AppLogScreen(
                         }
                     )
                     WindowDropdownPreference(
+                        startAction = { PreferenceIcon(FilledIcons.Calendar, PreferenceIconTone.Tools) },
                         title = stringResource(R.string.log_retention_title),
                         summary = stringResource(R.string.log_retention_summary),
                         items = logRetentionItems,
@@ -442,7 +443,7 @@ private fun AppLogDetailSheet(
                     }
                 ) {
                     Icon(
-                        imageVector = MiuixIcons.Copy,
+                        imageVector = FilledIcons.Copy,
                         contentDescription = stringResource(R.string.action_copy_log)
                     )
                 }

@@ -45,6 +45,9 @@ import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lonx.lyrico.BuildConfig
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.icons.FilledIcons
+import com.lonx.lyrico.ui.components.icons.PreferenceIcon
+import com.lonx.lyrico.ui.components.icons.PreferenceIconTone
 import com.lonx.lyrico.data.model.AppLanguage
 import com.lonx.lyrico.data.model.ArtistSeparator
 import com.lonx.lyrico.data.model.ConversionMode
@@ -99,8 +102,6 @@ import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TextField
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Back
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.preference.RadioButtonPreference
 import top.yukonga.miuix.kmp.preference.SliderPreference
@@ -275,7 +276,7 @@ fun SettingsScreen(
                             onClick = { navigator.popBackStack() }
                         ) {
                             Icon(
-                                MiuixIcons.Back,
+                                FilledIcons.ArrowLeft,
                                 contentDescription = stringResource(R.string.action_back)
                             )
                         }
@@ -368,6 +369,7 @@ fun SettingsScreen(
                         )
                     }
                     WindowDropdownPreference(
+                        startAction = { PreferenceIcon(FilledIcons.Languages, PreferenceIconTone.Appearance) },
                         title = stringResource(R.string.app_language),
                         items = AppLanguage.entries.map { stringResource(it.labelRes) },
                         selectedIndex = AppLanguage.entries.indexOfFirst {
@@ -381,6 +383,7 @@ fun SettingsScreen(
                         }
                     )
                     WindowDropdownPreference(
+                        startAction = { PreferenceIcon(FilledIcons.Moon, PreferenceIconTone.Appearance) },
                         title = stringResource(R.string.theme_mode),
                         items = themeModeItems,
                         selectedIndex = selectedThemeModeIndex,
@@ -389,12 +392,14 @@ fun SettingsScreen(
                         }
                     )
                     SwitchPreference(
+                        startAction = { PreferenceIcon(FilledIcons.Blend, PreferenceIconTone.Appearance) },
                         title = stringResource(R.string.bar_blur),
                         summary = stringResource(R.string.bar_blur_summary),
                         checked = barBlurEnabled,
                         onCheckedChange = settingsViewModel::setBarBlurEnabled,
                     )
                     SwitchPreference(
+                        startAction = { PreferenceIcon(FilledIcons.PanelBottom, PreferenceIconTone.Appearance) },
                         title = stringResource(R.string.floating_bottom_bar),
                         summary = stringResource(R.string.floating_bottom_bar_summary),
                         checked = floatingBottomBarEnabled,
@@ -402,6 +407,7 @@ fun SettingsScreen(
                     )
                     AnimatedVisibility(visible = floatingBottomBarEnabled) {
                         WindowDropdownPreference(
+                            startAction = { PreferenceIcon(FilledIcons.Layers, PreferenceIconTone.Appearance) },
                             title = stringResource(R.string.floating_bar_effect),
                             items = floatingBarEffectItems,
                             selectedIndex = floatingBarEffect.ordinal,
@@ -413,6 +419,7 @@ fun SettingsScreen(
                         )
                     }
                     SwitchPreference(
+                        startAction = { PreferenceIcon(FilledIcons.Palette, PreferenceIconTone.Appearance) },
                         title = stringResource(R.string.monet),
                         checked = monetEnable,
                         onCheckedChange = {
@@ -443,6 +450,7 @@ fun SettingsScreen(
                         WindowSpinnerPreference(
                             items = options,
                             selectedIndex = currentSelectedIndex,
+                            startAction = { PreferenceIcon(FilledIcons.Palette, PreferenceIconTone.Appearance) },
                             title = stringResource(R.string.key_color),
                             onSelectedIndexChange = {
                                 val selectedKeyColor = KeyColors[it]
@@ -467,11 +475,13 @@ fun SettingsScreen(
                         stringResource(R.string.folder_manage_hint)
                     }
                     ArrowPreference(
+                        startAction = { PreferenceIcon(FilledIcons.Folder, PreferenceIconTone.Library) },
                         title = stringResource(R.string.folder_manager),
                         summary = folderSummary,
                         onClick = { navigator.navigate(FolderManagerDestination()) }
                     )
                     ArrowPreference(
+                        startAction = { PreferenceIcon(FilledIcons.Image, PreferenceIconTone.Library) },
                         title = stringResource(R.string.artist_poster_folders),
                         summary = stringResource(
                             if (artistPosterFolder == null) {
@@ -483,17 +493,20 @@ fun SettingsScreen(
                         onClick = { navigator.navigate(ArtistPosterFoldersDestination()) }
                     )
                     SwitchPreference(
+                        startAction = { PreferenceIcon(FilledIcons.AudioLines, PreferenceIconTone.Library) },
                         title = stringResource(R.string.ignore_short_audio),
                         checked = ignoreShortAudio,
                         onCheckedChange = { settingsViewModel.setIgnoreShortAudio(it) }
                     )
                     SwitchPreference(
+                        startAction = { PreferenceIcon(FilledIcons.Database, PreferenceIconTone.Lyrics) },
                         title = stringResource(R.string.lyric_index_title),
                         summary = stringResource(R.string.lyric_index_summary),
                         checked = settingsUiState.lyricIndexEnabled,
                         onCheckedChange = { settingsViewModel.setLyricIndexEnabled(it) }
                     )
                     ArrowPreference(
+                        startAction = { PreferenceIcon(FilledIcons.Volume2, PreferenceIconTone.Library) },
                         title = stringResource(R.string.settings_replay_gain_target_loudness),
                         summary = stringResource(R.string.settings_replay_gain_target_loudness_summary),
                         endActions = {
@@ -507,6 +520,7 @@ fun SettingsScreen(
                         holdDownState = showRgTargetDialog.value
                     )
                     WindowDropdownPreference(
+                        startAction = { PreferenceIcon(FilledIcons.Activity, PreferenceIconTone.Library) },
                         title = stringResource(R.string.settings_replay_gain_peak_mode),
                         items = replayGainPeakModeItems,
                         selectedIndex = selectedReplayGainPeakModeIndex,
@@ -523,10 +537,12 @@ fun SettingsScreen(
                 SmallTitle(text = stringResource(R.string.section_search))
                 Card(modifier = Modifier.padding(horizontal = 12.dp)) {
                     ArrowPreference(
+                        startAction = { PreferenceIcon(FilledIcons.Plug, PreferenceIconTone.Tools) },
                         title = stringResource(R.string.plugin_manager_title),
                         onClick = { navigator.navigate(PluginManagerDestination()) }
                     )
                     WindowDropdownPreference(
+                        startAction = { PreferenceIcon(FilledIcons.PanelsTopLeft, PreferenceIconTone.Tools) },
                         title = stringResource(R.string.search_source_tab_style),
                         items = searchSourceTabStyleItems,
                         selectedIndex = selectedSearchSourceTabStyleIndex,
@@ -537,6 +553,7 @@ fun SettingsScreen(
                         }
                     )
                     SliderPreference(
+                        startAction = { PreferenceIcon(FilledIcons.ListFilter, PreferenceIconTone.Tools) },
                         title = stringResource(R.string.search_limit),
                         showKeyPoints = true,
                         valueText = tempSearchPageSize.intValue.toString(),
@@ -553,6 +570,7 @@ fun SettingsScreen(
                         }
                     )
                     WindowDropdownPreference(
+                        startAction = { PreferenceIcon(FilledIcons.Split, PreferenceIconTone.Tools) },
                         title = stringResource(R.string.artist_separator),
                         summary = stringResource(R.string.artist_separator_hint),
                         items = artistSeparatorItems,
@@ -562,6 +580,7 @@ fun SettingsScreen(
                         }
                     )
                     SwitchPreference(
+                        startAction = { PreferenceIcon(FilledIcons.TextSearch, PreferenceIconTone.Tools) },
                         title = stringResource(R.string.show_all_search_result_fields),
                         summary = stringResource(R.string.show_all_search_result_fields_summary),
                         checked = showAllSearchResultFields,
@@ -574,6 +593,7 @@ fun SettingsScreen(
                 SmallTitle(text = stringResource(R.string.section_lyrics))
                 Card(modifier = Modifier.padding(horizontal = 12.dp)) {
                     WindowDropdownPreference(
+                        startAction = { PreferenceIcon(FilledIcons.FileMusic, PreferenceIconTone.Lyrics) },
                         title = stringResource(R.string.lyric_mode),
                         items = lyricFormatItems,
                         selectedIndex = selectedLyricFormatIndex,
@@ -582,12 +602,14 @@ fun SettingsScreen(
                         }
                     )
                     SwitchPreference(
+                        startAction = { PreferenceIcon(FilledIcons.Type, PreferenceIconTone.Lyrics) },
                         title = stringResource(R.string.roma),
                         summary = stringResource(R.string.roma_hint),
                         checked = romaEnabled,
                         onCheckedChange = { settingsViewModel.setRomaEnabled(it) }
                     )
                     SwitchPreference(
+                        startAction = { PreferenceIcon(FilledIcons.Languages, PreferenceIconTone.Lyrics) },
                         title = stringResource(R.string.translation),
                         summary = stringResource(R.string.translation_hint),
                         checked = translationEnabled,
@@ -595,6 +617,7 @@ fun SettingsScreen(
                     )
                     AnimatedVisibility(visible = translationEnabled) {
                         SwitchPreference(
+                            startAction = { PreferenceIcon(FilledIcons.Captions, PreferenceIconTone.Lyrics) },
                             title = stringResource(R.string.only_translation_if_available),
                             summary = stringResource(R.string.only_translation_if_available_hint),
                             enabled = translationEnabled,
@@ -609,6 +632,7 @@ fun SettingsScreen(
                 SmallTitle(text = stringResource(R.string.section_text_processing))
                 Card(modifier = Modifier.padding(horizontal = 12.dp)) {
                     WindowDropdownPreference(
+                        startAction = { PreferenceIcon(FilledIcons.ALargeSmall, PreferenceIconTone.Lyrics) },
                         title = stringResource(R.string.conversion_mode),
                         summary = stringResource(R.string.conversion_mode_hint),
                         items = conversionModeItems,
@@ -618,22 +642,26 @@ fun SettingsScreen(
                         },
                     )
                     SwitchPreference(
+                        startAction = { PreferenceIcon(FilledIcons.RemoveLines, PreferenceIconTone.Lyrics) },
                         title = stringResource(R.string.remove_empty_lines),
                         summary = stringResource(R.string.remove_empty_lines_hint),
                         checked = removeEmptyLines,
                         onCheckedChange = { settingsViewModel.setRemoveEmptyLines(it) }
                     )
                     ArrowPreference(
+                        startAction = { PreferenceIcon(FilledIcons.FilterLyrics, PreferenceIconTone.Lyrics) },
                         title = stringResource(R.string.non_lyrics_cleanup_rules_title),
                         summary = stringResource(R.string.non_lyrics_cleanup_rules_summary),
                         onClick = { navigator.navigate(LyricsCleanupRulesDestination()) }
                     )
                     ArrowPreference(
+                        startAction = { PreferenceIcon(FilledIcons.Users, PreferenceIconTone.Library) },
                         title = stringResource(R.string.artist_split_settings_title),
                         summary = stringResource(R.string.artist_split_settings_summary),
                         onClick = { navigator.navigate(ArtistSplitSettingsDestination()) }
                     )
                     ArrowPreference(
+                        startAction = { PreferenceIcon(FilledIcons.SlidersHorizontal, PreferenceIconTone.Tools) },
                         title = stringResource(R.string.edit_field_settings_title),
                         summary = stringResource(R.string.edit_field_settings_summary),
                         onClick = { navigator.navigate(EditFieldSettingsDestination()) }
@@ -645,6 +673,7 @@ fun SettingsScreen(
                 SmallTitle(text = stringResource(R.string.section_backup))
                 Card(modifier = Modifier.padding(horizontal = 12.dp)) {
                     ArrowPreference(
+                        startAction = { PreferenceIcon(FilledIcons.FileUp, PreferenceIconTone.Tools) },
                         title = stringResource(R.string.export_config),
                         summary = stringResource(R.string.export_config_hint),
                         onClick = {
@@ -653,6 +682,7 @@ fun SettingsScreen(
                         }
                     )
                     ArrowPreference(
+                        startAction = { PreferenceIcon(FilledIcons.FileDown, PreferenceIconTone.Tools) },
                         title = stringResource(R.string.import_config),
                         summary = stringResource(R.string.import_config_hint),
                         onClick = {
@@ -666,16 +696,19 @@ fun SettingsScreen(
                 SmallTitle(text = stringResource(R.string.section_other))
                 Card(modifier = Modifier.padding(horizontal = 12.dp)) {
                     ArrowPreference(
+                        startAction = { PreferenceIcon(FilledIcons.ClipboardList, PreferenceIconTone.Tools) },
                         title = stringResource(R.string.batch_task_list_title),
                         onClick = { navigator.navigate(BatchTaskListDestination()) }
                     )
                     ArrowPreference(
+                        startAction = { PreferenceIcon(FilledIcons.Logs, PreferenceIconTone.Tools) },
                         title = stringResource(R.string.app_log_title),
                         summary = stringResource(R.string.app_log_summary),
                         onClick = { navigator.navigate(AppLogsDestination()) }
                     )
                     if (BuildConfig.DEBUG) {
                         ArrowPreference(
+                            startAction = { PreferenceIcon(FilledIcons.Terminal, PreferenceIconTone.Tools) },
                             title = stringResource(R.string.quickjs_test_title),
                             summary = stringResource(R.string.quickjs_test_description_summary),
                             onClick = { navigator.navigate(QuickjsTestDestination()) }
@@ -687,6 +720,7 @@ fun SettingsScreen(
                         Formatter.formatFileSize(context, settingsUiState.totalCacheSize)
                     )
                     ArrowPreference(
+                        startAction = { PreferenceIcon(FilledIcons.Eraser, PreferenceIconTone.Tools) },
                         title = stringResource(R.string.clear_cache),
                         summary = cacheSummary,
                         onClick = { showClearCacheDialog.value = true },
@@ -694,6 +728,7 @@ fun SettingsScreen(
                     )
                     if (BuildConfig.DEBUG) {
                         ArrowPreference(
+                            startAction = { PreferenceIcon(FilledIcons.Database, PreferenceIconTone.Danger) },
                             title = stringResource(R.string.clear_songs),
                             onClick = {
                                 scope.launch {
@@ -714,6 +749,7 @@ fun SettingsScreen(
                         )
                     }
                     ArrowPreference(
+                        startAction = { PreferenceIcon(FilledIcons.Info, PreferenceIconTone.Tools) },
                         title = stringResource(R.string.about_title),
                         onClick = { navigator.navigate(AboutDestination()) }
                     )

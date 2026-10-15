@@ -31,6 +31,9 @@ import com.lonx.lyrico.ui.components.blur.BlurredTopBar
 import com.lonx.lyrico.ui.components.blur.blurSource
 import com.lonx.lyrico.ui.components.blur.rememberBarBlurBackdrop
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.icons.FilledIcons
+import com.lonx.lyrico.ui.components.icons.PreferenceIcon
+import com.lonx.lyrico.ui.components.icons.PreferenceIconTone
 import com.lonx.lyrico.ui.components.library.EmptyStateKind
 import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.ui.components.scaffoldContentPadding
@@ -53,8 +56,6 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Back
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -95,7 +96,7 @@ fun AboutScreen(
                             onClick = { navigator.popBackStack() }
                         ) {
                             Icon(
-                                MiuixIcons.Back,
+                                FilledIcons.ArrowLeft,
                                 contentDescription = stringResource(R.string.action_back)
                             )
                         }
@@ -124,10 +125,12 @@ fun AboutScreen(
                     modifier = Modifier.padding(horizontal = 12.dp)
                 ) {
                     BasicComponent(
+                        startAction = { PreferenceIcon(FilledIcons.Info, PreferenceIconTone.Tools) },
                         title = stringResource(R.string.about_app_version),
                         summary = "${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE})"
                     )
                     ArrowPreference(
+                        startAction = { PreferenceIcon(FilledIcons.CodeXml, PreferenceIconTone.Tools) },
                         title = stringResource(R.string.about_project_url),
                         summary = stringResource(R.string.about_project_url_sub),
                         endActions = {
@@ -145,6 +148,7 @@ fun AboutScreen(
                         }
                     )
                     ArrowPreference(
+                        startAction = { PreferenceIcon(FilledIcons.Send, PreferenceIconTone.Tools) },
                         title = "Telegram",
                         summary = TELEGRAM_GROUP_LINK,
                         endActions = {
@@ -159,18 +163,21 @@ fun AboutScreen(
                         }
                     )
                     ArrowPreference(
+                        startAction = { PreferenceIcon(FilledIcons.Scale, PreferenceIconTone.Tools) },
                         title = stringResource(R.string.title_opensource_licence),
                         onClick = {
                             navigator.navigate(OpensourceLicenceDestination())
                         }
                     )
                     SwitchPreference(
+                        startAction = { PreferenceIcon(FilledIcons.CloudDownload, PreferenceIconTone.Tools) },
                         title = stringResource(R.string.about_auto_check_update),
                         summary = stringResource(R.string.about_auto_check_update_sub),
                         checked = checkUpdateEnabled,
                         onCheckedChange = viewModel::setCheckUpdateEnabled
                     )
                     ArrowPreference(
+                        startAction = { PreferenceIcon(FilledIcons.Download, PreferenceIconTone.Tools) },
                         title = stringResource(R.string.about_check_update),
                         summary = stringResource(
                             updateEffect.messageRes,

@@ -11,6 +11,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.icons.PreferenceIconTone
+import com.lonx.lyrico.ui.components.icons.PreferenceIcon
+import com.lonx.lyrico.ui.components.icons.FilledIcons
 import com.lonx.lyrico.data.model.ConversionMode
 import com.lonx.lyrico.data.model.lyrics.LyricFormat
 import com.lonx.lyrico.data.model.lyrics.LyricRenderConfig
@@ -66,6 +69,7 @@ fun LyricRenderConfigBottomSheet(
                         .coerceAtLeast(0)
 
                     WindowDropdownPreference(
+                        startAction = { PreferenceIcon(FilledIcons.FileMusic, PreferenceIconTone.Lyrics) },
                         title = stringResource(R.string.lyric_mode),
                         items = lyricFormatItems,
                         selectedIndex = selectedLyricFormatIndex,
@@ -74,12 +78,14 @@ fun LyricRenderConfigBottomSheet(
                         }
                     )
                     SwitchPreference(
+                        startAction = { PreferenceIcon(FilledIcons.Type, PreferenceIconTone.Lyrics) },
                         title = stringResource(R.string.roma),
                         summary = stringResource(R.string.roma_hint),
                         checked = lyricConfig.showRomanization,
                         onCheckedChange = onRomaEnabledChange
                     )
                     SwitchPreference(
+                        startAction = { PreferenceIcon(FilledIcons.Languages, PreferenceIconTone.Lyrics) },
                         title = stringResource(R.string.translation),
                         summary = stringResource(R.string.translation_hint),
                         checked = lyricConfig.showTranslation,
@@ -87,6 +93,7 @@ fun LyricRenderConfigBottomSheet(
                     )
                     AnimatedVisibility(visible = lyricConfig.showTranslation) {
                         SwitchPreference(
+                            startAction = { PreferenceIcon(FilledIcons.Captions, PreferenceIconTone.Lyrics, enabled = lyricConfig.showTranslation) },
                             title = stringResource(R.string.only_translation_if_available),
                             summary = stringResource(
                                 R.string.only_translation_if_available_hint
@@ -97,12 +104,14 @@ fun LyricRenderConfigBottomSheet(
                         )
                     }
                     SwitchPreference(
+                        startAction = { PreferenceIcon(FilledIcons.RemoveLines, PreferenceIconTone.Lyrics) },
                         title = stringResource(R.string.remove_empty_lines),
                         summary = stringResource(R.string.remove_empty_lines_hint),
                         checked = lyricConfig.removeEmptyLines,
                         onCheckedChange = onRemoveEmptyLinesChange
                     )
                     WindowDropdownPreference(
+                        startAction = { PreferenceIcon(FilledIcons.ALargeSmall, PreferenceIconTone.Lyrics) },
                         title = stringResource(R.string.conversion_mode),
                         items = conversionModeItems,
                         selectedIndex = selectedConversionModeIndex,

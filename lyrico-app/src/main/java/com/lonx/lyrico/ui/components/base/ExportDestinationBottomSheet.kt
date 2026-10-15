@@ -12,6 +12,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.icons.PreferenceIconTone
+import com.lonx.lyrico.ui.components.icons.PreferenceIcon
+import com.lonx.lyrico.ui.components.icons.FilledIcons
 import com.lonx.lyrico.data.model.ExportDestination
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
@@ -42,12 +45,14 @@ fun ExportDestinationBottomSheet(
                     )
                 ) {
                     RadioButtonPreference(
+                        startAction = { PreferenceIcon(FilledIcons.Folder, PreferenceIconTone.Library) },
                         title = stringResource(R.string.export_destination_selected_folder),
                         summary = stringResource(R.string.export_destination_selected_folder_summary),
                         selected = destination == ExportDestination.SELECTED_DIRECTORY,
                         onClick = { destination = ExportDestination.SELECTED_DIRECTORY }
                     )
                     RadioButtonPreference(
+                        startAction = { PreferenceIcon(FilledIcons.FileMusic, PreferenceIconTone.Library) },
                         title = stringResource(R.string.export_destination_audio_folder),
                         summary = stringResource(R.string.export_destination_audio_folder_summary),
                         selected = destination == ExportDestination.AUDIO_DIRECTORY,

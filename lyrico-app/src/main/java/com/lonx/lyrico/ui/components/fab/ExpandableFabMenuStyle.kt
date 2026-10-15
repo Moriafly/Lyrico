@@ -1,17 +1,17 @@
 package com.lonx.lyrico.ui.components.fab
 
+import com.lonx.lyrico.ui.components.icons.FilledIcons
+
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Add
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 data class ExpandableFabMenuStyle(
-    val mainIcon: ImageVector = MiuixIcons.Add,
+    val mainIcon: ImageVector = FilledIcons.Plus,
     val mainFabSize: Dp = 56.dp,
     val mainIconSize: Dp = 24.dp,
     val mainContainerColor: Color,

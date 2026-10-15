@@ -21,6 +21,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lonx.lyrico.ui.components.lyrics.LyricsOrganizationMenu
 import com.lonx.lyrico.data.model.lyrics.LyricsOperation
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.icons.FilledIcons
 import com.lonx.lyrico.data.model.ExportDestination
 import com.lonx.lyrico.data.model.BatchTaskType
 import com.lonx.lyrico.data.model.entity.SongEntity
@@ -49,12 +50,6 @@ import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Add
-import top.yukonga.miuix.kmp.icon.extended.Delete
-import top.yukonga.miuix.kmp.icon.extended.Edit
-import top.yukonga.miuix.kmp.icon.extended.Rename
-import top.yukonga.miuix.kmp.icon.extended.Share
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -325,14 +320,14 @@ fun BoxScope.SongBatchSelectionActions(
         enabled = selectedSongUris.isNotEmpty(),
         modifier = modifier,
         style = ExpandableFabMenuStyle.default().copy(
-            mainIcon = MiuixIcons.Add
+            mainIcon = FilledIcons.Plus
         ),
         itemCount = 12,
         onExpandedChange = onExpandedChange
     ) {
         FabMenuItem(
             label = stringResource(R.string.action_batch_replay_gain),
-            icon = MiuixIcons.Edit,
+            icon = FilledIcons.Volume2,
             onClick = {
                 onExpandedChange(false)
                 batchReplayGainViewModel.setSelectionUris(selectedSongUris.toList())
@@ -342,7 +337,7 @@ fun BoxScope.SongBatchSelectionActions(
 
         FabMenuItem(
             label = stringResource(R.string.lyrics_convert),
-            icon = MiuixIcons.Edit,
+            icon = FilledIcons.Convert,
             onClick = {
                 onExpandedChange(false)
                 batchLyricsFormatViewModel.setSelectionUris(selectedSongUris.toList())
@@ -355,12 +350,12 @@ fun BoxScope.SongBatchSelectionActions(
             batchLyricsFormatViewModel.setSelectionUris(selectedSongUris.toList())
             batchLyricsFormatViewModel.openConfig(batchReplayGainUiState.concurrency, operation)
         }) { open ->
-            FabMenuItem(label = stringResource(R.string.lyrics_organize), icon = MiuixIcons.Edit, onClick = open)
+            FabMenuItem(label = stringResource(R.string.lyrics_organize), icon = FilledIcons.Sort, onClick = open)
         }
 
         FabMenuItem(
             label = stringResource(R.string.action_batch_export_lyrics),
-            icon = MiuixIcons.Share,
+            icon = FilledIcons.FileUp,
             onClick = {
                 onExpandedChange(false)
                 pendingExportTaskType = BatchTaskType.EXPORT_LYRICS
@@ -370,7 +365,7 @@ fun BoxScope.SongBatchSelectionActions(
 
         FabMenuItem(
             label = stringResource(R.string.action_batch_export_cover),
-            icon = MiuixIcons.Share,
+            icon = FilledIcons.Image,
             onClick = {
                 onExpandedChange(false)
                 pendingExportTaskType = BatchTaskType.EXPORT_COVER
@@ -380,7 +375,7 @@ fun BoxScope.SongBatchSelectionActions(
 
         FabMenuItem(
             label = stringResource(R.string.action_batch_rename),
-            icon = MiuixIcons.Rename,
+            icon = FilledIcons.Type,
             onClick = {
                 onExpandedChange(false)
                 if (onSetSelectionUris()) {
@@ -391,7 +386,7 @@ fun BoxScope.SongBatchSelectionActions(
 
         FabMenuItem(
             label = stringResource(R.string.batch_edit_title),
-            icon = MiuixIcons.Edit,
+            icon = FilledIcons.Pencil,
             onClick = {
                 onExpandedChange(false)
                 if (onSetSelectionUris()) {
@@ -402,7 +397,7 @@ fun BoxScope.SongBatchSelectionActions(
 
         FabMenuItem(
             label = stringResource(R.string.action_batch_match_cover),
-            icon = MiuixIcons.Edit,
+            icon = FilledIcons.ImageSearch,
             onClick = {
                 onExpandedChange(false)
                 if (onSetSelectionUris()) {
@@ -413,7 +408,7 @@ fun BoxScope.SongBatchSelectionActions(
 
         FabMenuItem(
             label = stringResource(R.string.action_batch_match_lyrics),
-            icon = MiuixIcons.Edit,
+            icon = FilledIcons.TextSearch,
             onClick = {
                 onExpandedChange(false)
                 if (onSetSelectionUris()) {
@@ -424,7 +419,7 @@ fun BoxScope.SongBatchSelectionActions(
 
         FabMenuItem(
             label = stringResource(R.string.action_batch_match_metadata),
-            icon = MiuixIcons.Edit,
+            icon = FilledIcons.Tags,
             onClick = {
                 onExpandedChange(false)
                 if (onSetSelectionUris()) {
@@ -435,7 +430,7 @@ fun BoxScope.SongBatchSelectionActions(
 
         FabMenuItem(
             label = stringResource(R.string.action_delete),
-            icon = MiuixIcons.Delete,
+            icon = FilledIcons.Trash,
             onClick = {
                 onExpandedChange(false)
                 showBatchDeleteDialog = true
@@ -444,7 +439,7 @@ fun BoxScope.SongBatchSelectionActions(
 
         FabMenuItem(
             label = stringResource(R.string.action_share),
-            icon = MiuixIcons.Share,
+            icon = FilledIcons.Share2,
             onClick = {
                 onExpandedChange(false)
                 onBatchShare(context, songs)

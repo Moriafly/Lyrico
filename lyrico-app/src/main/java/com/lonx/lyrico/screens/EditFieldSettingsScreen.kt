@@ -34,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -42,6 +43,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.icons.FilledIcons
+import com.lonx.lyrico.ui.components.icons.PreferenceIcon
+import com.lonx.lyrico.ui.components.icons.PreferenceIconTone
 import com.lonx.lyrico.data.editfield.EditFieldBlock
 import com.lonx.lyrico.data.editfield.EditFieldDefinition
 import com.lonx.lyrico.data.editfield.EditFieldListItem
@@ -83,11 +87,6 @@ import top.yukonga.miuix.kmp.basic.Switch
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TextField
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Add
-import top.yukonga.miuix.kmp.icon.extended.Back
-import top.yukonga.miuix.kmp.icon.extended.More
-import top.yukonga.miuix.kmp.icon.extended.Reset
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
@@ -139,19 +138,19 @@ fun EditFieldSettingsScreen(
                     defaultWindowInsetsPadding = false,
                     navigationIcon = {
                         IconButton(onClick = { navigator.popBackStack() }) {
-                            Icon(MiuixIcons.Back, stringResource(R.string.action_back))
+                            Icon(FilledIcons.ArrowLeft, stringResource(R.string.action_back))
                         }
                     },
                     actions = {
                         IconButton(onClick = { showResetDialog = true }) {
-                            Icon(MiuixIcons.Reset, stringResource(R.string.reset_to_default))
+                            Icon(FilledIcons.RotateCcw, stringResource(R.string.reset_to_default))
                         }
                         IconButton(onClick = {
                             viewModel.clearInputError()
                             showAddDialog = true
                         }) {
                             Icon(
-                                MiuixIcons.Add,
+                                FilledIcons.Plus,
                                 contentDescription = stringResource(R.string.custom_tag_add_key),
                             )
                         }
@@ -337,10 +336,10 @@ private fun EditFieldRow(
     inSheet: Boolean = false,
 ) {
     var showMenu by remember { mutableStateOf(false) }
-    val menuItems = buildList<Pair<String, () -> Unit>> {
-        if (component != null) add(stringResource(R.string.edit_field_manage_members) to onManageComponent)
-        add(stringResource(R.string.edit_field_view_songs) to onOpenSongs)
-        if (item.field.custom) add(stringResource(R.string.common_delete) to onDelete)
+    val menuItems = buildList<Triple<String, ImageVector, () -> Unit>> {
+        if (component != null) add(Triple(stringResource(R.string.edit_field_manage_members), FilledIcons.Settings, onManageComponent))
+        add(Triple(stringResource(R.string.edit_field_view_songs), FilledIcons.ListMusic, onOpenSongs))
+        if (item.field.custom) add(Triple(stringResource(R.string.common_delete), FilledIcons.Trash, onDelete))
     }
     val content: @Composable () -> Unit = {
         Row(
@@ -349,6 +348,11 @@ private fun EditFieldRow(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
+            PreferenceIcon(
+                imageVector = if (component?.isComposite == true) FilledIcons.Volume2 else item.field.settingsIcon(),
+                tone = if (item.field.groupCode == EditFieldRegistry.GROUP_LYRICS) PreferenceIconTone.Lyrics else PreferenceIconTone.Library,
+                modifier = Modifier,
+            )
             Row(
                 modifier = Modifier.weight(1f),
                 verticalAlignment = Alignment.CenterVertically,
@@ -373,7 +377,7 @@ private fun EditFieldRow(
                     showText = false,
                     style = PillButtonDefaults.style(PillButtonSize.Small),
                     onClick = { showMenu = true },
-                    leading = { Icon(MiuixIcons.More, stringResource(R.string.cd_more_actions), Modifier.size(20.dp)) },
+                    leading = { Icon(FilledIcons.Ellipsis, stringResource(R.string.cd_more_actions), Modifier.size(20.dp)) },
                 )
                 WindowListPopup(
                     show = showMenu,
@@ -382,9 +386,16 @@ private fun EditFieldRow(
                     alignment = PopupPositionProvider.Align.End,
                 ) {
                     ListPopupColumn {
-                        menuItems.forEachIndexed { index, (label, action) ->
+                        menuItems.forEachIndexed { index, (label, icon, action) ->
                             DropdownImpl(
-                                text = label,
+                                item = top.yukonga.miuix.kmp.basic.DropdownItem(
+                                    text = label,
+                                    icon = { modifier ->
+                                        PreferenceIcon(icon,
+                                            if (icon == FilledIcons.Trash) PreferenceIconTone.Danger else PreferenceIconTone.Tools,
+                                            modifier = modifier)
+                                    },
+                                ),
                                 isSelected = false,
                                 optionSize = menuItems.size,
                                 index = index,
@@ -410,6 +421,27 @@ private fun EditFieldRow(
 private fun EditFieldBlock.title(): String = stringResource(
     if (isComposite) R.string.group_replay_gain else fields.first().titleRes
 )
+
+private fun EditFieldDefinition.settingsIcon(): ImageVector = when (code) {
+    "picture" -> FilledIcons.Image
+    "rating" -> FilledIcons.Star
+    "title" -> FilledIcons.Music
+    "artist", "album_artist" -> FilledIcons.Users
+    "album", "disc_number" -> FilledIcons.Disc
+    "date" -> FilledIcons.Calendar
+    "language" -> FilledIcons.Languages
+    "genre" -> FilledIcons.Tags
+    "track_number" -> FilledIcons.ListMusic
+    "lyricist" -> FilledIcons.NotebookPen
+    "composer" -> FilledIcons.Music
+    "copyright" -> FilledIcons.Copyright
+    "comment" -> FilledIcons.MessageSquare
+    "track_gain", "album_gain", "reference_loudness" -> FilledIcons.Volume2
+    "track_peak", "album_peak" -> FilledIcons.Activity
+    "lyrics" -> FilledIcons.Captions
+    "lyrics_offset" -> FilledIcons.ArrowDownUp
+    else -> FilledIcons.Tags
+}
 
 @Composable
 private fun ComponentFieldsBottomSheet(

@@ -28,14 +28,13 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.net.toUri
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.icons.FilledIcons
 import com.lonx.lyrico.ui.components.crop.ImageCropperSheet
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import top.yukonga.miuix.kmp.basic.*
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.*
 import top.yukonga.miuix.kmp.menu.WindowIconDropdownMenu
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
@@ -166,7 +165,7 @@ fun ArtistPosterPreview(
                 Row(Modifier.fillMaxWidth().background(Brush.verticalGradient(listOf(Color.Black.copy(alpha = 0.8f), Color.Transparent)))
                     .padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
                     IconButton(onClick = ::dismiss, modifier = Modifier.size(48.dp)) {
-                        Icon(MiuixIcons.Back, stringResource(R.string.artist_poster_back), tint = Color.White)
+                        Icon(FilledIcons.ArrowLeft, stringResource(R.string.artist_poster_back), tint = Color.White)
                     }
                     Column(Modifier.weight(1f).padding(horizontal = 8.dp)) {
                         Text(title(currentPage), color = Color.White, fontSize = MiuixTheme.textStyles.body1.fontSize,
@@ -177,7 +176,7 @@ fun ArtistPosterPreview(
                     menuEntry?.let { entry ->
                         WindowIconDropdownMenu(entry = entry(currentPage), enabled = !busy && editingEnabled,
                             minWidth = 48.dp, minHeight = 48.dp) {
-                            Icon(MiuixIcons.More, stringResource(R.string.cd_more_actions), tint = Color.White)
+                            Icon(FilledIcons.Ellipsis, stringResource(R.string.cd_more_actions), tint = Color.White)
                         }
                     }
                 }
@@ -195,20 +194,20 @@ fun ArtistPosterPreview(
                     }
                     Row(Modifier.widthIn(max = 420.dp).fillMaxWidth().padding(horizontal = 24.dp),
                         horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                        PreviewAction(MiuixIcons.Share, stringResource(R.string.action_share), !busy, actionBackground, actionTint) {
+                        PreviewAction(FilledIcons.Share2, stringResource(R.string.action_share), !busy, actionBackground, actionTint) {
                             action {
                                 val intent = withContext(Dispatchers.IO) { current.shareIntent(context) }
                                 context.startActivity(android.content.Intent.createChooser(intent, null))
                             }
                         }
-                        if (!current.isVideo) PreviewAction(MiuixIcons.Edit, stringResource(R.string.poster_preview_edit),
+                        if (!current.isVideo) PreviewAction(FilledIcons.Crop, stringResource(R.string.poster_preview_edit),
                             !busy && editingEnabled, actionBackground, actionTint, wide = true) {
                             action {
                                 crop = PreviewCrop(current.key, current, requireNotNull(withContext(Dispatchers.IO) { current.readBitmap(context) }))
                                 showCrop = true
                             }
                         }
-                        PreviewAction(MiuixIcons.Info, stringResource(R.string.poster_preview_info), !busy,
+                        PreviewAction(FilledIcons.Info, stringResource(R.string.poster_preview_info), !busy,
                             if (infoOpen) lerp(Color(0xFF202020), MiuixTheme.colorScheme.onSurface, progress) else actionBackground,
                             if (infoOpen) lerp(Color.White, panelColor, progress) else actionTint) { setInfo(!infoOpen) }
                     }

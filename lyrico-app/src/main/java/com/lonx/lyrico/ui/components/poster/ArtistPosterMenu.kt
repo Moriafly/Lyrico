@@ -18,6 +18,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.lonx.audiotag.model.AudioPicture
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.icons.PreferenceIconTone
+import com.lonx.lyrico.ui.components.icons.PreferenceIcon
+import com.lonx.lyrico.ui.components.icons.FilledIcons
 import com.lonx.lyrico.domain.poster.ArtistPictureEntry
 import com.lonx.lyrico.domain.poster.ArtistPosterGrouping
 import top.yukonga.miuix.kmp.basic.Card
@@ -200,6 +203,7 @@ fun ArtistPosterMenu(
             ) {
                 // 一个艺术家只有一张海报，所以「从本地选择」同时就是新增和替换
                 ArrowPreference(
+                    startAction = { PreferenceIcon(FilledIcons.ImageAdd, PreferenceIconTone.Library) },
                     title = stringResource(R.string.label_change_artist_image),
                     onClick = {
                         state.closeOptions()
@@ -208,6 +212,7 @@ fun ArtistPosterMenu(
                 )
                 if (canActOnEmbedded) {
                     ArrowPreference(
+                        startAction = { PreferenceIcon(FilledIcons.Trash, PreferenceIconTone.Danger) },
                         title = stringResource(R.string.label_remove_artist_image),
                         onClick = {
                             state.closeOptions()
@@ -215,6 +220,7 @@ fun ArtistPosterMenu(
                         }
                     )
                     ArrowPreference(
+                        startAction = { PreferenceIcon(FilledIcons.Download, PreferenceIconTone.Tools) },
                         title = stringResource(R.string.label_save_artist_image),
                         onClick = {
                             state.closeOptions()
@@ -222,6 +228,7 @@ fun ArtistPosterMenu(
                         }
                     )
                     ArrowPreference(
+                        startAction = { PreferenceIcon(FilledIcons.Crop, PreferenceIconTone.Library) },
                         title = stringResource(R.string.label_crop_artist_image),
                         onClick = {
                             state.closeOptions()
@@ -239,6 +246,7 @@ fun ArtistPosterMenu(
                     colors = CardDefaults.defaultColors(color = MiuixTheme.colorScheme.secondaryContainer)
                 ) {
                     ArrowPreference(
+                        startAction = { PreferenceIcon(FilledIcons.UserSwitch, PreferenceIconTone.Library) },
                         title = stringResource(
                             R.string.label_reassign_artist_image,
                             currentEntry.displayName(untaggedLabel)

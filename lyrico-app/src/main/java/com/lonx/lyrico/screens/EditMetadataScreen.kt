@@ -93,6 +93,9 @@ import com.lonx.lyrico.data.model.lyrics.LyricsOperation
 import com.lonx.lyrico.ui.components.lyrics.LyricsProcessingSheet
 import com.lonx.lyrico.ui.components.lyrics.LyricsOrganizationMenu
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.icons.PreferenceIconTone
+import com.lonx.lyrico.ui.components.icons.PreferenceIcon
+import com.lonx.lyrico.ui.components.icons.FilledIcons
 import com.lonx.lyrico.data.editfield.EditFieldDefinition
 import com.lonx.lyrico.data.editfield.EditFieldKind
 import com.lonx.lyrico.data.editfield.EditFieldRegistry
@@ -163,17 +166,6 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.basic.TextFieldDefaults
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.AddCircle
-import top.yukonga.miuix.kmp.icon.extended.Back
-import top.yukonga.miuix.kmp.icon.extended.Copy
-import top.yukonga.miuix.kmp.icon.extended.Image
-import top.yukonga.miuix.kmp.icon.extended.Notes
-import top.yukonga.miuix.kmp.icon.extended.Ok
-import top.yukonga.miuix.kmp.icon.extended.Play
-import top.yukonga.miuix.kmp.icon.extended.Search
-import top.yukonga.miuix.kmp.icon.extended.Settings
-import top.yukonga.miuix.kmp.icon.extended.Undo
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -843,7 +835,7 @@ fun EditMetadataScreen(
                                         closeEditor(saved = uiState.saveSuccess == true)
                                     }
                                 }
-                            ) { Icon(imageVector = MiuixIcons.Back, contentDescription = null) }
+                            ) { Icon(imageVector = FilledIcons.ArrowLeft, contentDescription = null) }
                         },
                         actions = {
                             // 保存按钮
@@ -856,7 +848,7 @@ fun EditMetadataScreen(
                                         24.dp
                                     )
                                 )
-                                else Icon(imageVector = MiuixIcons.Ok, contentDescription = null)
+                                else Icon(imageVector = FilledIcons.Check, contentDescription = null)
                             }
                         },
                         scrollBehavior = topAppBarScrollBehavior
@@ -1126,7 +1118,7 @@ fun EditMetadataScreen(
                 expanded = isSearchFabMenuExpanded,
                 enabled = true,
                 itemCount = searchMenuItemCount,
-                style = ExpandableFabMenuStyle.default().copy(mainIcon = MiuixIcons.Search),
+                style = ExpandableFabMenuStyle.default().copy(mainIcon = FilledIcons.Search),
                 onExpandedChange = { expanded ->
                     if (expanded) isFabMenuExpanded = false
                     isSearchFabMenuExpanded = expanded
@@ -1135,7 +1127,7 @@ fun EditMetadataScreen(
                 if (mainSearchSources.isNotEmpty()) {
                     FabMenuItem(
                         label = stringResource(R.string.action_main_search),
-                        icon = MiuixIcons.Search,
+                        icon = FilledIcons.Search,
                         onClick = {
                             isSearchFabMenuExpanded = false
                             val keyword = if (!editingTagData?.title.isNullOrEmpty()) {
@@ -1151,7 +1143,7 @@ fun EditMetadataScreen(
                 if (lyricsSearchSources.isNotEmpty()) {
                     FabMenuItem(
                         label = stringResource(R.string.action_search_lyrics),
-                        icon = MiuixIcons.Notes,
+                        icon = FilledIcons.Captions,
                         onClick = {
                             isSearchFabMenuExpanded = false
                             navigator.navigate(
@@ -1168,7 +1160,7 @@ fun EditMetadataScreen(
                 if (coverSearchSources.isNotEmpty()) {
                     FabMenuItem(
                         label = stringResource(R.string.action_search_cover),
-                        icon = MiuixIcons.Image,
+                        icon = FilledIcons.ImageSearch,
                         onClick = {
                             isSearchFabMenuExpanded = false
                             val keyword = if (!editingTagData?.title.isNullOrEmpty()) {
@@ -1197,7 +1189,7 @@ fun EditMetadataScreen(
         ) {
             FabMenuItem(
                 label = stringResource(R.string.action_add_custom_tag),
-                icon = MiuixIcons.AddCircle,
+                icon = FilledIcons.Plus,
                 onClick = {
                     isFabMenuExpanded = false
                     showAddCustomTagDialog = true
@@ -1207,7 +1199,7 @@ fun EditMetadataScreen(
             if (editingTagData != null) {
                 FabMenuItem(
                     label = stringResource(R.string.action_lyrics_options),
-                    icon = MiuixIcons.Notes,
+                    icon = FilledIcons.Captions,
                     onClick = {
                         isFabMenuExpanded = false
                         showLyricsActionBottomSheet = true
@@ -1218,7 +1210,7 @@ fun EditMetadataScreen(
             if (editingTagData != null) {
                 FabMenuItem(
                     label = stringResource(R.string.label_cover_options),
-                    icon = MiuixIcons.Image,
+                    icon = FilledIcons.Image,
                     onClick = {
                         isFabMenuExpanded = false
                         showCoverOptionsSheet = true
@@ -1226,7 +1218,7 @@ fun EditMetadataScreen(
                 )
                 FabMenuItem(
                     label = stringResource(R.string.label_artist_image_options),
-                    icon = MiuixIcons.Image,
+                    icon = FilledIcons.Users,
                     onClick = {
                         isFabMenuExpanded = false
                         // 从菜单进来时没有指定海报，多张时需要用户自己选
@@ -1237,7 +1229,7 @@ fun EditMetadataScreen(
 
             FabMenuItem(
                 label = stringResource(R.string.menu_play_music),
-                icon = MiuixIcons.Play,
+                icon = FilledIcons.Play,
                 onClick = {
                     isFabMenuExpanded = false
                     showPlayerPicker = true
@@ -1246,7 +1238,7 @@ fun EditMetadataScreen(
 
             FabMenuItem(
                 label = stringResource(R.string.edit_field_settings_title),
-                icon = MiuixIcons.Settings,
+                icon = FilledIcons.Settings,
                 onClick = {
                     isFabMenuExpanded = false
                     navigator.navigate(EditFieldSettingsDestination())
@@ -1281,6 +1273,7 @@ fun EditMetadataScreen(
             ) {
                 if (lyricsSearchSources.isNotEmpty()) {
                     ArrowPreference(
+                        startAction = { PreferenceIcon(FilledIcons.Search, PreferenceIconTone.Lyrics) },
                         title = stringResource(R.string.action_search_lyrics),
                         onClick = {
                             showLyricsActionBottomSheet = false
@@ -1296,6 +1289,7 @@ fun EditMetadataScreen(
                     )
                 }
                 ArrowPreference(
+                    startAction = { PreferenceIcon(FilledIcons.FileDown, PreferenceIconTone.Lyrics) },
                     title = stringResource(R.string.action_import_lyrics),
                     onClick = {
                         showLyricsActionBottomSheet = false
@@ -1304,6 +1298,7 @@ fun EditMetadataScreen(
                 )
                 editingTagData?.lyrics?.let {
                     ArrowPreference(
+                        startAction = { PreferenceIcon(FilledIcons.FileUp, PreferenceIconTone.Lyrics) },
                         title = stringResource(R.string.action_export_lyrics),
                         onClick = {
                             showLyricsActionBottomSheet = false
@@ -1311,6 +1306,7 @@ fun EditMetadataScreen(
                         }
                     )
                     ArrowPreference(
+                        startAction = { PreferenceIcon(FilledIcons.Languages, PreferenceIconTone.Lyrics) },
                         title = stringResource(R.string.chinese_conversion_mode_simplified_to_traditional),
                         onClick = {
                             showLyricsActionBottomSheet = false
@@ -1318,6 +1314,7 @@ fun EditMetadataScreen(
                         }
                     )
                     ArrowPreference(
+                        startAction = { PreferenceIcon(FilledIcons.Languages, PreferenceIconTone.Lyrics) },
                         title = stringResource(R.string.chinese_conversion_mode_traditional_to_simplified),
                         onClick = {
                             showLyricsActionBottomSheet = false
@@ -1326,6 +1323,7 @@ fun EditMetadataScreen(
                     )
 
                     ArrowPreference(
+                        startAction = { PreferenceIcon(FilledIcons.Timing, PreferenceIconTone.Lyrics) },
                         title = stringResource(R.string.offset_adjust_hint),
                         onClick = {
                             showLyricsActionBottomSheet = false
@@ -1334,6 +1332,7 @@ fun EditMetadataScreen(
                         }
                     )
                     ArrowPreference(
+                        startAction = { PreferenceIcon(FilledIcons.Convert, PreferenceIconTone.Lyrics) },
                         title = stringResource(R.string.lyrics_convert),
                         onClick = {
                             showLyricsActionBottomSheet = false
@@ -1346,9 +1345,11 @@ fun EditMetadataScreen(
                         lyricsOperation = operation
                         showLyricsProcessingSheet = true
                     }) { open ->
-                        ArrowPreference(title = stringResource(R.string.lyrics_organize), onClick = open)
+                        ArrowPreference(startAction = { PreferenceIcon(FilledIcons.Sort, PreferenceIconTone.Lyrics) },
+                            title = stringResource(R.string.lyrics_organize), onClick = open)
                     }
                     ArrowPreference(
+                        startAction = { PreferenceIcon(FilledIcons.Captions, PreferenceIconTone.Lyrics) },
                         title = stringResource(R.string.action_view_plain_lyrics),
                         onClick = {
                             showLyricsActionBottomSheet = false
@@ -1392,7 +1393,7 @@ fun EditMetadataScreen(
                 }
             ) {
                 Icon(
-                    imageVector = MiuixIcons.Copy,
+                    imageVector = FilledIcons.Copy,
                     contentDescription = null
                 )
             }
@@ -1463,6 +1464,7 @@ fun EditMetadataScreen(
             ) {
                 if (coverSearchSources.isNotEmpty()) {
                     ArrowPreference(
+                        startAction = { PreferenceIcon(FilledIcons.ImageSearch, PreferenceIconTone.Library) },
                         title = stringResource(R.string.action_search_cover),
                         onClick = {
                             val keyword = if (!editingTagData?.title.isNullOrEmpty()) {
@@ -1477,6 +1479,7 @@ fun EditMetadataScreen(
                     )
                 }
                 ArrowPreference(
+                    startAction = { PreferenceIcon(FilledIcons.ImageAdd, PreferenceIconTone.Library) },
                     title = stringResource(R.string.label_change_cover),
                     onClick = {
                         showCoverOptionsSheet = false
@@ -1488,6 +1491,7 @@ fun EditMetadataScreen(
                     }
                 )
                 ArrowPreference(
+                    startAction = { PreferenceIcon(FilledIcons.Disc, PreferenceIconTone.Library) },
                     title = stringResource(R.string.label_select_same_album_cover),
                     onClick = {
                         showCoverOptionsSheet = false
@@ -1495,6 +1499,7 @@ fun EditMetadataScreen(
                     }
                 )
                 ArrowPreference(
+                    startAction = { PreferenceIcon(FilledIcons.Trash, PreferenceIconTone.Danger) },
                     title = stringResource(R.string.label_remove_cover),
                     onClick = {
                         showCoverOptionsSheet = false
@@ -1503,6 +1508,7 @@ fun EditMetadataScreen(
                 )
                 if (uiState.coverUri != null || uiState.originalCover != null) {
                     ArrowPreference(
+                        startAction = { PreferenceIcon(FilledIcons.Download, PreferenceIconTone.Tools) },
                         title = stringResource(R.string.label_save_cover),
                         onClick = {
                             showCoverOptionsSheet = false
@@ -1510,6 +1516,7 @@ fun EditMetadataScreen(
                         }
                     )
                     ArrowPreference(
+                        startAction = { PreferenceIcon(FilledIcons.Crop, PreferenceIconTone.Library) },
                         title = stringResource(R.string.label_crop_cover),
                         onClick = {
                             showCoverOptionsSheet = false
@@ -2267,7 +2274,7 @@ private fun MetadataInputField(
                 {
                     IconButton(onClick = onRevert) {
                         Icon(
-                            imageVector = MiuixIcons.Undo,
+                            imageVector = FilledIcons.Undo,
                             contentDescription = "Undo"
                         )
                     }

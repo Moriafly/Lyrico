@@ -1,5 +1,7 @@
 package com.lonx.lyrico.ui.components.lyrics
 
+import com.lonx.lyrico.ui.components.icons.FilledIcons
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,8 +25,6 @@ import top.yukonga.miuix.kmp.basic.CircularProgressIndicator
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Copy
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -101,7 +101,7 @@ fun LyricsPreviewPane(
                     )
             ) {
                 Icon(
-                    imageVector = MiuixIcons.Copy,
+                    imageVector = FilledIcons.Copy,
                     contentDescription = null
                 )
             }

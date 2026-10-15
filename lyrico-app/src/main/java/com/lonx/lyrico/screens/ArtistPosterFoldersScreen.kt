@@ -1,6 +1,5 @@
 package com.lonx.lyrico.screens
 
-import top.yukonga.miuix.kmp.icon.extended.AddFolder
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -17,6 +16,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.icons.FilledIcons
+import com.lonx.lyrico.ui.components.icons.PreferenceIcon
+import com.lonx.lyrico.ui.components.icons.PreferenceIconTone
 import com.lonx.lyrico.ui.components.library.EmptyStateKind
 import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.ui.components.blur.BlurredTopBar
@@ -31,9 +33,6 @@ import com.ramcosta.composedestinations.generated.destinations.ArtistDetailDesti
 import dev.jeziellago.compose.markdowntext.MarkdownText
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.basic.*
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Back
-import top.yukonga.miuix.kmp.icon.extended.More
 import top.yukonga.miuix.kmp.menu.OverlayIconDropdownMenu
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.window.WindowDialog
@@ -86,7 +85,7 @@ fun ArtistPosterFoldersScreen(navigator: DestinationsNavigator) {
                     defaultWindowInsetsPadding = false,
                     navigationIcon = {
                         IconButton(onClick = navigator::navigateUp) {
-                            Icon(MiuixIcons.Back, stringResource(R.string.artist_poster_back))
+                            Icon(FilledIcons.ArrowLeft, stringResource(R.string.artist_poster_back))
                         }
                     },
                     actions = {
@@ -94,23 +93,28 @@ fun ArtistPosterFoldersScreen(navigator: DestinationsNavigator) {
                             entry = DropdownEntry(
                                 items = buildList {
                                     add(DropdownItem(
+                                        icon = { modifier -> PreferenceIcon(FilledIcons.Info, PreferenceIconTone.Tools, modifier = modifier) },
                                         text = stringResource(R.string.artist_poster_naming),
                                         onClick = { showHelp = true }
                                     ))
                                     if (state.folder != null) {
                                         add(DropdownItem(
+                                            icon = { modifier -> PreferenceIcon(FilledIcons.Info, PreferenceIconTone.Tools, modifier = modifier) },
                                             text = stringResource(R.string.artist_poster_folder_details),
                                             onClick = { showFolderDetails = true }
                                         ))
                                         add(DropdownItem(
+                                            icon = { modifier -> PreferenceIcon(FilledIcons.RefreshCw, PreferenceIconTone.Tools, modifier = modifier) },
                                             text = stringResource(R.string.action_refresh_folder),
                                             onClick = viewModel::refresh
                                         ))
                                         add(DropdownItem(
+                                            icon = { modifier -> PreferenceIcon(FilledIcons.FolderPlus, PreferenceIconTone.Library, modifier = modifier) },
                                             text = stringResource(R.string.artist_poster_folder_change),
                                             onClick = { picker.launch(null) }
                                         ))
                                         add(DropdownItem(
+                                            icon = { modifier -> PreferenceIcon(FilledIcons.Folder, PreferenceIconTone.Tools, modifier = modifier) },
                                             text = stringResource(R.string.folder_action_remove),
                                             onClick = { showRemoveDialog = true }
                                         ))
@@ -119,7 +123,7 @@ fun ArtistPosterFoldersScreen(navigator: DestinationsNavigator) {
                             ),
                             enabled = !state.isLoading && !state.isEditing
                         ) {
-                            Icon(MiuixIcons.More, stringResource(R.string.cd_more_actions))
+                            Icon(FilledIcons.Ellipsis, stringResource(R.string.cd_more_actions))
                         }
                     },
                     scrollBehavior = scrollBehavior
@@ -164,7 +168,7 @@ fun ArtistPosterFoldersScreen(navigator: DestinationsNavigator) {
                         kind = EmptyStateKind.Folders,
                         title = stringResource(R.string.artist_poster_folder_not_selected),
                         summary = stringResource(if (state.error) R.string.artist_poster_folder_error else R.string.artist_poster_folders_empty),
-                        icon = MiuixIcons.AddFolder,
+                        icon = FilledIcons.FolderPlus,
                         actionText = stringResource(R.string.artist_poster_folder_add),
                         onAction = { picker.launch(null) },
                         modifier = Modifier.fillMaxSize().padding(scaffoldContentPadding(padding))
@@ -178,11 +182,13 @@ fun ArtistPosterFoldersScreen(navigator: DestinationsNavigator) {
             onDismissRequest = { showFileMenu = false }
         ) {
             ArrowPreference(
+                startAction = { PreferenceIcon(FilledIcons.Image, PreferenceIconTone.Library, enabled = file != null && !state.isEditing) },
                 title = stringResource(R.string.poster_view_artwork),
                 enabled = file != null && !state.isEditing,
                 onClick = { showFileMenu = false; previewUri = file?.uri }
             )
             ArrowPreference(
+                startAction = { PreferenceIcon(FilledIcons.Users, PreferenceIconTone.Library, enabled = file?.artistId != null && !state.isLoading && !state.isEditing) },
                 title = stringResource(R.string.poster_artist_details),
                 summary = if (file?.artistId == null) stringResource(R.string.poster_artist_unmatched) else null,
                 enabled = file?.artistId != null && !state.isLoading && !state.isEditing,
@@ -193,18 +199,24 @@ fun ArtistPosterFoldersScreen(navigator: DestinationsNavigator) {
                     }
                 }
             )
-            ArrowPreference(title = stringResource(R.string.action_rename), enabled = !state.isEditing, onClick = {
+            ArrowPreference(
+                startAction = { PreferenceIcon(FilledIcons.Pencil, PreferenceIconTone.Tools, enabled = !state.isEditing) },
+                title = stringResource(R.string.action_rename), enabled = !state.isEditing, onClick = {
                 renameStem = file?.name?.substringBeforeLast('.').orEmpty()
                 showFileMenu = false; showRenameFile = true
             })
             if (file?.name?.substringAfterLast('.')?.lowercase() in listOf("jpg", "jpeg", "png", "webp")) {
-                ArrowPreference(title = stringResource(R.string.label_crop_artist_image), enabled = !state.isEditing, onClick = {
+                ArrowPreference(
+                    startAction = { PreferenceIcon(FilledIcons.Crop, PreferenceIconTone.Library, enabled = !state.isEditing) },
+                    title = stringResource(R.string.label_crop_artist_image), enabled = !state.isEditing, onClick = {
                     showFileMenu = false
                     cropFile = file
                     file?.let { viewModel.readBitmap(it) { bitmap -> cropBitmap = bitmap; showCrop = true } }
                 })
             }
-            ArrowPreference(title = stringResource(R.string.action_delete), enabled = !state.isEditing,
+            ArrowPreference(
+                startAction = { PreferenceIcon(FilledIcons.Trash, PreferenceIconTone.Danger, enabled = !state.isEditing) },
+                title = stringResource(R.string.action_delete), enabled = !state.isEditing,
                 titleColor = BasicComponentColors(MiuixTheme.colorScheme.error, MiuixTheme.colorScheme.disabledOnSecondaryVariant),
                 onClick = { showFileMenu = false; showDeleteFile = true })
         }

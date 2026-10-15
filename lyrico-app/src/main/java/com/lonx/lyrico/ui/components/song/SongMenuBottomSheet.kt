@@ -3,6 +3,9 @@ package com.lonx.lyrico.ui.components.song
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.icons.PreferenceIconTone
+import com.lonx.lyrico.ui.components.icons.PreferenceIcon
+import com.lonx.lyrico.ui.components.icons.FilledIcons
 import com.lonx.lyrico.data.model.entity.SongEntity
 import top.yukonga.miuix.kmp.basic.BasicComponentColors
 import top.yukonga.miuix.kmp.preference.ArrowPreference
@@ -29,23 +32,28 @@ fun SongMenuBottomSheet(
         onDismissFinished = onDismissFinished, enableNestedScroll = enableNestedScroll
     ) {
     ArrowPreference(
+        startAction = { PreferenceIcon(FilledIcons.Play, PreferenceIconTone.Library) },
         title = stringResource(R.string.menu_action_play),
         summary = stringResource(R.string.menu_action_play_sub),
         onClick = { onPlay() }
     )
     ArrowPreference(
+        startAction = { PreferenceIcon(FilledIcons.Info, PreferenceIconTone.Tools) },
         title = stringResource(R.string.menu_action_info),
         onClick = { showInfo() }
     )
     ArrowPreference(
+        startAction = { PreferenceIcon(FilledIcons.Share2, PreferenceIconTone.Tools) },
         title = stringResource(R.string.menu_action_share),
         onClick = { onShare() }
     )
     ArrowPreference(
+        startAction = { PreferenceIcon(FilledIcons.Pencil, PreferenceIconTone.Tools) },
         title = stringResource(R.string.menu_action_rename),
         onClick = { onRename() }
     )
     ArrowPreference(
+        startAction = { PreferenceIcon(FilledIcons.Trash, PreferenceIconTone.Danger) },
         title = stringResource(R.string.menu_action_delete),
         summary = stringResource(R.string.menu_action_delete_sub),
         titleColor = BasicComponentColors(

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
@@ -25,6 +26,7 @@ import com.lonx.lyrico.ui.components.blur.BlurredTopBar
 import com.lonx.lyrico.ui.components.blur.blurSource
 import com.lonx.lyrico.ui.components.blur.rememberBarBlurBackdrop
 import com.lonx.lyrico.R
+import com.lonx.lyrico.ui.components.icons.FilledIcons
 import com.lonx.lyrico.ui.components.ChipGrid
 import com.lonx.lyrico.ui.components.ManagedChip
 import com.lonx.lyrico.ui.components.scaffoldContentPadding
@@ -34,6 +36,7 @@ import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
+import top.yukonga.miuix.kmp.basic.Button
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
@@ -44,8 +47,6 @@ import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TextField
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Back
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
@@ -76,7 +77,7 @@ fun LyricsCleanupRulesScreen(
                     navigationIcon = {
                         IconButton(onClick = { navigator.popBackStack() }) {
                             Icon(
-                                MiuixIcons.Back,
+                                FilledIcons.ArrowLeft,
                                 contentDescription = stringResource(R.string.action_back)
                             )
                         }
@@ -125,20 +126,28 @@ fun LyricsCleanupRulesScreen(
                             .padding(horizontal = 12.dp, vertical = 8.dp),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        TextButton(
-                            text = stringResource(R.string.add_non_lyrics_cleanup_rule),
+                        Button(
                             onClick = {
                                 errorMessage = null
                                 addingRule = true
                             },
                             modifier = Modifier.weight(1f),
-                            colors = ButtonDefaults.textButtonColorsPrimary()
-                        )
-                        TextButton(
-                            text = stringResource(R.string.reset_to_default),
+                            colors = ButtonDefaults.buttonColorsPrimary()
+                        ) {
+                            Icon(FilledIcons.Plus, null, Modifier.size(18.dp), tint = MiuixTheme.colorScheme.onPrimary)
+                            Spacer(Modifier.width(8.dp))
+                            Text(stringResource(R.string.add_non_lyrics_cleanup_rule), color = MiuixTheme.colorScheme.onPrimary,
+                                style = MiuixTheme.textStyles.button)
+                        }
+                        Button(
                             onClick = viewModel::resetNonLyricsContentRules,
                             modifier = Modifier.weight(1f)
-                        )
+                        ) {
+                            Icon(FilledIcons.RotateCcw, null, Modifier.size(18.dp), tint = MiuixTheme.colorScheme.onSecondaryContainer)
+                            Spacer(Modifier.width(8.dp))
+                            Text(stringResource(R.string.reset_to_default), color = MiuixTheme.colorScheme.onSecondaryContainer,
+                                style = MiuixTheme.textStyles.button)
+                        }
                     }
                 }
             }
