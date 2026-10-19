@@ -155,7 +155,6 @@
     <string name="about_contributors">贡献者</string>
     <string name="about_no_contributors">暂无贡献者</string>
 
-    <string name="about_contribution_count">贡献了 %1$d 个提交</string>
 
 
     <!-- 更新状态 -->

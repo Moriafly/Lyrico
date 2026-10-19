@@ -356,17 +356,15 @@ private fun SearchCoverContent(
                 }
 
                 searchError != null && results.isEmpty() -> {
-                    Box(Modifier.fillMaxSize(), Alignment.Center) {
-                        if (salt) com.moriafly.salt.ui.Text(
-                            text = searchError.asString().orEmpty(),
-                            style = SaltTheme.textStyles.main,
-                            color = SaltTheme.colors.error
-                        ) else Text(
-                            text = searchError.asString().orEmpty(),
-                            fontSize = 14.sp,
-                            color = MiuixTheme.colorScheme.error
-                        )
-                    }
+                    IllustratedEmptyState(
+                        kind = EmptyStateKind.Cover,
+                        title = stringResource(R.string.load_failed),
+                        summary = searchError.asString(),
+                        modifier = Modifier.fillMaxSize(),
+                        actionText = stringResource(R.string.refresh),
+                        icon = LucideIcons.RefreshCw,
+                        onAction = { viewModel.performCoverSearch() },
+                    )
                 }
 
                 results.isEmpty() -> {

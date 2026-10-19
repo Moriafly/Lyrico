@@ -460,6 +460,11 @@ private fun SearchResultsContent(
                     }
                 val isLoadingMore = pageSourceIds.any { it in uiState.loadingMoreSourceIds }
                 val canLoadMore = pageSourceIds.any { uiState.hasMoreBySource[it] == true }
+                val searchError = if (page == 0) {
+                    uiState.searchErrors.values.firstOrNull()
+                } else {
+                    source?.let { uiState.searchErrors[it.id] }
+                }
 
                 when {
                     uiState.isSearching && (page == 0 || source == uiState.selectedSearchSource) -> {
@@ -468,34 +473,16 @@ private fun SearchResultsContent(
                         }
                     }
 
-                    page == 0 && uiState.searchErrors.isNotEmpty() && results.isEmpty() -> {
-                        val errorMessage = uiState.searchErrors.values.firstOrNull()
-                        Box(Modifier.fillMaxSize(), Alignment.Center) {
-                            if (salt) com.moriafly.salt.ui.Text(
-                                text = errorMessage?.asString().orEmpty(),
-                                style = com.moriafly.salt.ui.SaltTheme.textStyles.main,
-                                color = com.moriafly.salt.ui.SaltTheme.colors.error
-                            ) else Text(
-                                text = errorMessage?.asString().orEmpty(),
-                                fontSize = 14.sp,
-                                color = MiuixTheme.colorScheme.error
-                            )
-                        }
-                    }
-
-                    page != 0 && source != null && uiState.searchErrors[source.id] != null -> {
-                        val errorMessage = uiState.searchErrors[source.id]
-                        Box(Modifier.fillMaxSize(), Alignment.Center) {
-                            if (salt) com.moriafly.salt.ui.Text(
-                                text = errorMessage?.asString().orEmpty(),
-                                style = com.moriafly.salt.ui.SaltTheme.textStyles.main,
-                                color = com.moriafly.salt.ui.SaltTheme.colors.error
-                            ) else Text(
-                                text = errorMessage?.asString().orEmpty(),
-                                fontSize = 14.sp,
-                                color = MiuixTheme.colorScheme.error
-                            )
-                        }
+                    searchError != null && results.isEmpty() -> {
+                        IllustratedEmptyState(
+                            kind = EmptyStateKind.Search,
+                            title = stringResource(R.string.load_failed),
+                            summary = searchError.asString(),
+                            modifier = Modifier.fillMaxSize(),
+                            actionText = stringResource(R.string.refresh),
+                            icon = LucideIcons.RefreshCw,
+                            onAction = { viewModel.performSearch() },
+                        )
                     }
 
                     results.isEmpty() -> {

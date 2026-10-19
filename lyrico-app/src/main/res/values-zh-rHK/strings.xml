@@ -155,7 +155,6 @@
     <string name="about_contributors">貢獻者</string>
     <string name="about_no_contributors">尚無貢獻者</string>
 
-    <string name="about_contribution_count">貢獻了 %1$d 次提交</string>
 
 
     <!-- 更新狀態 -->

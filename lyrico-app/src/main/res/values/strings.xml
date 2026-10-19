@@ -158,7 +158,6 @@
     <string name="about_contributors">Contributors</string>
     <string name="about_no_contributors">No contributors yet</string>
 
-    <string name="about_contribution_count">%1$d commits</string>
 
     <!-- Update status -->
     <string name="update_already_latest">You are already on the latest version</string>

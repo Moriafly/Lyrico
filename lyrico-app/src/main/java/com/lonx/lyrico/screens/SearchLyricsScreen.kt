@@ -488,17 +488,15 @@ private fun SearchLyricsContent(
                 }
 
                 error != null && results.isEmpty() -> {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        if (salt) com.moriafly.salt.ui.Text(
-                            text = error.asString().orEmpty(),
-                            style = SaltTheme.textStyles.main,
-                            color = SaltTheme.colors.error
-                        ) else Text(
-                            text = error.asString().orEmpty(),
-                            fontSize = 14.sp,
-                            color = MiuixTheme.colorScheme.error
-                        )
-                    }
+                    IllustratedEmptyState(
+                        kind = EmptyStateKind.Lyrics,
+                        title = stringResource(R.string.load_failed),
+                        summary = error.asString(),
+                        modifier = Modifier.fillMaxSize(),
+                        actionText = stringResource(R.string.refresh),
+                        icon = LucideIcons.RefreshCw,
+                        onAction = { viewModel.performSearch() },
+                    )
                 }
 
                 results.isEmpty() -> {
