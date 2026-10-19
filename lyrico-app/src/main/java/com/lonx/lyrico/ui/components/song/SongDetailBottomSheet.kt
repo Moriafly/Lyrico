@@ -26,6 +26,7 @@ import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
@@ -39,7 +40,6 @@ import com.lonx.lyrico.ui.components.salt.SaltBottomSheet
 import com.lonx.lyrico.ui.components.salt.SaltIconButton
 import com.lonx.lyrico.ui.theme.LocalUiEngine
 import com.lonx.lyrico.ui.components.miuix.MiuixBottomSheet
-import com.moriafly.salt.ui.ItemOuterTitle
 import com.moriafly.salt.ui.ItemValue
 import com.moriafly.salt.ui.RoundedColumn
 import com.moriafly.salt.ui.SaltTheme
@@ -125,11 +125,9 @@ fun SongDetailBottomSheet(
             show = show,
             onDismissRequest = onDismissRequest,
             onDismissFinished = {},
-            header = { ItemOuterTitle(text = title) },
             // 明细行自己不滚动，由弹层提供唯一滚动出口，内容超窗时可滚到底部。
             scrollContent = true,
         ) {
-            // 封面和艺术家信息保留在正文，歌名由标题槽显示。
             RoundedColumn {
                 Row(
                     modifier = Modifier.fillMaxWidth().innerPadding(),
@@ -151,6 +149,11 @@ fun SongDetailBottomSheet(
                         verticalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         com.moriafly.salt.ui.Text(
+                            text = title,
+                            style = SaltTheme.textStyles.main,
+                            fontWeight = FontWeight.Bold,
+                        )
+                        com.moriafly.salt.ui.Text(
                             text = artist,
                             style = SaltTheme.textStyles.main,
                             color = SaltTheme.colors.highlight,
@@ -171,7 +174,6 @@ fun SongDetailBottomSheet(
 
     MiuixBottomSheet(
         show = show,
-        title = title,
         enableNestedScroll = false,
         onDismissRequest = {
             onDismissRequest()
@@ -200,7 +202,15 @@ fun SongDetailBottomSheet(
                     error = painterResource(R.drawable.ic_album_24dp)
                 )
 
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    Text(
+                        text = title,
+                        style = MiuixTheme.textStyles.title3,
+                        fontWeight = FontWeight.Bold,
+                    )
                     Text(
                         text = artist,
                         style = MiuixTheme.textStyles.footnote1,

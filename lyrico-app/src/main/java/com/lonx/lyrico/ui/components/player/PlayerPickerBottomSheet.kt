@@ -93,7 +93,7 @@ fun PlayerPickerBottomSheet(
             show = show,
             onDismissRequest = onDismissRequest,
             onDismissFinished = {},
-            header = { ItemOuterTitle(text = stringResource(R.string.play_with)) },
+            title = stringResource(R.string.play_with),
             scrollContent = true,
         ) {
             RoundedColumn {

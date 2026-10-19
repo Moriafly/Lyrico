@@ -1553,7 +1553,7 @@ private fun SaltBatchOverlays(
         ItemMenuAction(stringResource(R.string.batch_edit_cover_remove), LucideIcons.Trash, PreferenceIconTone.Danger) { closeCoverMenu(); viewModel.removeCover() }
         if (state.coverUri != null || state.removeCover) ItemMenuAction(stringResource(R.string.batch_edit_cover_revert), LucideIcons.Undo, PreferenceIconTone.Lyrics) { closeCoverMenu(); viewModel.revertCover() }
     }
-    SaltBottomSheet(showValues, closeValues, header = { ItemOuterTitle(valueTitle) }) {
+    SaltBottomSheet(showValues, closeValues, title = valueTitle) {
         when {
             valuesLoading -> RoundedColumn { SaltText(stringResource(R.string.batch_edit_loading_selected_values), modifier = Modifier.padding(16.dp)) }
             values.isEmpty() -> IllustratedEmptyState(title = stringResource(R.string.batch_edit_no_selected_values), compact = true, modifier = Modifier.fillMaxWidth())
@@ -1580,7 +1580,7 @@ private fun SaltBatchOverlays(
         }
     }
     SaltBottomSheet(showCovers, closeCovers,
-        header = { ItemOuterTitle(stringResource(R.string.batch_edit_select_cover_from_selected_songs)) }) {
+        title = stringResource(R.string.batch_edit_select_cover_from_selected_songs)) {
         LazyVerticalGrid(GridCells.Adaptive(96.dp), Modifier.heightIn(max = 420.dp),
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -1606,7 +1606,7 @@ private fun SaltBatchOverlays(
     SaltBottomSheet(state.saveProgressBottomSheet,
         onDismissRequest = { if (!state.isSaving) viewModel.closeSaveBottomSheet() },
         onDismissFinished = onSaved, allowDismiss = !state.isSaving,
-        header = { ItemOuterTitle(stringResource(R.string.batch_edit_title)) },
+        title = stringResource(R.string.batch_edit_title),
         groupContent = true, scrollContent = true,
         footer = { SheetProgressAction(state.isSaving, { viewModel.abortSave() }, { viewModel.closeSaveBottomSheet() },
             label = stringResource(if (state.isSaving) R.string.action_abort else R.string.confirm)) }) {

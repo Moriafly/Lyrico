@@ -48,6 +48,9 @@ import com.lonx.lyrico.data.model.ReplayGainPeakMode
 import com.lonx.lyrico.data.model.SearchSourceTabStyle
 import com.lonx.lyrico.data.model.ThemeMode
 import com.lonx.lyrico.data.model.lyrics.LyricFormat
+import com.lonx.lyrico.data.model.lyrics.visibleLyricLineTracks
+import com.lonx.lyrico.ui.components.base.ActionBottomSheet
+import com.lonx.lyrico.ui.components.lyrics.LyricLineOrderBottomSheetContent
 import com.lonx.lyrico.data.repository.SettingsRepository
 import com.lonx.lyrico.ui.components.base.YesNoBottomSheet
 import com.lonx.lyrico.ui.components.getSystemWallpaperColor
@@ -120,6 +123,8 @@ fun SettingsScreen(
     val tempSearchPageSize = remember(searchPageSize) { mutableIntStateOf(searchPageSize) }
     val showClearCacheDialog = remember { mutableStateOf(false) }
     val showRgTargetDialog = remember { mutableStateOf(false) }
+    val showLyricLineOrderSheet = remember { mutableStateOf(false) }
+    val visibleTracks = visibleLyricLineTracks(romaEnabled, translationEnabled, onlyTranslationIfAvailable)
     val monetVisibilityState = remember(settingsUiState.isInitialized) {
         MutableTransitionState(monetEnable)
     }
@@ -152,6 +157,8 @@ fun SettingsScreen(
     val floatingBarEffectItems = FloatingBarEffect.entries.map { stringResource(it.labelRes) }
 
     val context = LocalContext.current
+    val lineOrderSummary = settingsUiState.lyricLineOrder.filter { it in visibleTracks }
+        .joinToString(" / ") { context.getString(it.labelRes) }
 
     val artistSeparators = remember {
         listOf(
@@ -225,6 +232,19 @@ fun SettingsScreen(
             }
         }
     }
+    ActionBottomSheet(
+        show = showLyricLineOrderSheet.value,
+        title = stringResource(R.string.lyric_line_order),
+        onDismissRequest = { showLyricLineOrderSheet.value = false },
+        scrollContent = false,
+        content = {
+            LyricLineOrderBottomSheetContent(
+                lineOrder = settingsUiState.lyricLineOrder,
+                visibleTracks = visibleTracks,
+                onLineOrderChange = settingsViewModel::setLyricLineOrder,
+            )
+        },
+    )
     SettingsPage(
         engine = uiEngine,
         initialized = settingsUiState.isInitialized,
@@ -488,6 +508,13 @@ fun SettingsScreen(
                             onCheckedChange = { settingsViewModel.setOnlyTranslationIfAvailable(it) }
                         )
                     }
+                    Action(
+                        icon = LucideIcons.ArrowDownUp, tone = PreferenceIconTone.Lyrics,
+                        title = stringResource(R.string.lyric_line_order),
+                        summary = lineOrderSummary,
+                        onClick = { showLyricLineOrderSheet.value = true },
+                        holdDownState = showLyricLineOrderSheet.value,
+                    )
                 }
             }
 

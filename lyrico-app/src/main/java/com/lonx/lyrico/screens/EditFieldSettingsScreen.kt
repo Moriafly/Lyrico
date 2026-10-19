@@ -74,7 +74,6 @@ import com.lonx.lyrico.ui.theme.LocalUiEngine
 import com.lonx.lyrico.viewmodel.CustomTagKeyError
 import com.lonx.lyrico.viewmodel.EditFieldSettingsViewModel
 import com.lonx.lyrico.ui.components.miuix.MiuixBottomSheet
-import com.moriafly.salt.ui.ItemOuterTitle
 import com.moriafly.salt.ui.RoundedColumn
 import com.moriafly.salt.ui.SaltTheme
 import com.moriafly.salt.ui.Switcher
@@ -617,7 +616,7 @@ private fun ComponentFieldsBottomSheet(
             show = show,
             onDismissRequest = onDismissRequest,
             onDismissFinished = onDismissFinished,
-            header = { ItemOuterTitle(text = component?.title().orEmpty()) },
+            title = component?.title().orEmpty(),
         ) {
             ComponentFieldsSheetContent(
                 component = component,

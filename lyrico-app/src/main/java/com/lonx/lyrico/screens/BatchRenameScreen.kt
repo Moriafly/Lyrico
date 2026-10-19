@@ -240,7 +240,7 @@ fun BatchRenameScreen(
                 allowDismiss = !uiState.isRenamingInProgress,
                 onDismissRequest = { viewModel.closeRenameDialog() },
                 onDismissFinished = {},
-                header = { ItemOuterTitle(text = stringResource(R.string.batch_rename_title)) },
+                title = stringResource(R.string.batch_rename_title),
                 footer = {
                     SheetProgressAction(
                         running = uiState.isRenamingInProgress,

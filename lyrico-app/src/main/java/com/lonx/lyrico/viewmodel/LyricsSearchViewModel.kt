@@ -6,6 +6,7 @@ import com.lonx.lyrico.R
 import com.lonx.lyrico.data.model.ConversionMode
 import com.lonx.lyrico.data.model.SearchSourceTabStyle
 import com.lonx.lyrico.data.model.lyrics.LyricFormat
+import com.lonx.lyrico.data.model.lyrics.LyricLineTrack
 import com.lonx.lyrico.data.model.lyrics.LyricRenderConfig
 import com.lonx.lyrico.data.model.lyrics.LyricsResult
 import com.lonx.lyrico.data.model.lyrics.SearchSource
@@ -638,6 +639,10 @@ class LyricsSearchViewModel(
 
     fun setLyricFormat(format: LyricFormat) {
         viewModelScope.launch { settingsRepository.saveLyricDisplayMode(format) }
+    }
+
+    fun setLyricLineOrder(order: List<LyricLineTrack>) {
+        viewModelScope.launch { settingsRepository.saveLyricLineOrder(order) }
     }
 
     fun setRomaEnabled(enabled: Boolean) {

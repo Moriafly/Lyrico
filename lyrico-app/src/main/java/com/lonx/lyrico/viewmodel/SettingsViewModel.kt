@@ -15,6 +15,7 @@ import com.lonx.lyrico.data.model.FloatingBarEffect
 import com.lonx.lyrico.data.model.ReplayGainPeakMode
 import com.lonx.lyrico.data.model.ReplayGainSettings
 import com.lonx.lyrico.data.model.lyrics.LyricFormat
+import com.lonx.lyrico.data.model.lyrics.LyricLineTrack
 import com.lonx.lyrico.data.model.lyrics.LyricsProcessingOptions
 import com.lonx.lyrico.data.model.plugin.PluginMetadataFieldWriteRule
 import com.lonx.lyrico.data.model.ThemeMode
@@ -43,6 +44,7 @@ data class SettingsUiState(
     val lyricFormat: LyricFormat = LyricFormat.VERBATIM_LRC,
     val separator: ArtistSeparator = ArtistSeparator.SLASH,
     val romaEnabled: Boolean = false,
+    val lyricLineOrder: List<LyricLineTrack> = com.lonx.lyrico.data.model.lyrics.DefaultLyricLineOrder,
     val translationEnabled: Boolean = false,
     val lyricIndexEnabled: Boolean = false,
     val ignoreShortAudio: Boolean = false,
@@ -160,6 +162,7 @@ class SettingsViewModel(
             isInitialized = true,
             lyricFormat = base.lyric.format,
             romaEnabled = base.lyric.showRomanization,
+            lyricLineOrder = base.lyric.normalizedLineOrder,
             translationEnabled = base.lyric.showTranslation,
             separator = base.search.separator.toArtistSeparator(),
             searchSourceOrder = base.search.searchSourceOrder,
@@ -211,6 +214,10 @@ class SettingsViewModel(
             CacheManager.clearAllCache(context)
             refreshCache(context)
         }
+    }
+
+    fun setLyricLineOrder(order: List<LyricLineTrack>) {
+        viewModelScope.launch { settingsRepository.saveLyricLineOrder(order) }
     }
 
     fun setRomaEnabled(enabled: Boolean) {

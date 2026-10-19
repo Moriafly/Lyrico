@@ -7,6 +7,7 @@ import com.lonx.lyrico.data.model.FloatingBarEffect
 import com.lonx.lyrico.data.model.ReplayGainPeakMode
 import com.lonx.lyrico.data.model.ReplayGainSettings
 import com.lonx.lyrico.data.model.lyrics.LyricFormat
+import com.lonx.lyrico.data.model.lyrics.LyricLineTrack
 import com.lonx.lyrico.data.model.lyrics.LyricRenderConfig
 import com.lonx.lyrico.data.model.log.LogRetentionOption
 import com.lonx.lyrico.data.model.plugin.PluginMetadataFieldWriteRule
@@ -43,6 +44,7 @@ interface SettingsRepository {
     val artistSortInfo: Flow<ArtistSortInfo>
     val albumGridColumns: Flow<Int>
     val separator: Flow<String>
+    val lyricLineOrder: Flow<List<LyricLineTrack>>
     val romaEnabled: Flow<Boolean>
 
     val conversionMode: Flow<ConversionMode>
@@ -87,6 +89,7 @@ interface SettingsRepository {
     suspend fun saveArtistSortInfo(sortInfo: ArtistSortInfo)
     suspend fun saveAlbumGridColumns(columns: Int)
     suspend fun saveSeparator(separator: String)
+    suspend fun saveLyricLineOrder(order: List<LyricLineTrack>)
     suspend fun saveRomaEnabled(enabled: Boolean)
     suspend fun saveConversionMode(mode: ConversionMode)
     suspend fun saveCheckUpdateEnabled(enabled: Boolean)

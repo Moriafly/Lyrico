@@ -15,7 +15,6 @@ import com.lonx.lyrico.ui.components.salt.SaltIconButton
 import com.lonx.lyrico.ui.theme.LocalUiEngine
 import com.lonx.lyrico.ui.components.base.SheetConfirmActions
 import com.lonx.lyrico.ui.components.miuix.MiuixBottomSheet
-import com.moriafly.salt.ui.ItemOuterTitle
 import com.moriafly.salt.ui.SaltTheme
 import top.yukonga.miuix.kmp.basic.CircularProgressIndicator
 
@@ -37,9 +36,13 @@ fun ImageCropperSheet(
             onDismissFinished = onDismissFinished,
             // 裁剪画布不应放进 RoundedColumn 分组，也不自滚，直接铺满内容区。
             groupContent = false,
+            title = title,
             header = {
-                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    Box(Modifier.weight(1f)) { ItemOuterTitle(text = title) }
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
                     SaltIconButton(LucideIcons.Check, stringResource(R.string.confirm),
                         enabled = state != null, onClick = {
                             state?.crop()?.let(onCrop)

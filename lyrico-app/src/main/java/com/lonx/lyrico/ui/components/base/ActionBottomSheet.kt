@@ -14,7 +14,6 @@ import com.lonx.lyrico.data.model.UiEngine
 import com.lonx.lyrico.ui.components.miuix.MiuixBottomSheet
 import com.lonx.lyrico.ui.components.salt.SaltBottomSheet
 import com.lonx.lyrico.ui.theme.LocalUiEngine
-import com.moriafly.salt.ui.ItemOuterTitle
 
 /** 操作弹层：业务内容共用，外壳按引擎区分（Salt 复用 SaltBottomSheet）。 */
 @Composable
@@ -44,9 +43,9 @@ fun ActionBottomSheet(
             onDismissFinished = onDismissFinished,
             allowDismiss = allowDismiss,
             footer = saltFooter ?: footer,
+            title = title,
             header = {
                 Column(Modifier.fillMaxWidth()) {
-                    title?.let { ItemOuterTitle(text = it) }
                     if (tools != null) {
                         FlowRow(
                             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),

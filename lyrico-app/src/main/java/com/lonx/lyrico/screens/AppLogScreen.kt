@@ -70,7 +70,6 @@ import com.lonx.lyrico.ui.theme.LocalUiEngine
 import com.lonx.lyrico.viewmodel.AppLogEvent
 import com.lonx.lyrico.viewmodel.AppLogViewModel
 import com.lonx.lyrico.ui.components.miuix.MiuixBottomSheet
-import com.moriafly.salt.ui.ItemOuterTitle
 import com.moriafly.salt.ui.SaltTheme
 import com.moriafly.salt.ui.dialog.YesNoDialog as SaltYesNoDialog
 import com.moriafly.salt.ui.screen.ScreenCard
@@ -609,19 +608,18 @@ private fun AppLogDetailSheet(
             groupContent = true,
             // 详情是纯文本，没有自带滚动，由弹层滚动。
             scrollContent = true,
-            header = {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(end = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(Modifier.weight(1f)) {
-                        ItemOuterTitle(text = stringResource(R.string.app_log_detail_title))
-                    }
-                    log?.let {
+            title = stringResource(R.string.app_log_detail_title),
+            header = log?.let { current ->
+                {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(end = 8.dp),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
                         SaltIconButton(
                             icon = LucideIcons.Copy,
                             label = stringResource(R.string.action_copy_log),
-                            onClick = { onCopy(it) }
+                            onClick = { onCopy(current) },
                         )
                     }
                 }

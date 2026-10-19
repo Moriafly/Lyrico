@@ -361,6 +361,7 @@ fun SearchResultsScreen(
         onDismissRequest = { showLyricRenderConfigBottomSheet.value = false },
         onLyricFormatChange = viewModel::setLyricFormat,
         onRomaEnabledChange = viewModel::setRomaEnabled,
+        onLineOrderChange = viewModel::setLyricLineOrder,
         onTranslationEnabledChange = viewModel::setTranslationEnabled,
         onOnlyTranslationIfAvailableChange = viewModel::setOnlyTranslationIfAvailable,
         onRemoveEmptyLinesChange = viewModel::setRemoveEmptyLines,

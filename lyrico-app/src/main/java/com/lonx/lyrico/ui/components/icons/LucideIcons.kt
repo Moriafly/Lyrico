@@ -36,6 +36,19 @@ internal object LucideIcons {
         )
     }
 
+    // Lucide 1.59.0, icons/grip-vertical.svg; same license as the existing icons.
+    // Archive SHA-256: aae4638a541df91e28cd7733eed2d0d87e72da0942a28b306941284fd00e176a
+    val GripVertical: ImageVector by lazy {
+        lucideIcon("grip-vertical",
+            "M8 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0",
+            "M8 5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0",
+            "M8 19a1 1 0 1 0 2 0a1 1 0 1 0 -2 0",
+            "M14 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0",
+            "M14 5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0",
+            "M14 19a1 1 0 1 0 2 0a1 1 0 1 0 -2 0",
+        )
+    }
+
     val ALargeSmall: ImageVector by lazy {
         lucideIcon("a-large-small",
             "m15 16 2.536-7.328a1.02 1.02 1 0 1 1.928 0L22 16",

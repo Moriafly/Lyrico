@@ -8,7 +8,6 @@ import com.lonx.lyrico.data.model.UiEngine
 import com.lonx.lyrico.ui.components.salt.SaltBottomSheet
 import com.lonx.lyrico.ui.theme.LocalUiEngine
 import com.lonx.lyrico.ui.components.miuix.MiuixBottomSheet
-import com.moriafly.salt.ui.ItemOuterTitle
 
 /** Single native window, with the existing Miuix content retained by the caller. */
 @Composable
@@ -24,14 +23,14 @@ internal fun EditorSheet(
         SaltBottomSheet(
             show = show,
             onDismissRequest = onDismissRequest,
-            header = {
-                Row(
-                    Modifier.fillMaxWidth(),
-                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
-                ) {
-                    Box(Modifier.weight(1f)) { ItemOuterTitle(title) }
-                    tools?.invoke()
-                    Spacer(Modifier.width(12.dp))
+            title = title,
+            header = tools?.let { actions ->
+                {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                    ) { actions() }
                 }
             },
             content = content,

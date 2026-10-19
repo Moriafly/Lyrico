@@ -4,7 +4,6 @@ package com.lonx.lyrico.ui.components.salt
 
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.runtime.Composable
-import com.moriafly.salt.ui.ItemOuterTitle
 
 /** Salt 的 Item 菜单弹层：标题加卡片分组，外壳与生命周期由 [SaltBottomSheet] 统一提供。 */
 @Composable
@@ -21,7 +20,7 @@ internal fun SaltMenuBottomSheet(
         show = show,
         onDismissRequest = onDismissRequest,
         onDismissFinished = onDismissFinished,
-        header = { ItemOuterTitle(text = label) },
+        title = label,
         // 菜单行自身不滚动，因此由弹层统一滚动；行本身不带分组背景，交给 RoundedColumn。
         scrollContent = true,
         allowDismiss = allowDismiss,

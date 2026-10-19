@@ -32,8 +32,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.moriafly.salt.ui.SaltTheme
+import com.moriafly.salt.ui.Text
 import com.moriafly.salt.ui.dialog.BottomSheetBehaviorProperties
 import com.moriafly.salt.ui.dialog.BottomSheetDialog
 import com.moriafly.salt.ui.dialog.BottomSheetDialogProperties
@@ -49,7 +55,7 @@ import com.moriafly.salt.ui.dialog.NavigationBarProperties
  * | 内容内边距                     | groupContent 为裸内容提供 padding；原生行由其自身提供，不叠加     |
  * | 纵向滚动出口                    | 只允许一个：内容自带 LazyColumn/verticalScroll 时本外壳不加滚动 |
  *
- * [header] 由调用方决定（例如 [com.moriafly.salt.ui.ItemOuterTitle]，它自带 outerPadding）。
+ * [title] 使用统一的居中标题；[header] 用于标题下方的工具操作行。
  *
  * [scrollContent]：仅当内容自己不滚动时置 true（菜单行、长文本详情、播放器列表等）， 由本外壳提供唯一的纵向滚动出口；若内容自带
  * LazyColumn/verticalScroll 必须保持 false， 内层若必须独立滚动（如字段列表），必须给它明确的高度上限。
@@ -70,6 +76,7 @@ internal fun SaltBottomSheet(
     scrollContent: Boolean = false,
     groupContent: Boolean = false,
     allowDismiss: Boolean = true,
+    title: String? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     var wasVisible by remember { mutableStateOf(show) }
@@ -121,6 +128,21 @@ internal fun SaltBottomSheet(
                     .clip(RoundedCornerShape(2.dp))
                     .background(SaltTheme.colors.subText.copy(alpha = 0.3f))
             )
+            title?.takeIf { it.isNotBlank() }?.let {
+                Text(
+                    text = it,
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(horizontal = 24.dp, vertical = 6.dp)
+                        .semantics { heading() },
+                    style = SaltTheme.textStyles.main.copy(
+                        fontSize = 18.sp,
+                        lineHeight = 24.sp,
+                        fontWeight = FontWeight.SemiBold,
+                    ),
+                    color = SaltTheme.colors.text,
+                    textAlign = TextAlign.Center,
+                )
+            }
             header?.invoke()
             Column(
                 Modifier.fillMaxWidth()

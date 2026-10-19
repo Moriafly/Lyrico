@@ -6,8 +6,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -23,6 +21,8 @@ import com.lonx.lyrico.ui.theme.LocalUiEngine
 import com.lonx.lyrico.data.model.ConversionMode
 import com.lonx.lyrico.data.model.lyrics.LyricFormat
 import com.lonx.lyrico.data.model.lyrics.LyricRenderConfig
+import com.lonx.lyrico.data.model.lyrics.LyricLineTrack
+import com.lonx.lyrico.data.model.lyrics.visibleLyricLineTracks
 import com.lonx.lyrico.ui.components.miuix.MiuixBottomSheet
 import com.moriafly.salt.ui.ItemSwitcher
 import top.yukonga.miuix.kmp.basic.Card
@@ -38,6 +38,7 @@ fun LyricRenderConfigBottomSheet(
     onDismissRequest: () -> Unit,
     onLyricFormatChange: (LyricFormat) -> Unit,
     onRomaEnabledChange: (Boolean) -> Unit,
+    onLineOrderChange: (List<LyricLineTrack>) -> Unit,
     onTranslationEnabledChange: (Boolean) -> Unit,
     onOnlyTranslationIfAvailableChange: (Boolean) -> Unit,
     onRemoveEmptyLinesChange: (Boolean) -> Unit,
@@ -109,19 +110,25 @@ fun LyricRenderConfigBottomSheet(
                     onConversionModeChange(ConversionMode.entries[index])
                 }
                 }
+                LyricLineOrderBottomSheetContent(
+                    lineOrder = lyricConfig.normalizedLineOrder,
+                    visibleTracks = visibleLyricLineTracks(
+                        lyricConfig.showRomanization,
+                        lyricConfig.showTranslation,
+                        lyricConfig.onlyTranslationIfAvailable,
+                    ),
+                    onLineOrderChange = onLineOrderChange,
+                )
             }
         }
         return
     }
     MiuixBottomSheet(
         show = show,
+        scrollContent = true,
         onDismissRequest = onDismissRequest
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
-        ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
             Card(
                 modifier = Modifier
                     .padding(bottom = 12.dp)
@@ -197,8 +204,17 @@ fun LyricRenderConfigBottomSheet(
                     )
                 }
             }
-
-
+            config?.let { lyricConfig ->
+                LyricLineOrderBottomSheetContent(
+                    lineOrder = lyricConfig.normalizedLineOrder,
+                    visibleTracks = visibleLyricLineTracks(
+                        lyricConfig.showRomanization,
+                        lyricConfig.showTranslation,
+                        lyricConfig.onlyTranslationIfAvailable,
+                    ),
+                    onLineOrderChange = onLineOrderChange,
+                )
+            }
         }
     }
 }
