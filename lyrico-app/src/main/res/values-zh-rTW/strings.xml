@@ -91,8 +91,8 @@
     <string name="lyric_line_original">原詞</string>
     <string name="lyric_line_romanization">音譯</string>
     <string name="lyric_line_translation">翻譯</string>
-    <string name="roma">羅馬拼音</string>
-    <string name="roma_hint">歌詞中包含羅馬拼音</string>
+    <string name="roma">音譯</string>
+    <string name="roma_hint">歌詞中包含音譯</string>
     <string name="translation">翻譯</string>
     <string name="translation_hint">歌詞中包含翻譯</string>
 
@@ -576,7 +576,7 @@
     <string name="current_detected_format">目前格式：%s</string>
     <string name="lyrics_format_keep_current">保持目前格式</string>
     <string name="lyrics_format_line_order">依句排序</string>
-    <string name="lyrics_format_line_order_hint">將先列原文、後列翻譯或羅馬拼音的歌詞整理為逐句對應</string>
+    <string name="lyrics_format_line_order_hint">將先列原文、後列翻譯或音譯的歌詞整理為逐句對應</string>
     <string name="lyrics_remove_tag_lines">移除非歌詞內容</string>
     <string name="lyrics_remove_tag_lines_hint">使用“非歌詞內容過濾規則”移除作詞、作曲、來源等內容</string>
     <string name="lyrics_remove_tag_lines_settings_hint">使用設定中的“非歌詞內容過濾規則”處理目前歌詞</string>

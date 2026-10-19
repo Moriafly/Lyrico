@@ -95,8 +95,8 @@
     <string name="lyric_line_original">Original</string>
     <string name="lyric_line_romanization">Romanization</string>
     <string name="lyric_line_translation">Translation</string>
-    <string name="roma">Romaji</string>
-    <string name="roma_hint">Include romaji in lyric</string>
+    <string name="roma">Romanization</string>
+    <string name="roma_hint">Include romanization in lyric</string>
     <string name="translation">Translation</string>
     <string name="translation_hint">Include translations in lyric</string>
 
