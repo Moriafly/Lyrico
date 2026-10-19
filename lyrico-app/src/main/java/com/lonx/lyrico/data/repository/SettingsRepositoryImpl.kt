@@ -113,6 +113,19 @@ object SettingsDefaults {
 }
 
 class SettingsRepositoryImpl(private val context: Context) : SettingsRepository {
+    private val proActivatedKey = booleanPreferencesKey("pro_activated")
+    override val proActivated: Flow<Boolean> = context.settingsDataStore.data.map {
+        it[proActivatedKey] ?: false
+    }
+
+    override suspend fun activatePro() {
+        context.settingsDataStore.edit { it[proActivatedKey] = true }
+    }
+
+    override suspend fun deactivatePro() {
+        context.settingsDataStore.edit { it[proActivatedKey] = false }
+    }
+
     private val artistPosterFoldersKey = stringPreferencesKey("artist_poster_folders")
     private val artistPosterRevisionKey = longPreferencesKey("artist_poster_revision")
     override val artistPosterRevision: Flow<Long> = context.settingsDataStore.data.map {

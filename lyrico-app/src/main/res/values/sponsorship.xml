@@ -1,0 +1,19 @@
+<resources>
+    <string name="pro_activation_failed">Could not save activation. Please try again</string>
+    <string name="sponsor_title">Support Lyrico</string>
+    <string name="sponsor_open_afdian">Open Afdian page</string>
+    <string name="pro_status_active">Activated</string>
+    <string name="sponsor_method_afdian">Afdian</string>
+    <string name="sponsor_method_wechat">WeChat</string>
+    <string name="pro_settings">Manage Pro</string>
+    <string name="pro_disable">Turn off Pro</string>
+    <string name="pro_deactivation_failed">Could not save the change. Please try again</string>
+    <string name="pro_disable_confirmation">Turn off Lyrico Pro</string>
+    <string name="pro_discovered">Easter egg unlocked, support Lyrico here</string>
+    <string name="pro_about_summary">Pro features unlocked</string>
+    <string name="sponsor_long_press_save">Long press the image to save to your gallery</string>
+    <string name="sponsor_saved_to_gallery">Saved to gallery</string>
+    <string name="sponsor_save_failed">Could not save image. Please try again</string>
+    <string name="sponsor_storage_permission_required">Allow storage access to save images to your gallery</string>
+    <string name="sponsor_saving">Saving</string>
+</resources>

@@ -15,7 +15,7 @@ import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 internal enum class PreferenceIconTone {
-    Appearance, Library, Lyrics, Tools, Teal, Orange, Pink, Danger;
+    Appearance, Library, Lyrics, Tools, Teal, Orange, Pink, Gold, Danger;
 
     fun forItem(index: Int): PreferenceIconTone = if (this == Danger) Danger else at(index)
 
@@ -39,6 +39,7 @@ internal enum class PreferenceIconTone {
             Teal -> if (dark) Color(0xFF75D5CE) else Color(0xFF16776F)
             Orange -> if (dark) Color(0xFFFFB78A) else Color(0xFFAC571E)
             Pink -> if (dark) Color(0xFFF3A6CF) else Color(0xFFA64278)
+            Gold -> if (dark) Color(0xFFE9C76D) else Color(0xFF946D18)
             Danger -> if (salt) SaltTheme.colors.error else MiuixTheme.colorScheme.error
         }
     }

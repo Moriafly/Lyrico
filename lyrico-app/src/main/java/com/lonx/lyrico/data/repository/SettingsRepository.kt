@@ -26,6 +26,9 @@ import kotlinx.coroutines.flow.Flow
 
 
 interface SettingsRepository {
+    val proActivated: Flow<Boolean>
+    suspend fun activatePro()
+    suspend fun deactivatePro()
     val artistPosterFolder: Flow<String?>
     val artistPosterRevision: Flow<Long>
     suspend fun refreshArtistPosters()

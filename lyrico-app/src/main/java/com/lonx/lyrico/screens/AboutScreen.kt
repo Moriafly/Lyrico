@@ -2,7 +2,6 @@
 
 package com.lonx.lyrico.screens
 
-import android.content.ClipData
 import android.widget.Toast
 import androidx.compose.foundation.rememberOverscrollEffect
 import androidx.compose.foundation.layout.Box
@@ -17,6 +16,9 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
@@ -26,8 +28,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.ClipEntry
-import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -54,13 +54,17 @@ import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.ui.components.scaffoldContentPadding
 import com.lonx.lyrico.utils.UpdateEffect
 import com.lonx.lyrico.viewmodel.AboutViewModel
+import com.lonx.lyrico.viewmodel.ProVersionTapResult
+import com.lonx.lyrico.ui.components.pro.ProDeactivationDialog
 import com.lonx.lyrico.viewmodel.UiError
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.OpensourceLicenceDestination
+import com.ramcosta.composedestinations.generated.destinations.ProDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import org.koin.androidx.compose.koinViewModel
 import kotlinx.coroutines.launch
+import java.io.IOException
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CircularProgressIndicator
@@ -84,6 +88,23 @@ fun AboutScreen(
     val viewModel: AboutViewModel = koinViewModel()
     val checkUpdateEnabled by viewModel.checkUpdateEnabled.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val proActivated by viewModel.proActivated.collectAsStateWithLifecycle()
+    var showDisablePro by rememberSaveable { mutableStateOf(false) }
+    val version = "${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE})"
+    val onVersionClick: () -> Unit = {
+        scope.launch {
+            try {
+                when (viewModel.onVersionTap()) {
+                    ProVersionTapResult.ACTIVATED -> navigator.navigate(ProDestination())
+                    ProVersionTapResult.CONFIRM_DEACTIVATION -> showDisablePro = true
+                    ProVersionTapResult.NONE -> Unit
+                }
+            } catch (_: IOException) {
+                Toast.makeText(context, R.string.pro_activation_failed, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
     val updateEffect by viewModel.updateEffect.collectAsStateWithLifecycle(
         initialValue = UpdateEffect(R.string.about_check_update_default)
     )
@@ -139,6 +160,10 @@ fun AboutScreen(
             item {
                 if (salt) {
                     SaltAboutAppInfo(
+                        proActivated = proActivated,
+                        onPro = { navigator.navigate(ProDestination()) },
+                        version = version,
+                        onVersionClick = onVersionClick,
                         checkUpdateEnabled = checkUpdateEnabled,
                         updateSummary = stringResource(updateEffect.messageRes, *updateEffect.formatArgs.toTypedArray()),
                         onProject = { viewModel.openBrowser(context, "https://github.com/$OWNER_ID/$REPO_NAME") },
@@ -155,19 +180,16 @@ fun AboutScreen(
                         BasicComponent(
                             startAction = { PreferenceIcon(LucideIcons.Info, PreferenceIconTone.Appearance) },
                             title = stringResource(R.string.about_app_version),
-                            summary = "${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE})"
+                            summary = version,
+                            onClick = onVersionClick,
                         )
+                        if (proActivated) {
+                            AboutProEntry(onClick = { navigator.navigate(ProDestination()) })
+                        }
                         ArrowPreference(
                             startAction = { PreferenceIcon(LucideIcons.CodeXml, PreferenceIconTone.Tools) },
                             title = stringResource(R.string.about_project_url),
                             summary = stringResource(R.string.about_project_url_sub),
-                            endActions = {
-                                Text(
-                                    text = "GitHub",
-                                    fontSize = MiuixTheme.textStyles.body2.fontSize,
-                                    color = MiuixTheme.colorScheme.onSurfaceVariantActions
-                                )
-                            },
                             onClick = {
                                 viewModel.openBrowser(
                                     context,
@@ -179,13 +201,6 @@ fun AboutScreen(
                             startAction = { PreferenceIcon(LucideIcons.Send, PreferenceIconTone.Library) },
                             title = "Telegram",
                             summary = TELEGRAM_GROUP_LINK,
-                            endActions = {
-                                Text(
-                                    text = "Telegram",
-                                    fontSize = MiuixTheme.textStyles.body2.fontSize,
-                                    color = MiuixTheme.colorScheme.onSurfaceVariantActions
-                                )
-                            },
                             onClick = {
                                 viewModel.openBrowser(context, TELEGRAM_GROUP_LINK)
                             }
@@ -340,10 +355,18 @@ fun AboutScreen(
             }
         }
     }
+    ProDeactivationDialog(
+        show = showDisablePro,
+        onDismissRequest = { showDisablePro = false },
+    )
 }
 
 @Composable
 private fun SaltAboutAppInfo(
+    proActivated: Boolean,
+    onPro: () -> Unit,
+    version: String,
+    onVersionClick: () -> Unit,
     checkUpdateEnabled: Boolean,
     updateSummary: String,
     onProject: () -> Unit,
@@ -352,11 +375,7 @@ private fun SaltAboutAppInfo(
     onCheckUpdateEnabled: (Boolean) -> Unit,
     onCheckUpdate: () -> Unit,
 ) {
-    val clipboard = LocalClipboard.current
-    val scope = rememberCoroutineScope()
-    val context = LocalContext.current
     val versionLabel = stringResource(R.string.about_app_version)
-    val version = "${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE})"
     ScreenCard(header = stringResource(R.string.about_app_info)) {
         com.moriafly.salt.ui.Item(
             text = versionLabel,
@@ -364,19 +383,14 @@ private fun SaltAboutAppInfo(
             iconPainter = rememberVectorPainter(LucideIcons.Info),
             iconColor = PreferenceIconTone.Appearance.color(),
             arrowType = com.moriafly.salt.ui.ItemArrowType.None,
-            onClick = {
-                scope.launch {
-                    clipboard.setClipEntry(ClipEntry(ClipData.newPlainText(versionLabel, version)))
-                    Toast.makeText(context, R.string.msg_copied_to_clipboard, Toast.LENGTH_SHORT).show()
-                }
-            },
+            onClick = onVersionClick,
         )
+        if (proActivated) AboutProEntry(onClick = onPro)
         com.moriafly.salt.ui.Item(
             text = stringResource(R.string.about_project_url),
             sub = stringResource(R.string.about_project_url_sub),
             iconPainter = rememberVectorPainter(LucideIcons.CodeXml),
             iconColor = PreferenceIconTone.Tools.color(),
-            tag = "GitHub",
             onClick = onProject
         )
         com.moriafly.salt.ui.Item(

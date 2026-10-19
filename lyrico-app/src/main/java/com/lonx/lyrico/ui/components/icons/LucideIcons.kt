@@ -13,6 +13,25 @@ import androidx.compose.ui.unit.dp
  * ISC / MIT; see assets/licenses/lucide.txt.
  */
 internal object LucideIcons {
+    // Lucide icons/crown.svg; same license as the existing icons.
+    // https://github.com/lucide-icons/lucide/blob/main/icons/crown.svg
+    val Crown: ImageVector by lazy {
+        lucideIcon("crown",
+            "M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z",
+            "M5 21h14",
+        )
+    }
+
+    // Lucide icons/heart.svg and icons/power.svg; same license as the existing icons.
+    // https://github.com/lucide-icons/lucide/tree/main/icons
+    val Heart: ImageVector by lazy {
+        lucideIcon("heart", "M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5")
+    }
+
+    val Power: ImageVector by lazy {
+        lucideIcon("power", "M12 2v10", "M18.4 6.6a9 9 0 1 1-12.77.04")
+    }
+
     // Lucide 1.58.0, icons/swatch-book.svg; same license as the existing icons.
     // Archive SHA-256: b8ef0e89a3a26d96ef43fabb3c55ace846236cd09439b15c2dac6ea450524e55
     val SwatchBook: ImageVector by lazy {

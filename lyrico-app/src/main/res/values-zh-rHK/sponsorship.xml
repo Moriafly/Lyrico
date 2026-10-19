@@ -1,0 +1,19 @@
+<resources>
+    <string name="pro_activation_failed">啟用狀態儲存失敗，請重試</string>
+    <string name="sponsor_title">贊助 Lyrico</string>
+    <string name="sponsor_open_afdian">開啟愛發電主頁</string>
+    <string name="pro_status_active">已啟用</string>
+    <string name="sponsor_method_afdian">愛發電</string>
+    <string name="sponsor_method_wechat">微信讚賞</string>
+    <string name="pro_settings">Pro 管理</string>
+    <string name="pro_disable">關閉 Pro</string>
+    <string name="pro_deactivation_failed">關閉失敗，請重試</string>
+    <string name="pro_disable_confirmation">是否關閉 Lyrico Pro</string>
+    <string name="pro_discovered">彩蛋已解鎖，可在此贊助 Lyrico</string>
+    <string name="pro_about_summary">已解鎖 Pro 功能</string>
+    <string name="sponsor_long_press_save">長按圖片儲存到相簿</string>
+    <string name="sponsor_saved_to_gallery">已儲存到相簿</string>
+    <string name="sponsor_save_failed">圖片儲存失敗，請重試</string>
+    <string name="sponsor_storage_permission_required">需要儲存空間權限才能儲存到相簿</string>
+    <string name="sponsor_saving">正在儲存</string>
+</resources>
