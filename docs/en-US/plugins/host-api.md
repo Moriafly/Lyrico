@@ -515,7 +515,7 @@ var responseBytes = Platform.base64.decodeBytes(res.bodyBase64);
 
 The XML module provides lightweight XML/TTML lookup and rewriting, useful for TTML returned by lyrics sources and `translation` nodes with prefixed attributes.
 
-These methods parse and re-serialize XML through the host. Output preserves elements, text, and attributes, but original indentation, comments, processing instructions, and byte-level formatting are not guaranteed. Attribute prefixes are preserved as part of the name, for example `xml:lang`.
+The XML methods parse and re-serialize XML through the host. Output preserves elements, text, and attributes, but original indentation, comments, processing instructions, and byte-level formatting are not guaranteed. Attribute prefixes are preserved as part of the name, for example `xml:lang`.
 
 ### XML Query Object
 

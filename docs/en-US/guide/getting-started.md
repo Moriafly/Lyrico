@@ -55,7 +55,7 @@ Tap any song in the list to open the **Edit Metadata** screen—Lyrico's core ed
 
 1. Tap a song to open the editor.
 2. Modify the title or artist field.
-3. Tap the **Save** button at the top.
+3. Tap the **✓** button in the top-right.
 4. After seeing "Saved successfully", changes are written to the audio file.
 
 For full editing operations (lyrics, covers, ReplayGain, etc.), see [Single Song Editing](./single-song.md).

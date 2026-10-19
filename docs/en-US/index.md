@@ -33,6 +33,6 @@ features:
     title: Online sources
     details: Extend song search, lyrics lookup, and cover search with JavaScript source plugins.
   - icon: ⚙️
-    title: Source settings
-    details: Save runtime options such as language, cover size, region, cookies, and tokens per source.
+    title: Flexible setup
+    details: Switch between Miuix and SaltUI interface styles, and save runtime options such as language, cover size, region, cookies, and tokens per source.
 ---

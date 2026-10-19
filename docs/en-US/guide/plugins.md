@@ -60,7 +60,7 @@ Some plugins require Token, API Key, region, cover size, or other settings to wo
 
 1. In the plugin management list, tap **Configure** on a plugin item.
 2. Fill in the required configuration fields. Types may include text, password, number, toggle, dropdown, etc.
-3. Tap **Save**.
+3. Tap the **✓** button in the top-right.
 
 Saved configuration takes effect on the next search. Existing search results are not auto-refreshed—you need to search again.
 

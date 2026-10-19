@@ -1,6 +1,6 @@
 # Batch Operations
 
-Batch operations let you process multiple songs at once. This page first explains how to enter selection mode and select songs, then covers each batch task in detail.
+Batch operations process multiple songs at once.
 
 ## Entering Selection Mode
 
@@ -94,27 +94,35 @@ Choose the corresponding task in the batch menu, then configure concurrency and 
 
 ## Edit Tags
 
-**Edit Tags** writes the same field values across multiple songs at once.
+**Edit Tags** writes the same field values across multiple songs. The Config tab only lists fields enabled for batch editing in [Edit Fields](./settings/metadata.md#edit-fields).
 
-**Full Steps:**
+**Steps:**
 
-1. In the song list, **enter selection mode** by long-pressing or swiping.
-2. Select the songs to modify.
-3. Tap the FAB expand button and choose **Edit Tags**.
-4. The batch edit page has **Configure** and **Preview** tabs.
-5. In the Configure tab, add or modify fields to write. Leave fields as `<keep>` to preserve their original values.
-6. Switch to the **Preview** tab to review the changes per song.
-7. Verify everything looks correct, then tap **Save** to start writing.
-8. After completion, success, skipped, and failed counts are shown. Failed items can be viewed in Task History.
+1. In the song list, **enter selection mode** by long-pressing or swiping, then select songs.
+2. Tap the FAB and choose **Edit Tags**.
+3. Fill in the fields to write on the **Config** tab.
+4. Switch to **Preview (N)** to review the changes. N is the number of songs that will change.
+5. Tap **Confirm** (✓) in the top bar to start. A bottom sheet shows progress plus success, skipped, and failed counts; tap **Abort** to stop.
+6. When it finishes, tap **Confirm** to close the sheet and go back. If any songs failed, you stay on the page and can check Task History.
 
-`<keep>` means the field retains its original value. Only modified fields are written; unchanged fields are not cleared.
+**Three states for a field:**
 
-**Additional operations:**
-- Pick field values from selected songs to use as batch input.
-- Change, remove, or restore cover art in bulk.
-- Pick cover from selected songs or same-album songs.
-- Remove ReplayGain tags.
-- Add and enable custom tags in [Edit Fields](./settings/metadata.md#edit-fields) to use them in batch editing.
+| State | UI | Result |
+|-------|----|--------|
+| Keep original | The field shows `<keep>` and its label reads **"Title (Unchanged)"** | Nothing is written; the original value stays |
+| Clear field | The field is empty | The tag is cleared |
+| Write new value | The field contains your text | Written to every selected song |
+
+"(Unchanged)" only means the field is skipped. It is **not** clearing. To clear a field, delete its text; an unchanged single-line field also has an **✕** button that clears it. After you edit a field, its icon becomes **Undo**; tap it to return to "(Unchanged)".
+
+**Pick values from selected songs:** The list icon next to a field opens **Select from selected songs** with the non-empty values those songs already have for that field (duplicates removed). Tap one to fill the field. If none exist, it shows "No available values in selected songs".
+
+**Other actions:**
+
+- **Cover**: tap the cover area to **Choose Cover from This Device**, **Select cover from selected songs**, **Choose Cover from Same Album**, **Remove Cover**, or **Revert Cover**. Same-album covers require the selected songs to share album and artist, or fill in the album field on the Config tab first.
+- **Custom tags**: choose **Add Custom Tag** in the Config tab's FAB menu, or add and enable tags in [Edit Fields](./settings/metadata.md#edit-fields).
+- **Edit Fields**: **Edit Fields** in the Config tab's FAB menu opens the field visibility and order settings.
+- **How to use**: **How to use** in the Config tab's FAB menu summarizes these rules.
 
 ---
 
@@ -175,6 +183,8 @@ Sorting uses the same settings as single-song editing; see [Organize Lyrics](./s
 
 **Calculate ReplayGain** analyzes selected songs and writes track gain, track peak, and reference loudness. A song is skipped only when all three fields are present and its reference loudness matches the current setting. If any field is missing or the reference loudness has changed, ReplayGain is recalculated and the track values are overwritten.
 
+Decoding starts with the system decoder. If that fails, Lyrico automatically retries with its built-in FFmpeg decoder; this is common with ALAC and APE songs and needs no setup. The fallback can also fail—Lyrico does not guarantee every codec. A song that still fails is marked as failed without affecting the others; check the Failed tab in Task History.
+
 **Full Steps:**
 
 1. **Enter selection mode**, select songs, then choose **Calculate ReplayGain** from the FAB.
@@ -211,7 +221,7 @@ Export rules:
 
 **Share** invokes the Android system share sheet with the selected audio files.
 
-These two operations run immediately without creating background tasks.
+Delete and Share run immediately without creating background tasks.
 
 ---
 

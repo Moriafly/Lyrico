@@ -28,26 +28,34 @@ Use the **Hide Folder** feature (`Settings` → `Scan Settings` → `Folder Mana
 
 For individual songs, move them to a separate folder and hide that folder.
 
-### Embedded artist artwork vs. poster folders—which wins?
+### Embedded artist posters vs. posters in the poster folder—which wins?
 
-This is decided **per artist**. Lyrico prefers the **embedded artwork** that belongs to that artist - the picture whose description names them, or an old picture with no description. Only when that artist has no usable embedded picture does it look up a poster by file name in your artist poster folders. So a same-named poster file has no effect for an artist that already carries embedded artwork, but it does not affect the other artists on the same song.
+Priority is decided **per artist**. Lyrico prefers the **embedded poster** that belongs to that artist - the picture whose description names them, or an old picture with no description. Only when that artist has no usable embedded poster does it look up a poster by file name in your **poster folder**. So a same-named poster file has no effect for an artist that already carries an embedded poster, but it does not affect the other artists on the same song.
 
-If an embedded picture's description matches no artist (usually after the artist field was edited), it gets its own page in the editor, and it can be assigned to an artist from that page's menu.
+If an embedded poster's description matches no artist (usually after the artist field was edited), it gets its own page in the editor, labeled **"Untagged"** or with its original description, and it can be assigned to an artist from that page's menu.
 
-### I added an artist poster folder but artists still show no image?
+See [Artist posters](./library.md#artist-posters).
+
+### What is the difference between removing an artist's posters and removing a poster folder?
+
+**Remove artist posters** deletes that artist's embedded posters and deletes the poster files named after that artist from the poster folder. You can run it from the artist row menu, the multi-select button, or the artist detail page. It cannot be undone.
+
+**Remove folder** is in `Settings` → `Scan Settings` → **Artist posters**. It only stops using the posters in that folder; no files are deleted. Re-add the folder whenever you need it.
+
+### I added a poster folder but artists still show no poster?
 
 Check in order:
 
 1. Are the poster files **directly inside** the selected folder? (Lyrico does not search subfolders.)
 2. Does the file name match the artist name (e.g., `周杰伦.jpg`)? Names containing `\ / : * ? " < > |` need a substitute such as an underscore—`AC/DC` becomes `AC_DC.jpg`.
-3. Does the artist already have embedded artwork? Embedded artwork takes priority and overrides the poster file.
-4. Is the "matched to library artists" count 0? A count of 0 means the file names do not line up with the artist names.
+3. Does the artist already have an embedded poster? Embedded posters take priority and override the folder file.
+4. Is the "matched to library artists" count in **Folder details** 0? A count of 0 means the file names do not line up with the artist names.
 
-See [Artist Poster Folders](./library.md#artist-poster-folders) for details.
+See [Artist posters](./library.md#artist-posters).
 
 ### One artist got split into several in the artist list?
 
-That is artist splitting breaking a multi-artist tag apart by separator; the tags in the audio files themselves are not modified. To keep an artist intact, add its name to the **No-Split Whitelist** under `Settings` → `Metadata Processing` → `Artist Split Rules`, then rebuild the artist index.
+Artist splitting breaks a multi-artist tag apart by separator; the tags in the audio files themselves are not modified. To keep an artist intact, add its name to the **No-Split Whitelist** under `Settings` → `Text Processing` → `Artist Split Rules`, then rebuild the artist index.
 
 ## Interface
 
@@ -59,9 +67,13 @@ Go to `Settings` → `Appearance` → `App Language` and choose Follow System, E
 
 Turn off **Floating Navigation Bar** in `Settings` → `Appearance` to get the normal bottom bar back. While it is on, you can also choose the **Floating Bar Effect** right below it (None / Frosted glass / Liquid glass). See [Appearance](./settings/appearance.md#floating-navigation-bar).
 
+### Blur and the floating navigation bar disappeared after I changed the interface style?
+
+**Bar blur** and the **floating navigation bar** are only available with the **Miuix** interface style. After you switch to **SaltUI** under `Settings` → `Appearance` → **Interface style**, both options are hidden; their previous switch values are kept. Switch back to **Miuix** to set them again. See [Interface style](./settings/appearance.md#interface-style).
+
 ### What is the number on the left of each song row?
 
-That is the **track number**, taken from the song's "track number" tag. When the tags include a disc number it is shown as `track (disc)`; songs without a track number show `—`. Only the song lists in album detail and artist detail show it.
+The number is the **track number**, taken from the song's "track number" tag. When the tags include a disc number it is shown as `track (disc)`; songs without a track number show `—`. Only the song lists in album detail and artist detail show it.
 
 ## Plugin Issues
 
@@ -115,6 +127,12 @@ Check:
 2. Whether the preview shows the expected filenames.
 3. Whether multiple files would get the same name (Lyrico auto-appends numeric suffixes).
 
+### What if a ReplayGain calculation fails?
+
+Failures show a reason; for batch tasks, check the **Failed** tab under `Settings` → `Other` → `Task History` → **Scan ReplayGain**. One failed song does not stop the rest.
+
+If the file is damaged, the codec is unrecognized, or decoded data is empty, check that the file plays in a player; if it still fails, check **App Logs** filtered to **Batch**.
+
 ## Lyrics
 
 ### Why don't word-timed lyrics display?
@@ -124,7 +142,7 @@ Check:
 
 ### How do I convert Traditional Chinese lyrics to Simplified?
 
-Use the "Simplify / Traditionalize" option in the editor's lyrics menu. Or set "Chinese Text Conversion" to "Traditional → Simplified" in `Settings` → `Metadata Processing` to auto-convert search results.
+Use the "Simplify / Traditionalize" option in the editor's lyrics menu. Or set "Chinese Text Conversion" to "Traditional → Simplified" in `Settings` → `Text Processing` to auto-convert search results.
 
 ## Other
 

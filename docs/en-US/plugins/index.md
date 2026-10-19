@@ -2,7 +2,7 @@
 
 Lyrico uses plugins to provide online music information. Plugins can extend song search, lyrics lookup, cover search, and source-specific configuration.
 
-These pages are for two audiences:
+The plugin documentation is for two audiences:
 
 - **Users** who want to install, enable, configure, disable, or remove plugins.
 - **Developers** who want to build or maintain source plugins.

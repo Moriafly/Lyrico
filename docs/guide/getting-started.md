@@ -6,7 +6,7 @@
 
 从 [GitHub Releases](https://github.com/Replica0110/Lyrico/releases) 下载最新版本 APK。Lyrico 按设备 ABI 分别提供安装包，不生成通用包：
 
-- `arm64-v8a`：适用于绝大多数较新的 Android 设备，通常优先选择此版本。
+- `arm64-v8a`：适用于绝大多数较新的 Android 设备，通常优先选择 `arm64-v8a`。
 - `armeabi-v7a`：适用于仍使用 32 位 ARM 架构的旧设备。
 
 APK 文件名格式为 `Lyrico-<版本号>-<ABI>.apk`，例如 `Lyrico-1.4.0-a1b2c3d-arm64-v8a.apk`。版本号末尾的短字符串是对应源码提交的 Git 短哈希，用于确认安装包的准确构建来源；Debug 构建还会包含 `-debug`。
@@ -55,7 +55,7 @@ Lyrico 不会自动扫描整台设备，你需要手动指定要管理的音乐�
 
 1. 点击一首歌进入编辑页。
 2. 修改标题或艺术家字段。
-3. 点击顶部的 **"保存"** 按钮。
+3. 点击右上角的 **✓** 按钮。
 4. 看到"保存成功"提示后，修改已写入音频文件。
 
 更完整的编辑操作（歌词、封面、ReplayGain 等）见 [单曲编辑](./single-song.md)。

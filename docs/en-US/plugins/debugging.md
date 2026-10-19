@@ -56,7 +56,7 @@ Validation checks include:
 lyrico-plugin inspect ./my-plugin
 ```
 
-This prints plugin information, declared capabilities, config fields, and script loading order.
+The command prints plugin information, declared capabilities, config fields, and script loading order.
 
 ## Run Plugin Functions
 

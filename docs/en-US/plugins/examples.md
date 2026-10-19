@@ -1,6 +1,6 @@
 # Build A Plugin From Scratch
 
-This is the first stop for plugin developers. It builds a complete Lyrico plugin from scratch and shows how the manifest, plugin functions, config fields, result fields, helper scripts, and packaging work together.
+Start here when writing your first plugin. The guide builds a complete Lyrico plugin from scratch and shows how the manifest, plugin functions, config fields, result fields, helper scripts, and packaging work together.
 
 The manifest only declares plugin identity, entry, capabilities, and required configuration. Plugins should return host-standard metadata through `fields` and platform-private context through `internal`.
 

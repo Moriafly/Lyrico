@@ -1,12 +1,23 @@
 # Appearance
 
-Control Lyrico's interface language, theme, colors, and bar effects.
+Control Lyrico's interface style, language, theme, colors, and bar effects.
+
+## Interface Style
+
+Lyrico has two interface styles:
+
+- **Miuix** (default)
+- **SaltUI**
+
+Switching takes effect immediately; no restart is required, and the whole app uses the selected style.
+
+**Blur**, **Floating navigation bar**, and **Floating bar effect** are available only in Miuix. With SaltUI, these three options no longer appear in settings.
 
 ## App Language
 
 Choose the language used by Lyrico's interface:
 
-- **Follow System**: Use the system language (default).
+- **Follow system**: Use the system language (default).
 - **English**
 - **简体中文**
 - **繁體中文（台灣）**
@@ -17,11 +28,11 @@ The interface switches immediately; no restart is required. This setting only af
 ## Theme Mode
 
 Options:
-- **Follow System**: Automatically switch between dark and light based on system settings.
-- **Light Mode**: Always use the light theme.
-- **Dark Mode**: Always use the dark theme.
+- **Follow system**: Automatically switch between dark and light based on system settings.
+- **Light mode**: Always use the light theme.
+- **Dark mode**: Always use the dark theme.
 
-## Blur
+## Bar Blur
 
 When enabled, the top and bottom bars of the library, detail, and settings pages use a background blur, so content stays visible while scrolling underneath.
 
@@ -29,16 +40,14 @@ When enabled, the top and bottom bars of the library, detail, and settings pages
 
 When enabled, phones use a floating bottom bar that is visually separated from the content. This only changes how the bottom navigation bar looks, not what its tabs do.
 
-Once the floating navigation bar is on, you can also set the **Floating Bar Effect**:
+Once the floating navigation bar is on, you can also set the **Floating bar effect**:
 
 - **None**: No extra effect.
 - **Frosted glass**: The floating bar uses a frosted-glass look.
 - **Liquid glass**: The floating bar uses a liquid-glass look.
 
-Frosted glass and liquid glass are mutually exclusive; only one can be selected.
-
 ## Monet Colors
 
-If your device supports dynamic colors (Android 12+), enable "Monet" to have Lyrico's colors follow your system wallpaper.
+If your device supports dynamic colors (Android 12+), enable **Monet palette** to have Lyrico's colors follow your system wallpaper.
 
-When Monet is disabled, you can manually choose a **Seed Color** as the app's theme color. Several preset options are available.
+When Monet palette is disabled, you can manually choose a **Key Color** as the app's theme color. Several preset options are available.

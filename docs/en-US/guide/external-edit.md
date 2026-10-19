@@ -27,7 +27,7 @@ Catch `ActivityNotFoundException` and prompt the user to install Lyrico if it is
 
 ## 3. Refresh on return
 
-When the user taps **Save**, Lyrico writes the changes and closes the editor. When the player returns to the foreground, reload the edited song's tags, lyrics, and cover art, and update its cache.
+When the user taps the **✓** button in the top-right, Lyrico writes the changes and closes the editor. When the player returns to the foreground, reload the edited song's tags, lyrics, and cover art, and update its cache.
 
 To receive a save result, register a callback in the Activity and replace `startActivity(intent)` above with `editLauncher.launch(intent)`:
 

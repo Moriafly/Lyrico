@@ -149,7 +149,7 @@ function searchSongs(request) {
 ## `getLyrics(request)`
 
 编辑页的独立歌词搜索会把当前歌曲的标题、艺术家、专辑和年份放在 `song` 中传入。
-`getLyrics` 可以直接用这些普通字段搜索，不要求插件实现 `searchSongs`，也不要求用户
+`getLyrics` 可以直接用普通歌曲字段搜索，不要求插件实现 `searchSongs`，也不要求用户
 提供平台歌曲 ID。只要插件同时声明 `searchSongs`，无论其 API 版本，宿主都会先让用户
 选择该插件的同源歌曲候选，再把选中的 `id`、`fields` 和 `internal` 原样传给同一插件的
 `getLyrics`。单曲搜索页不会调用独立歌词源。
@@ -198,7 +198,7 @@ function searchSongs(request) {
 
 API 4–5 应返回歌词对象数组（也可包装在 `items`、`results` 或 `candidates` 中）。每个歌词
 对象必须在 `tags` 中提供 `ti`（标题）、`ar`（艺术家）、`al`（专辑）和 `date`（年份），
-宿主从这些既有歌词标签生成候选列表，避免再声明一套重复的顶层歌曲字段：
+宿主从既有歌词标签生成候选列表，避免再声明一套重复的顶层歌曲字段：
 
 ```javascript
 function getLyrics(request) {
@@ -250,7 +250,7 @@ function getLyrics(request) {
 
 ### 结构化歌词的行格式
 
-API 5 扩展了结构化歌词载荷：逐词 `romanization`、行级扩展、`agents` / `metadata`、时间粒度与语言字段、`bodyDur` 和多音节 Ruby 注音。返回这些扩展时应声明 `apiVersion: 5`。候选数组及必填歌曲标签沿用 API 4，旧的整行文本格式仍兼容。宿主 API 独立编号，当前仍为 4。
+API 5 扩展了结构化歌词载荷：逐词 `romanization`、行级扩展、`agents` / `metadata`、时间粒度与语言字段、`bodyDur` 和多音节 Ruby 注音。返回 API5 扩展字段时应声明 `apiVersion: 5`。候选数组及必填歌曲标签沿用 API 4，旧的整行文本格式仍兼容。宿主 API 独立编号，当前仍为 4。
 
 `original` 和 `romanization` 都可使用逐词格式：
 
@@ -270,7 +270,7 @@ API 5 扩展了结构化歌词载荷：逐词 `romanization`、行级扩展、`a
 [27820, 27950, "詮", [[27820, 27880, "せ"], [27880, 27950, "ん"]]]
 ```
 
-两者也都兼容整行文本；`translated` 只使用这种格式：
+两者也都兼容整行文本；`translated` 只使用整行文本格式：
 
 ```
 [lineStartMs, lineEndMs, "text"]
@@ -378,7 +378,7 @@ function getLyrics(request) {
 | `tags` | `object` | 歌曲元信息标签 |
 | `original` | `Line[]` | 仅 `type: "structured"` 使用，原文歌词（逐词或整行） |
 | `translated` | `Line[] \| null` | 仅 `type: "structured"` 使用，翻译歌词 |
-| `romanization` | `Line[] \| null` | 仅 `type: "structured"` 使用，音译歌词（罗马音等）；行支持逐词（逐字注音）或整行文本 |
+| `romanization` | `Line[] \| null` | 仅 `type: "structured"` 使用，音译歌词；行支持逐词（逐字注音）或整行文本 |
 | `agents` | `Agent[]` | 仅 `type: "structured"` 使用，演唱者列表（可选；写回 TTML head `<ttm:agent>`，详见上文扩展字段） |
 | `metadata` | `MetadataElement[]` | 仅 `type: "structured"` 使用，补充 TTML head 的元素树（可选，约束见上文） |
 | `timing` | `string` | 仅 `type: "structured"` 使用，时间粒度标志（可选；词级传 `"Word"`，写回根 `<tt itunes:timing>`） |

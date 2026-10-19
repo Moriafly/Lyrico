@@ -66,7 +66,7 @@ API2 没有改变三个插件回调的请求或返回值。变化发生在 Platf
 | `Platform.base64.toUrl(base64)` | 标准 Base64 字符串 | Base64URL 字符串 |
 | `Platform.base64.fromUrl(base64Url)` | Base64URL 字符串 | 补齐 padding 的标准 Base64 字符串 |
 
-只有实际调用这些函数的插件才需要 `minHostApiVersion: 2`。仅使用 API2 回调协议、但不依赖新增 Platform 函数的插件仍可声明 `minHostApiVersion: 1`。
+只有实际调用新增 Platform 函数的插件才需要 `minHostApiVersion: 2`。仅使用 API2 回调协议、但不依赖新增 Platform 函数的插件仍可声明 `minHostApiVersion: 1`。
 
 ## API3：新增插件私有缓存
 
@@ -110,7 +110,7 @@ API4 调整 getLyrics 和 searchCovers 的结果契约，使独立歌词源和�
 | `getLyrics` | 是；新增可选 `page`、`pageSize` | 单个 `LyricsResult`、LRC 字符串或 `null` | `LyricsResult[]`；每项以 `tags.ti/ar/al/date` 提供标题、艺术家、专辑、日期 |
 | `searchCovers` | 是；新增可选 `page` | `SongSearchResult[]`，旧字段继续兼容 | `SongSearchResult[]`；每项必须有标题、艺术家、专辑、日期和封面 URL，平台歌曲 `id` 可省略 |
 
-当前宿主还会向 `getLyrics` 提供可选的 `page` 和 `pageSize`，供不实现 `searchSongs` 的 API4 歌词源分页返回候选。旧插件可以忽略这些新增字段；函数调用签名仍是单个 `request` 对象。
+当前宿主还会向 `getLyrics` 提供可选的 `page` 和 `pageSize`，供不实现 `searchSongs` 的 API4 歌词源分页返回候选。旧插件可以忽略新增的 page 和 pageSize 字段；函数调用签名仍是单个 `request` 对象。
 
 插件回调接收的是 JavaScript 对象，必须直接返回 JavaScript 值。Android 宿主会统一完成一次 JSON 序列化：
 
@@ -179,7 +179,7 @@ function searchCovers(request) {
 
 ## API5：歌词返回格式扩展与 TTML 信息保留
 
-API5 在 API4 歌词候选格式上扩展逐词音译、行级属性、演唱者、head 元数据、时间粒度、语言码、段落时间窗、正文时长和带时间的多音节 Ruby 注音。候选数组、必填歌曲标签以及 searchSongs / searchCovers 的契约不变。这些扩展来自提交 [0876c815](https://github.com/Replica0110/Lyrico/commit/0876c815) 和 [1071e09e](https://github.com/Replica0110/Lyrico/commit/1071e09e)。
+API5 在 API4 歌词候选格式上扩展逐词音译、行级属性、演唱者、head 元数据、时间粒度、语言码、段落时间窗、正文时长和带时间的多音节 Ruby 注音。候选数组、必填歌曲标签以及 searchSongs / searchCovers 的契约不变。逐词音译等扩展来自提交 [0876c815](https://github.com/Replica0110/Lyrico/commit/0876c815) 和 [1071e09e](https://github.com/Replica0110/Lyrico/commit/1071e09e)。
 
 继续兼容 API1–4 插件。扩展字段可选；声明 API5 不会自动补出源数据中缺失的信息。
 

@@ -4,9 +4,10 @@
 
 Export the current app configuration as a JSON file. Includes:
 
-- Theme and appearance settings
+- Interface style (Miuix / SaltUI)
+- Theme mode, Monet colors, Key Color, bar blur, floating navigation bar, and the floating bar effect
 - Search settings (plugin enabled state, sort order, configuration, search limit, etc.)
-- Lyrics settings (lyric mode, romanization, translation)
+- Lyrics settings (lyric mode, romanization, translation, lyric line order)
 - ReplayGain reference loudness and peak type
 - Artist split rules
 - Edit field configuration
@@ -20,9 +21,9 @@ Export the current app configuration as a JSON file. Includes:
 
 ## Import Settings
 
-Restore app configuration from a previously exported JSON file.
+Restore app configuration from a previously exported JSON file. Interface style, theme, and other appearance settings apply immediately.
 
-After importing, some index-related settings (like artist split rules) may require a library refresh or artist index rebuild to fully take effect.
+Some index-related settings (like artist split rules) may require a library refresh or artist index rebuild to fully take effect.
 
 ::: warning
 A settings backup is not a full data backup. It only contains app settings—it cannot restore music files, lyric data, or the database.

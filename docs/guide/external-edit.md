@@ -27,7 +27,7 @@ startActivity(intent)
 
 ## 3. 返回后刷新
 
-用户点击“保存”后，Lyrico 写入文件并退出编辑页。播放器返回前台时，应重新读取本次编辑歌曲的标签、歌词和封面，并更新缓存。
+用户点击右上角的 **✓** 按钮后，Lyrico 写入文件并退出编辑页。播放器返回前台时，应重新读取本次编辑歌曲的标签、歌词和封面，并更新缓存。
 
 如需获取保存结果，在 Activity 中注册回调，并将上面的 `startActivity(intent)` 改为 `editLauncher.launch(intent)`：
 

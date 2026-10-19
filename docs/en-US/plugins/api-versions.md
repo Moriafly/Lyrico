@@ -96,7 +96,7 @@ function loadCookies() {
 }
 ```
 
-This `JSON.stringify` is correct because it creates a cache string. Do not serialize a plugin callback's final return value.
+The `JSON.stringify` call is correct because it creates a cache string. Do not serialize a plugin callback's final return value.
 
 ## API4: lyrics and cover candidate contracts
 
@@ -129,7 +129,7 @@ function getLyrics(request) {
 }
 ```
 
-This produces a JSON string wrapped inside another JSON string and fails parsing:
+Serializing twice produces a JSON string wrapped inside another JSON string and fails parsing:
 
 ```javascript
 // Wrong: do not serialize a callback's final return value

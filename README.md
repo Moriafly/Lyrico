@@ -11,10 +11,11 @@ Lyrico 是一款面向 Android 的开源本地音乐标签编辑与歌词管理�
 - **本地音乐库管理**：扫描本地音乐文件，按歌曲、艺术家、专辑、文件夹等维度浏览与搜索。
 - **音频元数据编辑**：读取和修改标题、艺术家、专辑、专辑艺术家、年份、流派、音轨号、歌词、封面、注释和自定义标签等信息。
 - **多格式标签读写**：基于 TagLib 处理 MP3、FLAC、OGG/Opus、M4A/AAC、WAV、APE 等常见音频格式。
-- **歌词与封面补全**：通过插件搜索歌词、翻译、罗马音、封面和候选元数据，并写入本地音频文件。
+- **歌词与封面补全**：通过插件搜索歌词、翻译、音译、封面和候选元数据，并写入本地音频文件。
 - **歌词格式处理**：支持普通 LRC、增强型逐字歌词、TTML 等歌词内容的展示、匹配、转换与写入。
 - **批量整理流程**：支持多选、批量匹配、批量编辑、批量重命名、批量响度分析、批量分享和批量删除。
 - **插件化搜索源**：在线搜索能力由插件提供，应用本体负责运行时、配置界面、结果处理和标签写入。
+- **双界面风格**：内置 Miuix 与 SaltUI 两套界面，切换后立即生效。
 
 ## 插件系统
 
@@ -94,7 +95,7 @@ git submodule update --init --recursive
 - 长期维护成本可控
 - 能通过插件或配置扩展的能力不硬编码进应用本体
 
-高度定制化、使用场景过窄或会明显增加复杂度的功能，可能不会纳入主线。此类需求更适合通过插件、配置或 fork 项目实现。
+高度定制化、使用场景过窄或会明显增加复杂度的功能，可能不会纳入主线，更适合通过插件、配置或 fork 项目实现。
 
 ## 参考项目与第三方组件
 
@@ -103,6 +104,7 @@ git submodule update --init --recursive
 - [LDDC](https://github.com/chenmozhijin/LDDC)：简单易用的精准歌词下载匹配工具
 - [any-listen-extension-online-metadata](https://github.com/any-listen/any-listen-extension-online-metadata)：any-listen 音频元数据搜索插件
 - [Miuix](https://github.com/compose-miuix-ui/miuix)：Xiaomi HyperOS 风格的 Compose UI 组件库
+- [SaltUI](https://github.com/Moriafly/SaltUI)：Compose Multiplatform 平台化 UI 组件库
 - [音乐标签](https://www.cnblogs.com/vinlxc/p/11932130.html)：音频标签编辑应用
 - [quickjs-ng](https://github.com/quickjs-ng/quickjs)：嵌入式 JavaScript 运行时
 - [TagLib](https://github.com/taglib/taglib)：音频元数据读写库
