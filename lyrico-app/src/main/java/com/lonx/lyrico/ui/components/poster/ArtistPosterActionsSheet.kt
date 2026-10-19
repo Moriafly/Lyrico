@@ -40,7 +40,7 @@ fun ArtistPosterActionsSheet(
             enabled = enabled && canViewPoster,
             onClick = onViewPoster
         )
-        // Salt 菜单里不能出现 Miuix 进度圈：SaltUI 3.0.0-beta02 无进度控件，用 Material3 回退并取 Salt 颜色。
+        // SaltUI 3.0.0-beta02 无进度控件，用 Material3 回退并取 Salt 颜色。
         if (posterLoading) {
             if (com.lonx.lyrico.ui.theme.LocalUiEngine.current ==
                 com.lonx.lyrico.data.model.UiEngine.SALT

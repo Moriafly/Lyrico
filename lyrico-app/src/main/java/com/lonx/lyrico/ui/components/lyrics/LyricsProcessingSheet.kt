@@ -306,7 +306,6 @@ fun LyricsProcessingSheet(show: Boolean, raw: String, operation: LyricsOperation
         onConfirm(operation.options(target).copy(twoColumnMapping = twoColumnMapping, threeColumnMapping = threeColumnMapping))
     }
     ActionBottomSheet(show = show, title = stringResource(operation.titleRes), onDismissRequest = onDismiss,
-        // 内容自带 verticalScroll（Salt 下同样），外壳不再提供第二个滚动出口。
         scrollContent = false,
         footer = {
             SheetConfirmActions(

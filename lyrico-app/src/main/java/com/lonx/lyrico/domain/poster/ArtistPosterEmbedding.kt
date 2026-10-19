@@ -3,22 +3,15 @@ package com.lonx.lyrico.domain.poster
 import com.lonx.audiotag.model.AudioPicture
 
 /**
- * 把一张艺术家海报写进「这位艺术家的每一首歌」时要做的事。
+ * 把一张艺术家海报写进「这位艺术家的每一首歌」。
  *
- * 和单曲编辑页一样，海报的归属靠标签里的 `description` 记录，所以同一张图写进不同的歌时，
- * 描述要看那首歌的艺术家字段：
- *
- * - 那首歌只有这位艺术家时描述留空。空描述在本应用里是「唯一艺术家」的既有写法，也让它不会
- *   因为艺术家字段以后改名而失联；
- * - 那首歌同时挂着别的艺术家时必须写名字，否则这张海报会和另一位艺术家的海报撞在一起——
- *   读取时描述为空的图片只能归给唯一艺术家，多艺术家歌曲里就变成了「对不上」。
+ * 归属靠图片 `description` 记录：歌曲只有这位艺术家时留空（既是唯一艺术家的既有写法，
+ * 也不怕艺术家字段以后改名）；同时挂着别的艺术家时必须写名字，否则会与另一位艺术家的海报冲突。
  */
 object ArtistPosterEmbedding {
 
     /**
-     * 这首歌当前该用哪张艺术家海报；`null` 表示标签里已经就是它，不必再写一次。
-     *
-     * 返回 `null` 也让「用户授权后重跑」变成幂等的：已经写好的歌会被跳过，只补差下来的那些。
+     * 这首歌当前该用哪张艺术家海报；`null` 表示已经就是它，重跑时跳过。
      */
     fun plan(
         pictures: List<AudioPicture>,
@@ -49,8 +42,8 @@ object ArtistPosterEmbedding {
 }
 
 /**
- * @param description 这张海报写进目标歌曲时该用的图片描述
- * @param replaced 这首歌里被替换掉的旧海报；为 `null` 表示新增，位置保持不动
+ * @property description 写入目标歌曲的图片描述
+ * @property replaced 被替换掉的旧海报；`null` 表示新增
  */
 data class ArtistPosterBinding(
     val description: String,

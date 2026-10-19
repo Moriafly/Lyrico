@@ -251,7 +251,6 @@ private fun AlphabetSideBarIndicator(
     item: AlphabetSideBarItem?,
     visible: Boolean
 ) {
-    // 指示气泡按引擎取语义色：Salt 高亮底 + onHighlight 前景，Miuix 保持原色。
     val isSalt = LocalUiEngine.current == UiEngine.SALT
     AnimatedVisibility(
         visible = visible && item != null,
@@ -380,7 +379,6 @@ private fun AlphabetSideBarCell(
         size < 24.dp -> size * 0.66f
         else -> size * 0.62f
     }
-    // 单元格按引擎取语义色：Salt 用 highlight/subText，Miuix 保持原色。
     val isSalt = LocalUiEngine.current == UiEngine.SALT
     Box(
         modifier = Modifier.size(size),

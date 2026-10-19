@@ -141,7 +141,6 @@ object PillButtonDefaults {
         }
     }
 
-    /** 未选中的胶囊底色：亮/暗主题下都跟随当前引擎的表面色。 */
     @Composable
     fun defaultContainerColor(): Color =
         if (com.lonx.lyrico.ui.theme.LocalUiEngine.current == UiEngine.SALT) {
@@ -176,8 +175,8 @@ object PillButtonDefaults {
     }
 
     /**
-     * 无底色、强调色文字的胶囊：面包屑、加载更多这类链接式行内操作。
-     * Salt 原生 Plain 按钮最小 48dp，和列表/行内密度对不上。
+     * 无底色、强调色文字的胶囊，用于面包屑、加载更多这类行内操作。
+     * 不复用 Salt 原生 Plain 按钮：其最小高度 48dp，和列表密度对不上。
      */
     @Composable
     fun plainColors(): PillButtonColors {
@@ -239,8 +238,7 @@ fun PillButton(
         ) {
             leading?.invoke()
             if (hasLeading && hasText) Spacer(Modifier.width(style.spacing))
-            // 字号/字重必须跟随 PillButtonStyle 的 Small/Medium/Large 映射，
-            // 否则会被 Salt 的正文字号顶回去，胶囊比周围组件大一圈。
+            // 字号/字重覆盖 Salt 正文字号，否则胶囊会被撑大一圈。
             if (hasText) com.moriafly.salt.ui.Text(text, maxLines = 1, overflow = TextOverflow.Ellipsis,
                 style = if (selected) style.selectedTextStyle else style.textStyle)
             if (hasTrailing && hasText) Spacer(Modifier.width(style.spacing))

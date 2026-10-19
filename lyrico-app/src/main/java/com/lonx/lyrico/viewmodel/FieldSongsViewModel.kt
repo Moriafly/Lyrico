@@ -55,7 +55,7 @@ class FieldSongsViewModel(
         refresh()
     }
 
-    // The destination ViewModel owns one live subscription and retains its last result on return.
+    // Keep one live subscription; the last result is reused when returning to this screen.
     fun refresh() {
         songJob?.cancel()
         songJob = viewModelScope.launch {

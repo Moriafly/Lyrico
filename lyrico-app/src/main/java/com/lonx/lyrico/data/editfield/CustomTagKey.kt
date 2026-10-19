@@ -3,11 +3,7 @@ package com.lonx.lyrico.data.editfield
 import java.util.Locale
 
 /**
- * 自定义标签键名的归一化规则。
- *
- * 扫描入库（[com.lonx.lyrico.data.repository.CustomTagKeyRepository]）与用户手动添加
- * 都走这里，保证"库里扫到的键"和"用户输入的键"是同一个字符串，不会因为大小写或首尾
- * 空白产生两个条目。
+ * 自定义标签键名的归一化规则。扫描入库与用户手动添加都走这里，保证两边得到同一个字符串。
  */
 object CustomTagKey {
 

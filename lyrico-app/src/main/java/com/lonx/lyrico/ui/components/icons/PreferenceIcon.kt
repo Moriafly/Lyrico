@@ -32,7 +32,6 @@ internal enum class PreferenceIconTone {
         val dark = if (salt) SaltTheme.colors.background.luminance() < 0.5f
         else MiuixTheme.colorScheme.surface.luminance() < 0.5f
         return when (this) {
-            // 固定色板在两种引擎中保持一致，相邻条目按各自指定的色调显示。
             Appearance -> if (dark) Color(0xFFC4A7FF) else Color(0xFF7952B3)
             Library -> if (dark) Color(0xFFF3BF75) else Color(0xFF99600C)
             Lyrics -> if (dark) Color(0xFF7DD6AB) else Color(0xFF23784F)

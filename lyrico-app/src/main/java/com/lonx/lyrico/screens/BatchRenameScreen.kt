@@ -229,7 +229,6 @@ fun BatchRenameScreen(
             }
         }
 
-        // 重命名进度
         if (salt) {
             SaltBottomSheet(
                 show = uiState.renameProgress != null,

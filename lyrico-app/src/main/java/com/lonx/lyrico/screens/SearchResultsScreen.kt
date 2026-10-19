@@ -872,10 +872,8 @@ fun SearchResultItem(
 }
 
 /**
- * 搜索结果条目的字号。
- *
- * Salt 的语义样式（main 16sp / sub 12sp）比 Miuix 对应层级（body1 16sp / footnote2 11sp）大一档，
- * 共用同一套排列后 Salt 的结果列表会显得更松；这里把 Salt 收一档：标题 15sp、副文 11sp。
+ * 搜索结果条目的字号：Salt 的语义样式比 Miuix 对应层级大一档，共用同一套排列后列表会显得更松，
+ * 这里把 Salt 收一档（标题 15sp、副文 11sp）。
  */
 @Composable
 private fun searchResultTitleStyle(): TextStyle {

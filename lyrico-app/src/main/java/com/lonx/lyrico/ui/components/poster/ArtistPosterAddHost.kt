@@ -58,7 +58,6 @@ fun ArtistPosterAddHost(
     }
 
     val message = stringResource(R.string.permission_denied_cannot_save)
-    // 还没有海报文件夹时先添加
     val folderPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocumentTree()
     ) { uri ->

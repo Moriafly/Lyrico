@@ -55,7 +55,6 @@ fun BatchExportBottomSheet(
         allowDismiss = !batchExportUiState.isRunning,
         title = title,
         groupContent = true,
-        // 内容自带 verticalScroll，外壳不再提供滚动出口。
         scrollContent = false,
         content = {
             Column(

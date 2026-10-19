@@ -78,7 +78,6 @@ fun SongDetailBottomSheet(
         }
     }
 
-    // 明细字段与顺序两引擎一致，只有排版不同。
     val rows: List<Pair<String, String?>> = buildList {
         add(stringResource(R.string.label_album) to song.album)
         add(stringResource(R.string.label_year) to song.date)
@@ -125,7 +124,6 @@ fun SongDetailBottomSheet(
             show = show,
             onDismissRequest = onDismissRequest,
             onDismissFinished = {},
-            // 明细行自己不滚动，由弹层提供唯一滚动出口，内容超窗时可滚到底部。
             scrollContent = true,
         ) {
             RoundedColumn {
@@ -234,7 +232,6 @@ fun SongDetailBottomSheet(
     }
 }
 
-/** Salt 明细行：标签在上、取值在下，复制入口独立成按钮。 */
 @Composable
 private fun SaltSongDetailItem(
     label: String,

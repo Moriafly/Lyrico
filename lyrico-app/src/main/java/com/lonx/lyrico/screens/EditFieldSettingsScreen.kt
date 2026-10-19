@@ -152,7 +152,6 @@ fun EditFieldSettingsScreen(
         title = stringResource(R.string.edit_field_settings_title),
         onBack = { navigator.popBackStack() },
         actions = {
-            // Salt 原生顶栏槽位：恢复默认与新增自定义标签。
             SaltIconButton(
                 icon = LucideIcons.RotateCcw,
                 label = stringResource(R.string.reset_to_default),

@@ -365,7 +365,6 @@ Box(
                                     bottom = scaffoldBottomPadding(paddingValues, bottomExtra = 80.dp),
                                 ),
                             ) {
-                                // 歌曲数量信息
                                 item(key = "song_count") {
                                     if (salt) ItemOuterTitle(stringResource(R.string.batch_edit_song_count, uiState.songCount))
                                     else SmallTitle(stringResource(R.string.batch_edit_song_count, uiState.songCount))
@@ -432,7 +431,7 @@ Box(
                                                             onRevert = { viewModel.resetRating() }
                                                         )
 
-                                                        // 歌词偏移是数值调整控件，不是标签字段；正负号由控件本身表达，无需额外说明。
+                                                        // 歌词偏移是数值调整控件，不是标签字段。
                                                         "lyrics_offset" -> {
                                                             LyricsOffsetField(
                                                                 offset = uiState.lyricsOffset,

@@ -2,29 +2,21 @@ package com.lonx.lyrico.utils
 
 import com.lonx.lyrico.data.model.CharacterMappingRule
 
-/**
- * 文件名非法字符清理工具
- */
+/** 按映射规则清理文件名中的非法字符。 */
 object FileNameSanitizer {
 
 
     /**
-     * 使用自定义映射规则清理文件名
-     *
-     * @param fileName 要清理的文件名
-     * @param rules 映射规则列表（优先级从高到低）
-     * @return 清理后的文件名
+     * 按 [rules]（优先级从高到低）清理文件名。
      */
     fun sanitize(fileName: String, rules: List<CharacterMappingRule>): String {
         var result = fileName
 
-        // 应用所有启用的规则
         for (rule in rules) {
             if (!rule.isEnabled) continue
             result = replaceCharacters(result, rule.charMappings)
         }
 
-        // 清理前后空格和重复的替换字符
         return result.trim()
     }
 

@@ -103,7 +103,6 @@ fun BatchMatchConfigBottomSheet(
             }
         ),
         enableNestedScroll = false,
-        // 内容自带 verticalScroll，外壳不再提供滚动出口。
         scrollContent = false,
         content = {
             if (com.lonx.lyrico.ui.theme.LocalUiEngine.current ==

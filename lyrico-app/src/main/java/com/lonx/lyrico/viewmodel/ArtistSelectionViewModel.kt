@@ -5,7 +5,6 @@ import com.lonx.lyrico.data.SharedSelectionManager
 import com.lonx.lyrico.data.model.entity.ArtistEntity
 
 class ArtistSelectionViewModel : ViewModel() {
-    // Keep artist identity separate from selected song URIs, using the same range-selection rules.
     private val selection = SharedSelectionManager()
     val selectedIds = selection.selectedUris
     val isSelectionMode = selection.isSelectionMode

@@ -125,7 +125,7 @@ fun getSystemWallpaperColor(context: Context): Color {
         }
         dynamicScheme.primary
     } else {
-        // API<31 无动态取色；Salt 下回退色也须用 Salt 语义色，避免混入 Miuix 主色
+        // API<31 无动态取色，Salt 下回退到 Salt 语义色。
         if (LocalUiEngine.current == UiEngine.SALT) {
             SaltTheme.colors.highlight
         } else {

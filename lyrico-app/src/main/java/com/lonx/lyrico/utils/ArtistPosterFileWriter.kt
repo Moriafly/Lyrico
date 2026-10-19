@@ -11,13 +11,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 /**
- * 把一张海报写进艺术家海报文件夹。
+ * 把一张海报写进艺术家海报文件夹（SAF 授权目录，应用只允许配置一个）。
  *
- * 文件夹是用户通过 SAF 授权的目录，所以写文件要经过 [DocumentsContract]，权限在授权当时就
- * 已经拿到（`takePersistableUriPermission`）。应用只允许配置一个艺术家海报文件夹。
- *
- * 文件名由 [ArtistPosterFileNaming] 按艺术家名生成。替换时先写一个完整的临时文件，再删旧文件并改名，
- * 避免把 JPEG/PNG 字节直接写进旧的 `.mp4`/`.webp` 文件，也避免写到一半破坏原海报。
+ * 先写完整的临时文件再替换旧文件，避免把 JPEG/PNG 字节直接写进旧的 `.mp4`/`.webp`，
+ * 也避免写到一半破坏原海报。
  */
 object ArtistPosterFileWriter {
 
@@ -25,9 +22,6 @@ object ArtistPosterFileWriter {
 
     /**
      * 写入 [data]；返回真正写下去的文件名，`null` 表示没有写入。
-     *
-     * 读写失败（磁盘、Provider 报错）与「没有可用文件夹」在这里不作区分：对用户来说都是
-     * 「没存成」，界面统一提示稍后重试即可。
      */
     suspend fun write(
         context: Context,

@@ -93,7 +93,6 @@ fun ArtistPosterFoldersScreen(navigator: DestinationsNavigator) {
         title = stringResource(R.string.artist_poster_folders),
         onBack = { navigator.navigateUp() },
         actions = {
-            // Salt 原生顶栏槽位：右侧操作图标与弹出菜单。
             Box {
                 SaltIconButton(LucideIcons.EllipsisVertical, stringResource(R.string.cd_more_actions),
                     enabled = menuEnabled, onClick = { topMenu.expend() })

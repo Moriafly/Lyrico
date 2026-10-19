@@ -1,12 +1,9 @@
 package com.lonx.lyrico.data.editfield
 
 /**
- * 编辑字段配置——所有字段的**顺序**与**显隐**。
- *
- * - [order]：内置字段与自定义标签混排后的完整顺序；编辑器按组合件规则聚合。
- * - [overrides]：用户显式改过的显隐状态。没有条目时回落到字段的 `defaultVisible`，
- *   保留这个三态语义是为了让以后新增字段或调整默认值能自动继承给老用户。
- * - [customTags]：库里发现、用户已加入列表的自定义标签键（未加前缀）。
+ * 编辑字段配置：字段顺序与显隐。
+ * [order] 为内置字段与自定义标签的混排顺序；[overrides] 只记录用户显式改过的显隐，缺省回落到
+ * `defaultVisible`；[customTags] 为已加入列表的自定义标签键。
  */
 data class EditFieldConfig(
     val order: List<String> = emptyList(),

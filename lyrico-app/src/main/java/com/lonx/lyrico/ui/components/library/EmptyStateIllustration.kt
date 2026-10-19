@@ -24,7 +24,6 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 /** Neutral list illustration for pages without a domain-specific illustration. */
 @Composable
 internal fun EmptyStateIllustration(compact: Boolean) {
-    // Salt 页面改用原生语义色；只换颜色来源，透明度层次与尺寸比例保持不变。
     val salt = LocalUiEngine.current == UiEngine.SALT
     val accent = if (salt) SaltTheme.colors.highlight else MiuixTheme.colorScheme.primary
     val surface = if (salt) SaltTheme.colors.subBackground else MiuixTheme.colorScheme.surfaceContainer

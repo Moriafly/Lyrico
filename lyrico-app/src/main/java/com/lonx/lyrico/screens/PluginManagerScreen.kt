@@ -232,7 +232,6 @@ fun PluginManagerScreen(
         title = stringResource(id = R.string.plugin_manager_title),
         onBack = { navigator.navigateUp() },
         actions = {
-            // Salt 原生顶栏槽位：紧凑模式切换与导入。
             SaltIconButton(
                 icon = if (compactMode) LucideIcons.LayoutGrid else LucideIcons.List,
                 label = stringResource(

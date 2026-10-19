@@ -20,10 +20,6 @@ fun YesNoBottomSheet(
     confirmText: String = stringResource(R.string.confirm),
     confirmEnabled: Boolean = true,
     groupContent: Boolean = false,
-    /**
-     * 正文滚动出口：默认由外壳滚动，内容自行滚动时关闭。
-     * 内容自带 LazyColumn/verticalScroll 时必须显式置 false，避免两个纵向滚动容器叠加。
-     */
     scrollContent: Boolean = true,
     content: @Composable ColumnScope.() -> Unit,
 ) {

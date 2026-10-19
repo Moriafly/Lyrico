@@ -377,11 +377,9 @@ class SettingsRepositoryImpl(private val context: Context) : SettingsRepository 
         }
     override val keyColor: Flow<KeyColor>
         get() = context.settingsDataStore.data.map { preferences ->
-            // 检查 DataStore 中是否有保存颜色的 Key
             if (preferences.contains(PreferencesKeys.KEY_THEME_COLOR)) {
                 val savedColorInt = preferences[PreferencesKeys.KEY_THEME_COLOR]!!
                 val savedColor = Color(savedColorInt)
-                // 查找对应的颜色，找不到则返回默认项(第一个)
                 KeyColors.find { it.color == savedColor } ?: KeyColors.first()
             } else {
                 // 如果没有保存过，说明是“系统默认”
@@ -406,8 +404,7 @@ class SettingsRepositoryImpl(private val context: Context) : SettingsRepository 
         get() = context.settingsDataStore.data.map { it.resolveFloatingBarEffect() }
 
     /**
-     * 读取悬浮导航栏效果。新键缺失时回退到旧版的两个互斥开关，
-     * 让已经开过毛玻璃/液态玻璃的用户在升级后保留原来的选择。
+     * 新键缺失时回退到旧版的两个互斥开关，保留老用户升级前的选择。
      */
     private fun Preferences.resolveFloatingBarEffect(): FloatingBarEffect =
         this[PreferencesKeys.FLOATING_BAR_EFFECT]
@@ -725,7 +722,6 @@ class SettingsRepositoryImpl(private val context: Context) : SettingsRepository 
                 // 如果选了“系统默认”，直接移除保存的值
                 preferences.remove(PreferencesKeys.KEY_THEME_COLOR)
             } else {
-                // 否则保存颜色具体的 ARGB 值
                 preferences[PreferencesKeys.KEY_THEME_COLOR] = selectedKeyColor.color.toArgb()
             }
         }
@@ -933,9 +929,8 @@ class SettingsRepositoryImpl(private val context: Context) : SettingsRepository 
                     prefs[PreferencesKeys.SEARCH_SOURCE_ORDER] = list.idsToCsv()
                 }
                 
-                // 处理启用的搜索源：如果为null或为空，默认启用所有源
+                // 启用源为 null 或空时回落到默认列表
                 if (backup.enabledSearchSources.isNullOrEmpty()) {
-                    // 默认启用所有源
                     prefs[PreferencesKeys.ENABLED_SEARCH_SOURCES] =
                         SettingsDefaults.DEFAULT_ENABLED_SEARCH_SOURCES.idsToCsv()
                 } else {

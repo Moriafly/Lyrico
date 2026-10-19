@@ -28,7 +28,6 @@ object RenameEngine {
             val file = File(song.originalPath)
             val parentDir = file.parent ?: ""
 
-            // Generate new file name
             var newFileName = FormatParser.buildFileName(tokens, song.tagData)
             newFileName = FileNameSanitizer.sanitize(newFileName, request.characterMappingRules)
 
@@ -36,20 +35,17 @@ object RenameEngine {
                 newFileName = file.nameWithoutExtension
             }
 
-            // Append extension
             val extension = file.extension
             if (extension.isNotEmpty()) {
                 newFileName = "$newFileName.$extension"
             }
 
-            // Build full path
             var newPath = if (parentDir.isNotEmpty()) {
                 File(parentDir, newFileName).absolutePath
             } else {
                 newFileName
             }
 
-            // Resolve conflicts
             val conflict = generatedPaths.contains(newPath)
             newPath = ConflictResolver.resolveConflict(newPath, generatedPaths)
             generatedPaths.add(newPath)

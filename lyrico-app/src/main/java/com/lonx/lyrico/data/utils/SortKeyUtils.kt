@@ -17,19 +17,16 @@ object SortKeyUtils {
 
         val firstChar = raw[0]
 
-        // 数字
         if (firstChar.isDigit()) {
             return SortKeys("0", "0_$raw")
         }
 
-        // ASCII 字母
         if (firstChar.isLetter() && firstChar.code < 128) {
             val sortKey = raw.uppercase()
             val groupKey = sortKey[0].toString()
             return SortKeys(groupKey, "1_$sortKey")
         }
 
-        // 拼音
         val pinyinFull = try {
             Pinyin.toPinyin(raw, "")
         } catch (e: Exception) {
@@ -48,7 +45,6 @@ object SortKeyUtils {
             }
         }
 
-        // 兜底 #
         return SortKeys("#", "2_$raw")
     }
 }

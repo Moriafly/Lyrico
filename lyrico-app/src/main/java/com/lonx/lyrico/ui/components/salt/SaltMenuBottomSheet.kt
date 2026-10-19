@@ -12,7 +12,6 @@ internal fun SaltMenuBottomSheet(
     label: String,
     onDismissRequest: () -> Unit,
     onDismissFinished: () -> Unit,
-    /** 契约完整性：菜单当前都可关闭，但外壳必须能表达"不可关闭"（进行中菜单等场景）。 */
     allowDismiss: Boolean = true,
     content: @Composable ColumnScope.() -> Unit,
 ) {
@@ -21,7 +20,7 @@ internal fun SaltMenuBottomSheet(
         onDismissRequest = onDismissRequest,
         onDismissFinished = onDismissFinished,
         title = label,
-        // 菜单行自身不滚动，因此由弹层统一滚动；行本身不带分组背景，交给 RoundedColumn。
+        // 菜单行不自滚，由弹层统一滚动；分组背景交给 RoundedColumn。
         scrollContent = true,
         allowDismiss = allowDismiss,
         content = { com.moriafly.salt.ui.RoundedColumn(content = content) },

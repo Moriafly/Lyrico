@@ -5,10 +5,8 @@ import com.lonx.lyrico.data.model.metadata.MetadataFieldTarget
 /**
  * 库内歌曲记录是否**没有**某个字段的值。
  *
- * 与 `SearchResultApplier` 里对 `AudioTagData` 的判空是同一套语义，区别只是数据来源：
- * 编辑页拿到的是音频标签，这里拿到的是数据库记录。两者独立维护，新增字段时都要补。
- *
- * 封面和自定义标签需要单独的数据源，不能用数据库列假定其存在。
+ * 与 `SearchResultApplier` 对 `AudioTagData` 的判空语义一致，只是数据来源不同；新增字段时两边都要补。
+ * 封面与自定义标签需要单独的数据源，不能用数据库列假定其存在。
  */
 fun SongEntity.isTargetBlank(target: MetadataFieldTarget): Boolean = when (target) {
     MetadataFieldTarget.TITLE -> title.isNullOrBlank()

@@ -69,7 +69,6 @@ fun CoverImage(
     // so keep the placeholder icon instead of an empty box.
     var loadFailed by remember(request) { mutableStateOf(false) }
 
-    // 封面占位与回退图标随引擎取色：Salt 页面沿用应用既有的封面占位约定色。
     val salt = LocalUiEngine.current == UiEngine.SALT
     Box(
         modifier = modifier

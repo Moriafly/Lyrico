@@ -12,10 +12,7 @@ object CacheManager {
 
     private const val TAG = "CacheManager"
 
-    /**
-     * 获取按目录分类的缓存大小
-     * @return Map<分类, 字节大小>
-     */
+    /** 按目录分类的缓存大小（字节）。 */
     @OptIn(ExperimentalCoilApi::class)
     suspend fun getCategorizedCacheSize(
         context: Context
@@ -23,7 +20,6 @@ object CacheManager {
 
         val cacheMap = mutableMapOf<CacheCategory, Long>()
 
-        // Coil 图片缓存
         val coilCacheFile = context.imageLoader.diskCache?.directory?.toFile()
         val coilSize = coilCacheFile?.getFolderSize() ?: 0L
         cacheMap[CacheCategory.IMAGE] = coilSize
@@ -36,7 +32,7 @@ object CacheManager {
             when {
                 coilCacheFile != null &&
                         file.absolutePath == coilCacheFile.absolutePath -> {
-                    // skip coil
+                    // Coil 缓存已单独统计
                 }
 
                 file.name.contains("http", true) ||
@@ -53,22 +49,17 @@ object CacheManager {
         cacheMap[CacheCategory.NETWORK] = networkSize
         cacheMap[CacheCategory.OTHER] = otherInternalSize
 
-        // 外部缓存
         val externalSize = context.externalCacheDir?.getFolderSize() ?: 0L
         cacheMap[CacheCategory.EXTERNAL] = externalSize
 
         cacheMap
     }
 
-    /**
-     * 总大小
-     */
+    /** 总大小。 */
     fun getTotalSize(map: Map<CacheCategory, Long>): Long =
         map.values.sum()
 
-    /**
-     * 清理指定类别
-     */
+    /** 清理指定类别的缓存。 */
     @OptIn(ExperimentalCoilApi::class)
     suspend fun clearCacheByCategory(
         context: Context,
@@ -115,9 +106,7 @@ object CacheManager {
         }
     }
 
-    /**
-     * 清理全部
-     */
+    /** 清理全部缓存。 */
     @OptIn(ExperimentalCoilApi::class)
     suspend fun clearAllCache(context: Context) =
         withContext(Dispatchers.IO) {
@@ -128,9 +117,7 @@ object CacheManager {
         }
 }
 
-/**
- * 递归获取文件夹大小（扩展函数）
- */
+/** 递归计算文件夹大小。 */
 fun File.getFolderSize(): Long {
     if (!this.exists()) return 0L
     if (this.isFile) return this.length()

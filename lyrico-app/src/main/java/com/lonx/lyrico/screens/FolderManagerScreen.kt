@@ -297,7 +297,6 @@ fun FolderManagerScreen(
             onBack = navigateUpAction,
             selection = saltSelectionState,
             actions = {
-                // Salt 顶栏槽位：根目录可新增文件夹，歌曲页可切换排序。
                 if (currentFolderId == ROOT_FOLDER_ID) {
                     SaltIconButton(
                         icon = LucideIcons.FolderPlus,

@@ -6,15 +6,10 @@ import com.lonx.audiotag.model.type
 import com.lonx.lyrico.data.model.artist.normalizedArtistKey
 
 /**
- * 一张艺术家图片，以及它归属的艺术家。
+ * 一张艺术家图片及其归属。
  *
- * 归属由标签里的 `description` 决定（对不上时退回描述本身），所以**归属键就是图片的身份**：
- * 一个艺术家只允许有一张海报（ID3v2 规定同一 content descriptor 只能挂一张图），
- * 定位某张海报时用 [ownerKey] 而不是列表下标或对象实例。
- *
- * @param picture 图片本身
- * @param description 标签里记录的图片描述
- * @param artist 描述匹配到的艺术家（来自艺术家字段）；对不上任何艺术家时为 `null`
+ * 归属由 `description` 决定（对不上时退回描述本身），归属键即图片身份：一个艺术家只保留一张
+ * （ID3v2 同一 content descriptor 只能挂一张图），定位时用 [ownerKey] 而不是列表下标或实例。
  */
 data class ArtistPictureEntry(
     val picture: AudioPicture,
@@ -31,26 +26,19 @@ data class ArtistPictureEntry(
     val ownerKey: String get() = ownerName.normalizedArtistKey()
 
     /**
-     * 界面显示用的名字：优先归属的艺术家，其次标签里的描述，两者都没有时用 [untagged]
-     * （调用方传入本地化文案）。菜单和海报角标共用这一条规则，避免两处文案不一致。
+     * 界面显示名：优先归属的艺术家，其次标签描述，都为空时用 [untagged]。
      */
     fun displayName(untagged: String): String = ownerName.ifBlank { untagged }
 }
 
 /**
- * 把标签里的艺术家图片按归属（`description`）归到当前歌曲的艺术家。
- *
- * 所以「读取所有艺术家图片」之后还要判断每一张到底属于谁；对不上的图片需要在界面上让
- * 用户重新选择归属。
+ * 把标签里的艺术家图片按描述归属到当前歌曲的艺术家；对不上的图片由界面让用户重新指定归属。
  */
 object ArtistPosterGrouping {
 
     /**
-     * 取出 [pictures] 里所有艺术家图片并按描述归属到 [artistNames]（忽略大小写与首尾空白）。
-     *
-     * 匹配规则：
-     * - 描述非空：与某个艺术家同名即归属该艺术家，否则视为对不上；
-     * - 描述为空：只有整首歌只有一个艺术家时才能确定归属，否则同样视为对不上。
+     * 取出 [pictures] 里所有艺术家图片并归属到 [artistNames]（忽略大小写与首尾空白）。
+     * 描述非空时按同名归属；描述为空时只有唯一艺术家才能确定归属。
      */
     fun entries(
         pictures: List<AudioPicture>,

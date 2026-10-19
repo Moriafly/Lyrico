@@ -217,8 +217,7 @@ interface FolderDao {
 
 
     /**
-     * 刷新所有文件夹的歌曲数量
-     * 无论文件夹是否被忽略，都要反映其实际物理包含的歌曲数
+     * 刷新所有文件夹的歌曲数量；忽略状态也按实际物理歌曲数统计。
      */
     @Query("""
         UPDATE folders 
@@ -227,9 +226,7 @@ interface FolderDao {
     """)
     suspend fun refreshAllSongCounts(updateTime: Long = System.currentTimeMillis())
 
-    /**
-     * 刷新单个文件夹数量
-     */
+    /** 刷新单个文件夹的歌曲数量。 */
     @Query("""
         UPDATE folders 
         SET songCount = (SELECT COUNT(*) FROM songs WHERE folderId = :folderId),
@@ -239,10 +236,7 @@ interface FolderDao {
     suspend fun refreshSongCount(folderId: Long, updateTime: Long = System.currentTimeMillis())
 
     /**
-     * 只有同时满足以下三个条件的文件夹才会被自动删除：
-     * 1. 里面没歌 (songCount == 0)
-     * 2. 用户没有手动忽略它 (isIgnored == 0)
-     * 3. 不是用户手动通过选择器添加的 (addedBySaf == 0)
+     * 自动删除文件夹需同时满足：没有歌曲、未被手动忽略、不是通过 SAF 选择器添加的。
      */
     @Query("""
         DELETE FROM folders 

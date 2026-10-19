@@ -144,10 +144,8 @@ fun BatchTaskDetailScreen(
                 } else null
 
                 val summary = buildString {
-                    // 第一行：任务类型和状态
                     append("$typeLabel / $statusLabel")
 
-                    // 第二行：统计信息
                     append("\n")
                     append(
                         stringResource(
@@ -158,7 +156,6 @@ fun BatchTaskDetailScreen(
                         )
                     )
 
-                    // 第三行：耗时（如果有）
                     if (durationSecs != null) {
                         append("\n")
                         append(

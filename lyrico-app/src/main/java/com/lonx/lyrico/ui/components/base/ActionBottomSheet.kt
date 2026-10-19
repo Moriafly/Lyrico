@@ -29,10 +29,7 @@ fun ActionBottomSheet(
     tools: @Composable (() -> Unit)? = null,
     footer: @Composable (() -> Unit)? = null,
     groupContent: Boolean = false,
-    /**
-     * 正文滚动出口：默认由外壳滚动，内容自行滚动时关闭。
-     * 内容自带 LazyColumn/verticalScroll 时必须显式置 false，避免两个纵向滚动容器叠加。
-     */
+    /** 正文滚动出口：内容自带 LazyColumn/verticalScroll 时置 false，避免嵌套滚动。 */
     scrollContent: Boolean = true,
     saltFooter: (@Composable () -> Unit)? = null,
 ) {

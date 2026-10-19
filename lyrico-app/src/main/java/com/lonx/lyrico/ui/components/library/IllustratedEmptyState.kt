@@ -92,7 +92,6 @@ fun IllustratedEmptyState(
 
             val salt = LocalUiEngine.current == UiEngine.SALT
             val actionColor = if (salt) SaltTheme.colors.highlight else MiuixTheme.colorScheme.primary
-            // Both engines keep the lightweight highlighted-text action.
             if (!actionText.isNullOrBlank()) {
                 Spacer(Modifier.height(if (compact) 10.dp else 16.dp))
                 Row(

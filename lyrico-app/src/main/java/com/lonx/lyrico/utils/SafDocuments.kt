@@ -18,11 +18,8 @@ data class SafDocumentRow(
 )
 
 /**
- * Reads SAF folders through [DocumentsContract] queries.
- *
- * Shared by the music folder scanner and the artist poster folders so every feature sees exactly
- * the same files - `DocumentFile` is deliberately avoided, it reports an empty folder instead of
- * failing when a provider does not like the request.
+ * 通过 [DocumentsContract] 读取 SAF 文件夹。音乐扫描与艺术家海报共用，保证看到同一批文件；
+ * 不用 `DocumentFile`：它在 Provider 拒绝请求时返回空目录而不是失败。
  */
 object SafDocuments {
     private const val TAG = "SafDocuments"
@@ -36,10 +33,8 @@ object SafDocuments {
     )
 
     /**
-     * The direct children of [parentDocumentId], or of the tree root when it is `null`.
-     *
-     * Returns `null` when the provider could not be queried (deleted folder, revoked access),
-     * which callers use to tell "folder unavailable" apart from "folder is empty".
+     * [parentDocumentId] 的直接子项，为 `null` 时取树的根目录。Provider 无法查询（目录被删、
+     * 授权失效）时返回 `null`，调用方据此区分「文件夹不可用」与「文件夹为空」。
      */
     fun children(
         context: Context,

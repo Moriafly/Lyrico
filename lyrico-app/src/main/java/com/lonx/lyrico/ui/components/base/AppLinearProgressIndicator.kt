@@ -8,7 +8,7 @@ import com.moriafly.salt.ui.SaltTheme
 
 /**
  * 线性进度：Miuix 用自带指示器；SaltUI 3.0.0-beta02 没有进度组件，
- * 按文档要求使用已配置 Salt 颜色的回退控件。
+ * 回退到 Material3 指示器并取 Salt 主题色。
  */
 @Composable
 fun AppLinearProgressIndicator(progress: Float, modifier: Modifier = Modifier) {

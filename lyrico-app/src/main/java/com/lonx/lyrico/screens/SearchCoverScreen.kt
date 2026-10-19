@@ -276,9 +276,6 @@ private fun SearchCoverContent(
             return@Column
         }
 
-        /**
-         * Tabs
-         */
         val tabs = listOf(
             SourcePillTab(
                 label = stringResource(id = R.string.search_type_all),
@@ -302,9 +299,6 @@ private fun SearchCoverContent(
             modifier = Modifier.padding(bottom = 10.dp)
         )
 
-        /**
-         * Pager
-         */
         HorizontalPager(
             state = pagerState,
             modifier = Modifier.fillMaxSize()

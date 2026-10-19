@@ -156,10 +156,7 @@ class EditMetadataViewModel(
     )
 
     /**
-     * 艺术家拆分配置。
-     *
-     * 艺术家海报用图片描述记录归属，需要先把艺术家字段拆成一个个艺术家才能判断
-     * 每张海报属于谁，所以这里的规则和艺术家视图保持一致。
+     * 艺术家拆分配置。海报描述要与拆分后的艺术家对齐，所以与艺术家视图使用同一份规则。
      */
     val artistSplitConfig: StateFlow<ArtistSplitConfig> =
         settingsRepository.artistSplitConfigFlow.stateIn(
@@ -170,12 +167,10 @@ class EditMetadataViewModel(
 
     private var currentSong: SongEntity? = null
 
-    // 存储当前正在操作的 URI 字符串
     private var currentSongUri: String? = null
     private var preOffsetLyrics: String? = null
     private var lyricsFormatConversionSession: LyricsFormatConversionSession? = null
     private var scanJob: Job? = null
-    // 记录当前的累计偏移量，供 UI 显示
     private val _currentShiftOffset = MutableStateFlow(0L)
     val currentShiftOffset: StateFlow<Long> = _currentShiftOffset.asStateFlow()
     private val _uiState = MutableStateFlow(EditMetadataUiState())
@@ -199,11 +194,9 @@ class EditMetadataViewModel(
 
         viewModelScope.launch {
             try {
-                // 1. 获取数据库实体
                 val song = songLibraryRepository.getSongByUri(uriString)
                 currentSong = song
 
-                // 2. 读取文件标签
                 val audioTagData = readAudioTagsUseCase(uriString)
                 val displayFileName = song?.fileName ?: audioTagData.fileName
                 val displayPicture = audioTagData.pictures.frontCoverOrFallback()
@@ -220,7 +213,6 @@ class EditMetadataViewModel(
                             ".",
                             missingDelimiterValue = displayFileName
                         ),
-                        // 如果当前没有在编辑，才重置 editingTagData
                         editingTagData = if (state.isEditing) state.editingTagData else audioTagData,
                         picture = displayPicture,
                         originalCover = if (state.isEditing) state.originalCover else displayCover,
@@ -329,10 +321,9 @@ class EditMetadataViewModel(
     fun applyLyricsOffset(totalOffset: Long) {
         val originalLyrics = preOffsetLyrics ?: return
 
-        // 1. 更新当前显示的数值
         _currentShiftOffset.value = totalOffset
 
-        // 2. 永远基于 originalLyrics (快照) 进行偏移，避免来回计算导致的精度丢失或触底失真
+        // 始终基于 originalLyrics 快照偏移，避免来回计算导致精度丢失或触底失真
         val shiftedLyrics = LyricEncoder.shiftLyricsOffset(originalLyrics, totalOffset)
 
         _uiState.update { state ->
@@ -473,10 +464,8 @@ class EditMetadataViewModel(
     // ---------------------------------------------------------------- 艺术家海报
 
     /**
-     * 新增/替换 [artistName] 的艺术家海报：该艺术家名下原有的海报会被替换掉。
-     *
-     * 一个艺术家只保留一张海报（ID3v2 规定同一个 content descriptor 只能挂一张图），
-     * 所以「从本地选择」既是新增也是替换；[artistName] 会写进图片描述作为归属。
+     * 新增或替换 [artistName] 的艺术家海报：该艺术家名下的旧海报会被替换。
+     * 一个艺术家只保留一张（ID3v2 同一 content descriptor 只能挂一张图）。
      */
     fun setArtistImage(context: Context, uri: Uri, artistName: String) {
         readPictureBytes(
@@ -511,10 +500,8 @@ class EditMetadataViewModel(
     }
 
     /**
-     * 把 [target] 这一组艺术家海报改挂到 [artistName]。
-     *
-     * 描述对不上任何艺术家时用户需要在这里重新指定；该艺术家原有的海报会被替换掉。
-     * 目标艺术家已有海报且用户想两张都留下时用 [swapArtistImages]。
+     * 把 [target] 改挂到 [artistName]，该艺术家原有的海报会被替换。
+     * 两张都想留下时用 [swapArtistImages]。
      */
     fun reassignArtistImages(target: AudioPicture, artistName: String) {
         updateArtistPictures { pictures, _ ->
@@ -874,10 +861,7 @@ class EditMetadataViewModel(
     }
 
     /**
-     * 还原所有艺术家海报。
-     *
-     * 这是唯一的还原入口：逐张还原需要知道「这张图原来是哪张」，而重挂会同时删掉目标艺术家原来的
-     * 海报、裁剪会改数据，光靠当前的图片内容推断不出来，猜错就是丢图或贴错别人的图。
+     * 还原所有艺术家海报。重挂或裁剪后无法逐张识别原图，只能整组还原。
      */
     fun revertArtistImages() {
         updateArtistPictures { pictures, original ->
@@ -1188,17 +1172,15 @@ class EditMetadataViewModel(
             try {
                 replayGainScanner.analyze(uriString, replayGainSettings.peakMode)
                     .flowOn(Dispatchers.IO) // 将解码和 DSP 计算放入 IO 线程池，不卡顿 UI
-                    .collect { state ->     // 持续监听发射出来的状态
+                    .collect { state ->
                         when (state) {
                             is ReplayGainCalculateState.Progress -> {
-                                // 实时刷新进度条
                                 _uiState.update {
                                     it.copy(replayGainCalculateProgress = state.percent)
                                 }
                             }
 
                             is ReplayGainCalculateState.Success -> {
-                                // 扫描成功，写入标签
                                 _uiState.update { ui ->
                                     val current = ui.editingTagData ?: AudioTagData(fileName = ui.fileName.orEmpty())
                                     ui.copy(
@@ -1230,7 +1212,6 @@ class EditMetadataViewModel(
                             }
 
                             is ReplayGainCalculateState.Failed -> {
-                                // 根据 state.error 映射具体的错误信息
                                 val errorMsg = mapErrorToUiMessage(state.mimeType, state.error)
                                 recordMetadataFailure(
                                     message = "ReplayGain scan failed",
@@ -1340,14 +1321,10 @@ class EditMetadataViewModel(
         }
     }
 
-    /**
-     * 检测歌词格式：LRC 或 TTML
-     * 返回 "lrc" 或 "ttml"
-     */
+    /** 检测歌词格式，返回 "lrc" 或 "ttml"。 */
     private fun getLyricsMimeType(lyrics: String?): String {
         if (lyrics.isNullOrBlank()) return "lrc"
         
-        // 检测 TTML 格式
         if (lyrics.contains("begin=") && lyrics.contains("end=") && lyrics.contains("<?xml")) {
             return "ttml"
         }
@@ -1357,7 +1334,6 @@ class EditMetadataViewModel(
             return "lrc"
         }
         
-        // 默认返回 lrc
         return "lrc"
     }
 
@@ -1547,10 +1523,7 @@ class EditMetadataViewModel(
         updateTag { copy(lyrics = convertedLyrics) }
     }
 
-    /**
-     * 转换歌词格式
-     * @param targetFormat 目标格式
-     */
+    /** 把歌词转换为 [targetFormat]。 */
     fun convertLyricsFormat(targetFormat: LyricFormat) {
         processLyrics(
             LyricsProcessingOptions(
@@ -1661,10 +1634,7 @@ class EditMetadataViewModel(
         playbackRepository.play(context, uriStr.toUri())
     }
 
-    /**
-     * 获取同专辑歌曲封面
-     * 优先使用同专辑且同歌手的查询结果作为封面
-     */
+    /** 获取同专辑歌曲封面，优先同专辑且同歌手的结果。 */
     suspend fun getSameAlbumCovers(): List<Pair<String, Any?>> {
         val currentAlbum = _uiState.value.editingTagData?.album ?: return emptyList()
         val currentArtist = _uiState.value.editingTagData?.artist ?: ""

@@ -123,7 +123,6 @@ class App : Application(), SingletonImageLoader.Factory {
                 ))
             }
             .diskCache {
-                // 磁盘缓存：最大 50 MB，目录为应用缓存目录
                 DiskCache.Builder()
                     .maxSizeBytes(50L * 1024 * 1024)
                     .directory(context.cacheDir.resolve("image_cache"))

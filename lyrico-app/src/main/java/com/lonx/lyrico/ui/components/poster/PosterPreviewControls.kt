@@ -124,7 +124,6 @@ internal fun PosterThumbnailStrip(items: List<PosterPreviewMedia>, currentPage: 
 internal fun PosterInformation(item: PosterPreviewMedia, info: PosterMediaInfo?, loading: Boolean, failed: Boolean,
     onRetry: () -> Unit, headerGesture: Modifier) {
     val context = LocalContext.current
-    // Salt 用自身语义色，Miuix 保留原色板。
     val salt = LocalUiEngine.current == UiEngine.SALT
     val summaryColor = if (salt) SaltTheme.colors.subText else MiuixTheme.colorScheme.onSurfaceVariantSummary
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, top = 16.dp, bottom = 84.dp),

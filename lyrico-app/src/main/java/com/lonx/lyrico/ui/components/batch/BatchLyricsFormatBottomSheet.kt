@@ -53,7 +53,6 @@ fun BatchLyricsFormatBottomSheet(
         allowDismiss = !batchLyricsFormatUiState.isRunning,
         title = stringResource(batchLyricsFormatUiState.operation.titleRes),
         groupContent = true,
-        // 内容自带 verticalScroll，外壳不再提供滚动出口。
         scrollContent = false,
         content = {
             Column(

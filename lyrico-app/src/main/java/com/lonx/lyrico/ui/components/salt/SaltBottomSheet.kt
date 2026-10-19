@@ -46,25 +46,13 @@ import com.moriafly.salt.ui.dialog.BottomSheetDialogProperties
 import com.moriafly.salt.ui.dialog.NavigationBarProperties
 
 /**
- * Salt 原生底部弹层外壳。职责边界（避免逐页堆偏移补丁）：
+ * Salt 原生底部弹层外壳。
  *
- * | 归属                        | 负责方                                           |
- * |---------------------------|-----------------------------------------------|
- * | 圆角、拖拽把手、左右安全区、底部安全区 + 8dp | 本外壳                                           |
- * | 卡片外边距                     | 裸内容用 groupContent；原生行分组由调用方使用 RoundedColumn   |
- * | 内容内边距                     | groupContent 为裸内容提供 padding；原生行由其自身提供，不叠加     |
- * | 纵向滚动出口                    | 只允许一个：内容自带 LazyColumn/verticalScroll 时本外壳不加滚动 |
- *
- * [title] 使用统一的居中标题；[header] 用于标题下方的工具操作行。
- *
- * [scrollContent]：仅当内容自己不滚动时置 true（菜单行、长文本详情、播放器列表等）， 由本外壳提供唯一的纵向滚动出口；若内容自带
- * LazyColumn/verticalScroll 必须保持 false， 内层若必须独立滚动（如字段列表），必须给它明确的高度上限。
- *
- * [groupContent]：裸内容置 true，提供卡片外边距及内容内边距。 原生 Item 分组应自行使用 RoundedColumn，行组件负责其内边距。 底部大按钮一律通过
- * [footer] 提供，位于 RoundedColumn 外；正文只包含信息和配置。
- *
- * [allowDismiss] = false 时**真正禁止关闭**：系统返回键、点击外部、下拉手势与 hideable 全部关闭（而不是只吞掉 onDismissRequest
- * 回调），用于"进行中不允许打断"的进度弹层。
+ * 圆角、拖拽把手和安全区由外壳处理；卡片分组用 [groupContent] 或 [RoundedColumn]，底部按钮走 [footer]。
+ * 纵向滚动只留一个出口：[scrollContent] 仅在内容自身不滚动时置 true；内容自带 LazyColumn/verticalScroll
+ * 时保持 false，内层独立滚动需自限高度。
+ * [allowDismiss] = false 会同时关闭返回键、外部点击和下拉手势，用于进行中的进度弹层。
+ * [title] 为居中标题，[header] 为标题下方的工具操作行。
  */
 @Composable
 internal fun SaltBottomSheet(
@@ -94,7 +82,6 @@ internal fun SaltBottomSheet(
         onDismissRequest = { if (allowDismiss) onDismissRequest() },
         properties =
             BottomSheetDialogProperties(
-                // 进行中的弹层：返回键、外部点击、下拉手势全部关闭，避免"看起来取消了其实还在跑"。
                 dismissOnBackPress = allowDismiss,
                 dismissOnClickOutside = allowDismiss,
                 behaviorProperties =

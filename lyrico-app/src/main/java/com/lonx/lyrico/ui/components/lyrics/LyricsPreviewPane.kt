@@ -61,7 +61,6 @@ fun LyricsPreviewPane(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
-                            // SaltUI 没有加载指示器，回退控件使用 Salt 颜色。
                             if (salt) androidx.compose.material3.CircularProgressIndicator(
                                 modifier = Modifier.size(32.dp),
                                 color = com.moriafly.salt.ui.SaltTheme.colors.highlight,

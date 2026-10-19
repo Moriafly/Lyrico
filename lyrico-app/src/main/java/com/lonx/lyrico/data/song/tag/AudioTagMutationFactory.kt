@@ -8,9 +8,8 @@ import com.lonx.audiotag.model.CustomTagField
 
 object AudioTagMutationFactory {
     /**
-     * @param picturesAuthored 调用方是否已经拿到过完整的图片列表（读取成功）并且用户改过它。
-     *   没有它就无法区分「用户把图片删光了」和「这次读取没拿到图片」——前者必须写成空列表，
-     *   后者绝不能写，否则会把文件里原有的图片抹掉。
+     * @param picturesAuthored 调用方已成功读取完整图片列表并且用户改过它。用于区分「用户删光图片」
+     *   （写空列表）与「这次没读到图片」（不写），否则会抹掉文件里原有的图片。
      */
     fun fromAudioTagData(
         data: AudioTagData,
@@ -118,11 +117,8 @@ object AudioTagMutationFactory {
     }
 
     /**
-     * 换封面时用来承载其余图片的基准列表。
-     *
-     * 用户改过图（[picturesAuthored]）时，**空列表也是有效基准**：否则下游会退回磁盘上的旧
-     * 图片，「先把艺术家海报删光、再换封面」这种操作就会把删掉的海报又找回来。
-     * 没改过图时保持 `null`，让下游沿用磁盘内容，避免读取失败时误删图片。
+     * 换封面时承载其余图片的基准列表。改过图时**空列表也是有效基准**，否则删掉的海报会被
+     * 磁盘上的旧图找回来；没改过图时返回 `null`，让下游沿用磁盘内容。
      */
     private fun List<AudioPicture>.asOverwriteBase(
         mode: AudioTagMutationMode,

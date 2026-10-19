@@ -855,27 +855,20 @@ class BatchEditViewModel(
         }
     }
 
-    /**
-     * 获取同专辑歌曲封面
-     * 优先使用同专辑且同歌手的查询结果作为封面
-     * 如果专辑或艺术家字段被修改过，则使用修改后的值进行查询
-     */
+    /** 获取同专辑歌曲封面，优先同专辑且同歌手的结果。 */
     suspend fun getSameAlbumCovers(): List<Pair<String, Any?>> {
         val uiState = _uiState.value
         val editedAlbum = uiState.album
         val editedArtist = uiState.artist
 
-        // 确定使用的专辑和艺术家值
         val targetAlbum: String
         val targetArtist: String
 
         if (editedAlbum != "<keep>" && editedAlbum.isNotBlank()) {
-            // 如果专辑被修改过，使用修改后的值
             targetAlbum = editedAlbum
             targetArtist =
                 if (editedArtist != "<keep>" && editedArtist.isNotBlank()) editedArtist else ""
         } else {
-            // 如果专辑没被修改，检查所有选中歌曲的专辑和艺术家是否一致
             ensureSelectedSongsLoaded()
             var commonAlbum: String? = null
             var commonArtist: String? = null
@@ -896,7 +889,6 @@ class BatchEditViewModel(
                 }
             }
 
-            // 如果存在不一致的情况，更新错误消息并返回空列表
             if (hasMismatch || commonAlbum.isNullOrBlank()) {
                 _uiState.update {
                     it.copy(errorMessage = UiMessage.StringResource(R.string.batch_edit_cover_mismatch))
@@ -910,10 +902,8 @@ class BatchEditViewModel(
                     ?: "")
         }
 
-        // 清除之前的错误消息
         _uiState.update { it.copy(errorMessage = null) }
 
-        // 查询同专辑的歌曲封面
         val sameAlbumSongs = songLibraryRepository.getSongsByAlbum(targetAlbum, targetArtist)
         for (song in sameAlbumSongs) {
             try {

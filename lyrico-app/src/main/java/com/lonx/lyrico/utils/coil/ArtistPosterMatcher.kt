@@ -6,32 +6,16 @@ import java.text.Normalizer
 /**
  * Matches poster file names against artist names.
  *
- * A file name cannot contain the characters the app itself treats as invalid
- * ([CharacterMappingDefaults.DEFAULT_INVALID_CHARS]: `\ / : * ? " < > |`), so an artist named
- * `AC/DC` can only be stored as `AC_DC.jpg`, `AC-DC.jpg`, `AC DC.jpg`, `ACDC.jpg` - or as
- * `AC／DC.jpg`, because the app's own file renaming replaces them with full-width characters.
- * Those characters are therefore interchangeable with one separator, with their full-width form,
- * or with nothing at all. Every other character - including punctuation that *is* legal in a file
- * name, such as the dots of `G.E.M. 邓紫棋` - must match as-is.
- *
- * Ranks, lowest wins:
- * - `0` exact name (`周杰伦.jpg`, `AC_DC.jpg` for `AC_DC`, `AC／DC.jpg` for `AC/DC`)
- * - `1` same name once invalid characters are dropped or replaced
- *   (`AC/DC` -> `AC_DC.jpg`, `AC-DC.jpg`, `AC DC.jpg`, `ACDC.jpg`)
- * - `2` suffixed variant, i.e. the name followed by `_` (`Artist_live.jpg`, `AC_DC_live.jpg`)
- * - `null` the file does not belong to that artist
- *
- * The name must end (or be followed by `_`) exactly where the artist name ends, so
- * `ArtistExtra.jpg` never matches `Artist` and `伍佰 & China Blue.jpg` never matches `伍佰`.
+ * Invalid filename characters in the artist name may be dropped, replaced by one separator or use
+ * their full-width form; everything else must match as-is, and a name must end where the artist
+ * name ends (`ArtistExtra.jpg` never matches `Artist`). Ranks, lowest wins: `0` exact,
+ * `1` after normalization, `2` suffixed variant (name followed by `_`), `null` not this artist.
  */
 internal object ArtistPosterMatcher {
     /** File extensions that can be used as an artist poster. */
     val extensions = setOf("jpg", "jpeg", "png", "webp", "mp4")
 
-    /**
-     * Characters that a file name cannot hold, taken from the rule the app itself uses when it
-     * renames files ([CharacterMappingDefaults.DEFAULT_INVALID_CHARS]).
-     */
+    /** Characters a file name cannot hold, from the rule the app uses when renaming files. */
     internal val invalidFileNameChars: Set<Char> =
         CharacterMappingDefaults.DEFAULT_INVALID_CHARS.charMappings.keys
             .mapNotNullTo(mutableSetOf()) { it.singleOrNull() }
@@ -58,10 +42,7 @@ internal object ArtistPosterMatcher {
         return rankStem(fileName.substringBeforeLast('.').normalizeName(), artist)
     }
 
-    /**
-     * Counts [fileNames] that belong to at least one of [artistNames], normalizing every artist
-     * name once instead of for each file/artist pair.
-     */
+    /** Counts [fileNames] that belong to at least one of [artistNames]. */
     fun countMatchedFiles(fileNames: List<String>, artistNames: List<String>): Int {
         if (fileNames.isEmpty() || artistNames.isEmpty()) return 0
         val artists = artistNames.map { it.normalizeName() }.filter { it.isNotEmpty() }.distinct()
@@ -85,9 +66,8 @@ internal object ArtistPosterMatcher {
     }
 
     /**
-     * Returns the index in [stem] right after a match of [artist] that started at index `0`,
-     * or `-1` when the artist name does not match there. Characters a file name cannot hold may
-     * be missing from the stem or replaced by a run of separators.
+     * Index in [stem] right after an [artist] match at `0`, or `-1` when it does not match;
+     * characters a file name cannot hold may be missing or replaced by separators.
      */
     private fun tolerantPrefixEnd(stem: String, artist: String): Int {
         var stemIndex = 0
@@ -110,9 +90,8 @@ internal object ArtistPosterMatcher {
     }
 
     /**
-     * Tag values and file names are typed independently. NFKC folds the full-width characters the
-     * app renames invalid characters to back to their ASCII form, and handles the Unicode
-     * composition differences of accents.
+     * NFKC folds the full-width forms the app renames invalid characters to back to ASCII, and
+     * handles the Unicode composition differences of accents.
      */
     private fun String.normalizeName(): String =
         Normalizer.normalize(trim(), Normalizer.Form.NFKC).lowercase()

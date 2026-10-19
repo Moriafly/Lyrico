@@ -627,10 +627,7 @@ class SearchViewModel(
     // 歌词逻辑
     // -------------------------------------------------------------------------
 
-    /**
-     * 加载指定歌曲的歌词
-     * 同一时间只允许一个歌词加载任务
-     */
+    /** 加载指定歌曲的歌词；同一时间只允许一个加载任务。 */
     fun loadLyrics(song: SongSearchResult) {
         lyricsJob?.cancel()
         val source = findSource(song.pluginId)
@@ -682,10 +679,7 @@ class SearchViewModel(
         }
     }
 
-    /**
-     * 清除当前歌词状态
-     * 通常用于关闭歌词页或切换歌曲列表时
-     */
+    /** 清除歌词状态（关闭歌词页或切换列表时）。 */
     fun clearLyrics() {
         lyricsJob?.cancel()
         lyricsState.value = LyricsUiState()

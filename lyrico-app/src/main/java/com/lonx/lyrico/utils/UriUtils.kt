@@ -14,8 +14,7 @@ object UriUtils {
     private const val TAG = "UriUtils"
 
     /**
-     * 尝试从 SAF 返回的 Tree Uri 中获取绝对路径
-     * 仅适用于外部存储设备（手机内置存储和 SD 卡）
+     * 从 SAF Tree Uri 取绝对路径，仅适用于外部存储（内置存储与 SD 卡）。
      */
     fun getFileAbsolutePath(context: Context, treeUri: Uri): String? {
         try {
@@ -125,8 +124,7 @@ object UriUtils {
     }
 
     /**
-     * 从 MediaStore URI 获取文件名
-     * 适用于 content://media/external/audio/media/xxx 格式的 URI
+     * 从 MediaStore URI（content://media/...）取文件名。
      */
     fun getMediaStoreFileName(contentResolver: ContentResolver, mediaUri: Uri): String? {
         return try {

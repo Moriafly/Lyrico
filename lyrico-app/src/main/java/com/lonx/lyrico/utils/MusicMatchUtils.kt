@@ -145,8 +145,7 @@ object MusicMatchUtils {
     }
 
     /**
-     * 单串对单串的综合相似度
-     * 短字符串更依赖 Levenshtein，长字符串更依赖字符残差
+     * 单串对单串的综合相似度：短字符串更依赖 Levenshtein，长字符串更依赖字符残差。
      */
     fun smartSimilarity(a: String?, b: String?): Double {
         if (a.isNullOrBlank() && b.isNullOrBlank()) return 1.0
@@ -186,13 +185,7 @@ object MusicMatchUtils {
     // ==================== 4. 片段匹配（核心） ====================
 
     /**
-     * 片段匹配分数
-     *
-     * 加入 coverage 项：要求本地片段大部分都能匹配上
-     * 避免"只匹配到一个片段但那个片段很强"导致分数偏高
-     *
-     * 例：本地 ["周杰伦", "七里香"]，结果 ["周杰伦", "晴天"]
-     * localScores = [高, 低]，localAvg 中等，但 coverage 只有 0.5，会被压低
+     * 片段匹配分数。加入 coverage 项，要求本地片段大部分都能匹配上，避免只命中一个强片段就虚高。
      */
     fun segmentMatchScore(
         localSegments: List<String>,
@@ -275,8 +268,7 @@ object MusicMatchUtils {
     // ==================== 6. 排序权重 ====================
 
     /**
-     * 搜索结果排序加分
-     * 只有文本分数达标时才生效，防止低匹配候选被"救活"
+     * 搜索结果排序加分。只对文本分数达标的候选生效，防止低匹配候选被救活。
      */
     private fun rankBonus(
         index: Int,
@@ -291,8 +283,7 @@ object MusicMatchUtils {
     // ==================== 7. 本地片段提取 ====================
 
     /**
-     * 从歌曲信息中提取本地关键词片段
-     * preferFileName 为 true 时只用去掉扩展名的原始文件名，既不清洗也不拆分
+     * 从歌曲信息中提取本地关键词片段；[preferFileName] 为 true 时只用去掉扩展名的文件名。
      */
     fun extractLocalSegments(
         song: SongEntity,

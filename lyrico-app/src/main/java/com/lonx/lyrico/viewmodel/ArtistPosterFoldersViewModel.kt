@@ -88,8 +88,7 @@ class ArtistPosterFoldersViewModel(
     }
 
     /**
-     * Posters are matched by file name, so a folder full of posters that matches no artist of the
-     * library means the names do not line up - surface that instead of silently showing nothing.
+     * 海报按文件名匹配；整文件夹都对不上库内艺术家时需要说明，而不是静默显示空。
      */
     private fun countMatchedPosters(posters: List<ArtistPosterFile>?, artistNames: List<String>): Int =
         ArtistPosterMatcher.countMatchedFiles(posters.orEmpty().map { it.name }, artistNames)

@@ -148,7 +148,6 @@ fun ArtistsPage(
     }
     val sortInfo by viewModel.sortInfo.collectAsStateWithLifecycle()
     val topAppBarScrollBehavior = MiuixScrollBehavior()
-    // 使用应用级 UI 引擎，页面与共享列表组件保持一致。
     val isSaltEngine = LocalUiEngine.current == UiEngine.SALT
     val topBarBackdrop = rememberBarBlurBackdrop(enabled = LocalUiEngine.current == UiEngine.MIUIX && com.lonx.lyrico.ui.components.blur.rememberBarBlurEnabled())
     val gridState = rememberLazyGridState()

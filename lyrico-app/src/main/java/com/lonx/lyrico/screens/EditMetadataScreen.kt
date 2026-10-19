@@ -864,7 +864,6 @@ Box(modifier = Modifier.fillMaxSize()) {
                         ) { Icon(imageVector = LucideIcons.ArrowLeft, contentDescription = null) }
                     },
                     actions = {
-                        // 保存按钮
                         IconButton(
                             onClick = { viewModel.saveMetadata() },
                             enabled = !uiState.isSaving
@@ -1449,7 +1448,7 @@ Box(modifier = Modifier.fillMaxSize()) {
                 .fillMaxWidth(),
         ) {
             val plainLyricsScrollState = rememberScrollState()
-            // 歌词正文自成一组卡片；罗马音/译文是独立按钮，留在卡片外。
+            // 歌词正文自成一组卡片；音译/译文是独立按钮，留在卡片外。
             val lyricsBody: @Composable ColumnScope.() -> Unit = {
                 Box(
                     modifier = Modifier
@@ -2261,9 +2260,7 @@ private fun CoverSection(
 
 /**
  * 封面 / 艺术家海报上的角标排列：左上标签、左下尺寸与来源、右下编辑入口、右上已修改撤销。
- *
- * 两个引擎共用这套排列，避免同一张卡片在 Miuix 与 Salt 下角标位置不一致；只有文字控件
- * 按引擎作用域取各自的排版实现，底色与字号沿用应用既有规格。
+ * 两个引擎共用这套排列，只有文字控件按引擎作用域取各自的排版实现。
  */
 @Composable
 private fun BoxScope.PictureOverlayBadges(

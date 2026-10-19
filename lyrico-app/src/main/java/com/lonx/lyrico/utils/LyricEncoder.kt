@@ -31,9 +31,7 @@ object LyricEncoder {
     }
 
     /**
-     * @param result 原始歌词结果
-     * @param conversionMode 转换模式
-     * @return 转换后的 LyricsResult
+     * 按 [conversionMode] 转换歌词并返回新的歌词结果。
      */
     fun convertLyricsResult(
         result: LyricsResult,
@@ -94,10 +92,7 @@ object LyricEncoder {
     }
 
     /**
-     * 对纯文本歌词字符串进行简繁转换
-     * @param lyricsText 歌词全文
-     * @param conversionMode 转换模式
-     * @return 转换后的歌词字符串
+     * 对纯文本歌词做简繁转换。
      */
     fun convertLyricsText(lyricsText: String, conversionMode: ConversionMode): String {
         if (conversionMode == ConversionMode.NONE || lyricsText.isBlank()) return lyricsText
@@ -113,17 +108,14 @@ object LyricEncoder {
         var lastEnd = 0
     
         timeTokenPattern.findAll(lyricsText).forEach { match ->
-            // 转换时间戳之前的文本部分
             if (match.range.first > lastEnd) {
                 val textSegment = lyricsText.substring(lastEnd, match.range.first)
                 result.append(convertText(textSegment, conversionMode))
             }
-            // 时间戳原样保留
             result.append(match.value)
             lastEnd = match.range.last + 1
         }
     
-        // 处理最后一段文本
         if (lastEnd < lyricsText.length) {
             result.append(convertText(lyricsText.substring(lastEnd), conversionMode))
         }
@@ -132,11 +124,7 @@ object LyricEncoder {
     }
     
     /**
-     * 从 LyricsResult 提取纯文本歌词（不包含时间轴和格式标记）
-     * @param result 歌词结果
-     * @param config 渲染配置（控制是否包含翻译、音译等）
-     * @param conversionMode 简繁转换模式
-     * @return 纯文本歌词，每行一句
+     * 从歌词结果提取纯文本（不含时间轴与格式标记）；[config] 控制是否包含翻译、音译。
      */
     fun encodePlainText(
         result: LyricsResult,
@@ -473,7 +461,6 @@ object LyricEncoder {
         val lineText = line.words.joinToString("") { it.text }
 //        val endTime = line.words.lastOrNull()?.end
 
-        // 应用 offset
         val startTimeFormatted = LyricFormatter.formatTimestamp(LyricFormatter.applyOffset(line.start, offset))
 
         builder.append("[$startTimeFormatted]$lineText")
@@ -523,10 +510,7 @@ object LyricEncoder {
     }
 
     /**
-     * 对纯文本歌词字符串进行整体时间偏移
-     * @param lyricsText 歌词全文 (支持 LRC, Enhanced LRC, Verbatim, TTML)
-     * @param offset 偏移量（毫秒），正数表示时间延后，负数表示时间提前
-     * @return 调整时间戳后的歌词字符串
+     * 整体时间偏移（支持 LRC、Enhanced LRC、Verbatim、TTML）；[offset] 正数延后，负数提前。
      */
     @SuppressLint("DefaultLocale")
     fun shiftLyricsOffset(lyricsText: String, offset: Long): String {
@@ -545,11 +529,9 @@ object LyricEncoder {
             // 将毫秒补齐到3位，例如 .12 -> 120ms, .5 -> 500ms
             val ms = msStr.padEnd(3, '0').toLong()
 
-            // 计算总毫秒并加上偏移量，确保不小于0
             val totalMs = (min * 60 + sec) * 1000 + ms
             val newTotalMs = (totalMs + offset).coerceAtLeast(0L)
 
-            // 重新计算分、秒、毫秒
             val newMin = newTotalMs / 60000
             val newSec = (newTotalMs % 60000) / 1000
             val newMs = newTotalMs % 1000

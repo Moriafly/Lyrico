@@ -25,8 +25,7 @@ internal inline fun <T> readArtworkSafely(block: () -> T): T? = try {
 }
 
 /**
- * Poster files are user supplied, so an unreadable file must be skipped instead of shadowing a
- * working one in the same folder.
+ * 用户提供的海报文件可能损坏，读不出的文件应跳过，而不是遮住同目录中可用的那张。
  */
 internal fun ByteArray.validArtwork(): ByteArray? {
     if (isEmpty()) return null
@@ -44,8 +43,7 @@ internal fun ByteArray.validArtwork(): ByteArray? {
 }
 
 /**
- * Looks up an artist poster in the user's poster folders, in the order the folders were added.
- * Files named exactly after the artist win over suffixed ones inside each folder.
+ * 按文件夹添加顺序查找艺术家海报；同一文件夹内，精确命名的文件优先于带后缀的变体。
  */
 internal suspend fun readExternalArtistPoster(
     context: Context,

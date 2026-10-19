@@ -54,8 +54,8 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 private data class PreviewCrop(val key: String, val media: PosterPreviewMedia, val bitmap: android.graphics.Bitmap)
 
 /**
- * 预览顶栏菜单的一项，与具体 UI 引擎无关：Miuix 渲染下拉菜单，Salt 渲染原生弹出菜单。
- * Salt 3.0.0-beta02 的 PopupMenuItem 没有禁用参数，禁用项由调用方在这里表达。
+ * 预览顶栏菜单的一项。Salt 3.0.0-beta02 的 PopupMenuItem 没有禁用参数，
+ * 禁用项由调用方通过 enabledAlpha 表达。
  */
 internal data class PosterPreviewMenuAction(
     val title: String,
@@ -151,7 +151,7 @@ internal fun ArtistPosterPreview(
                 }
             )
             val progress = infoProgress.value
-            // Salt 走自身语义色板；压在图片上的黑底/白字渐变与海报合成，保持引擎中立。
+            // 压在图片上的黑底/白字渐变与海报合成，不随引擎取色。
             val salt = LocalUiEngine.current == UiEngine.SALT
             val panelColor = if (salt) SaltTheme.colors.background else MiuixTheme.colorScheme.surface
             val actionBackground = lerp(Color(0xFF202020),
@@ -222,7 +222,6 @@ internal fun ArtistPosterPreview(
                                     expanded = previewMenuExpanded,
                                     onDismissRequest = { previewMenuExpanded = false }) {
                                     actions.forEachIndexed { index, action ->
-                                        // Keep disabled actions visible and inert; the summary explains why.
                                         Box(Modifier.enabledAlpha(action.enabled)) {
                                             com.moriafly.salt.ui.popup.PopupMenuItem(
                                                 text = action.title, sub = action.summary,

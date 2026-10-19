@@ -7,14 +7,8 @@ import com.lonx.lyrico.R
 import kotlinx.serialization.Serializable
 
 /**
- * 字符映射规则
- *
- * @param id 规则ID（唯一标识）
- * @param name 规则名称
- * @param charMappings 字符映射表：key = 原字符，value = 替换字符（null表示移除）
- * @param description 规则描述
- * @param isBuiltIn 是否为内置规则
- * @param isEnabled 是否启用该规则
+ * 字符映射规则。
+ * @param charMappings 原字符 → 替换字符；value 为 `null` 表示移除。
  */
 @Serializable
 data class CharacterMappingRule(
@@ -26,11 +20,7 @@ data class CharacterMappingRule(
     val isEnabled: Boolean = true
 )
 
-/**
- * 字符映射配置
- *
- * @param rules 所有映射规则（内置规则）
- */
+/** 字符映射规则列表。 */
 @Serializable
 data class CharacterMappingConfig(
     val rules: List<CharacterMappingRule> = emptyList()
@@ -127,7 +117,6 @@ fun ReplacementCharOption.displayName(): String {
 }
 
 object CharacterMappingDefaults {
-    // 系统默认的非法字符规则 - 使用新的 charMappings 方式
     val DEFAULT_INVALID_CHARS = CharacterMappingRule(
         id = "default_invalid_chars",
         name = "文件系统非法字符",

@@ -3,12 +3,7 @@ package com.lonx.lyrico.data.model
 import androidx.annotation.StringRes
 import com.lonx.lyrico.R
 
-/**
- * 悬浮导航栏的视觉效果。
- *
- * 毛玻璃和液态玻璃是互斥的两种渲染方式，因此用同一个三选一设置表达，
- * 而不是两个可以同时打开的开关。
- */
+/** 悬浮导航栏的视觉效果。毛玻璃与液态玻璃互斥，因此用三选一设置而不是两个开关。 */
 enum class FloatingBarEffect(
     @field:StringRes val labelRes: Int
 ) {

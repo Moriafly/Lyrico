@@ -48,9 +48,7 @@ fun BatchMatchBottomSheet(
         title = stringResource(R.string.batch_matching_title),
         enableNestedScroll = enableNestedScroll,
         groupContent = true,
-        // 内容自带 verticalScroll，外壳不再提供滚动出口。
         scrollContent = false,
-        // 进行中真正禁止关闭（返回键/外部点击/下拉）。
         allowDismiss = !uiState.isRunning,
         content = {
             Column(

@@ -31,7 +31,7 @@ fun LibraryScanProgressText(
         LibraryScanStage.FINISHED -> stringResource(R.string.scan_progress_finished)
     }
 
-    // 该组件被两套引擎共用的 pageContent 调用，Salt 下要用自己的语义字体和颜色，避免显示 Miuix 样式
+    // 两套引擎的 pageContent 共用此组件，Salt 下需用自身语义字体和颜色。
     if (LocalUiEngine.current == UiEngine.SALT) {
         com.moriafly.salt.ui.Text(
             text = title,

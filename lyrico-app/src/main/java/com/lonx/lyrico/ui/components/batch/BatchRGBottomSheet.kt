@@ -53,7 +53,6 @@ fun BatchRGBottomSheet(
         allowDismiss = !batchReplayGainUiState.isRunning,
         title = stringResource(R.string.action_batch_replay_gain),
         groupContent = true,
-        // 内容自带 verticalScroll，外壳不再提供滚动出口。
         scrollContent = false,
         content = {
             Column(

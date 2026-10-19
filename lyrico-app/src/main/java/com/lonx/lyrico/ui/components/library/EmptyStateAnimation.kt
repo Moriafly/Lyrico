@@ -44,7 +44,6 @@ internal fun EmptyStateAnimation(kind: EmptyStateKind, compact: Boolean) = key(k
         LottieCompositionSpec.Asset("empty_states/${kind.asset}.json"),
     )
     val composition by compositionResult
-    // 动画色槽随引擎取色，保持与静态插画一致的语义；暖色/冷色沿用应用约定色。
     val salt = LocalUiEngine.current == UiEngine.SALT
     val accent = if (salt) SaltTheme.colors.highlight else MiuixTheme.colorScheme.primary
     val surface = if (salt) SaltTheme.colors.subBackground else MiuixTheme.colorScheme.surfaceContainer

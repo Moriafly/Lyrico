@@ -61,7 +61,6 @@ class AudioCoverFetcher(
         includeOtherArtists: Boolean = false
     ): ByteArray? {
         for (candidate in candidates) {
-            // A missing or unreadable candidate must not stop the poster folder lookup below.
             val bytes = readArtworkSafely {
                 contentResolver.openFileDescriptor(candidate.uri, "r")?.use { pfd ->
                     AudioTagReader.readPicture(

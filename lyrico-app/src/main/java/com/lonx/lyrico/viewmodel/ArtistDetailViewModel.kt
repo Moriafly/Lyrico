@@ -37,9 +37,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
- * 一张已经读进来的待设置海报。
- *
- * 图片字节只读一次：后续可能要写入多首歌，也可能要等待系统写入授权。
+ * 一张已读入的待设置海报。字节只读一次：后续可能写入多首歌，也可能等待写入授权。
  */
 data class ArtistImageSource(
     val picture: AudioPicture,
@@ -47,10 +45,7 @@ data class ArtistImageSource(
 )
 
 /**
- * 艺术家详情页里「设置艺术家海报」的进度。
- *
- * [message] 是**结果**，只在这一轮结束后才有值；进行中靠 [done]/[total] 说话，
- * 这样界面不需要根据进度反推该显示哪句文案。
+ * 「设置艺术家海报」的进度。[message] 只在结束后有值，进行中靠 [done]/[total] 表达。
  */
 data class ArtistPosterEmbedUiState(
     val isRunning: Boolean = false,
@@ -73,11 +68,7 @@ data class ArtistPosterEmbedUiState(
 }
 
 /**
- * 艺术家详情页的数据，以及「给这位艺术家设置海报」的两条写入路径。
- *
- * 两条路径的落点不一样，所以要让用户先选：
- * - [embedArtistImageForAllSongs] 把海报内嵌进这位艺术家每一首歌的标签；
- * - [saveArtistImageToFolder] 按艺术家名存进用户已授权的艺术家海报文件夹（外置兜底）。
+ * 艺术家详情页的数据，以及「设置艺术家海报」的两条路径：内嵌到每首歌的标签，或存进海报文件夹。
  */
 class ArtistDetailViewModel(
     private val libraryIndexRepository: LibraryIndexRepository,
@@ -122,10 +113,7 @@ class ArtistDetailViewModel(
             null
         )
 
-    /**
-     * 海报的归属靠图片描述记录，而描述要和艺术家字段的拆分规则
-     * （[ArtistNameSplitter]）对齐，所以这里读的是同一份配置。
-     */
+    /** 海报描述要与艺术家字段的拆分规则对齐，所以读同一份配置。 */
     private val artistSplitConfig = settingsRepository.artistSplitConfigFlow
         .stateIn(
             viewModelScope,
@@ -139,10 +127,7 @@ class ArtistDetailViewModel(
     private var artistPosterJob: Job? = null
 
     /**
-     * 读取用户在系统选图器里选中的本地图片。
-     *
-     * 选图器给的是单次授权 URI，所以字节必须当场读出来；
-     * 读失败时只发一条提示，不调用回调。
+     * 读取选图器返回的本地图片。URI 是单次授权，字节必须当场读出。
      */
     fun prepareArtistImage(context: Context, uri: Uri, onReady: (ArtistImageSource) -> Unit) {
         val appContext = context.applicationContext
@@ -186,10 +171,7 @@ class ArtistDetailViewModel(
     }
 
     /**
-     * 把 [source] 内嵌进这位艺术家的每一首歌。
-     *
-     * 每首歌先按它自己的艺术家字段算出图片描述（见 [ArtistPosterEmbedding]）；标签里已经是
-     * 这张图的歌直接跳过，所以「授权后重跑」不会重复写盘，只会补上没写成的那些。
+     * 把 [source] 内嵌进这位艺术家的每一首歌。已是这张图的歌会跳过，授权后重跑只补未写的。
      */
     fun embedArtistImageForAllSongs(
         artistName: String,
@@ -284,9 +266,7 @@ class ArtistDetailViewModel(
     }
 
     /**
-     * 把 [source] 按艺术家名存进艺术家海报文件夹。
-     *
-     * 没有可用文件夹时写入会失败并提示：用户点这一项之前，界面会先带他去添加文件夹。
+     * 把 [source] 按艺术家名存进艺术家海报文件夹；没有可用文件夹时写入失败并提示。
      */
     fun saveArtistImageToFolder(artistName: String, source: ArtistImageSource) {
         val name = artistName.trim()
@@ -350,10 +330,7 @@ class ArtistDetailViewModel(
     }
 
     /**
-     * 注册新的艺术家海报文件夹。
-     *
-     * 用 SAF 拿到的读写权限由界面在回调里 `takePersistableUriPermission` 落盘，这里只负责登记
-     * 与触发一次重新读取——用户接着选的那张海报要立刻能被找到。
+     * 注册新的艺术家海报文件夹。持久化权限由界面回调负责，这里只登记并触发重新读取。
      */
     fun setArtistPosterFolder(uri: Uri, onAdded: () -> Unit) {
         artistPosterJob = viewModelScope.launch {
@@ -392,10 +369,8 @@ class ArtistDetailViewModel(
         application.getString(resId, *args)
 
     /**
-     * 把 [source] 写进 [song]：读它当前的标签，按它自己的艺术家字段算出描述，再整份写回去。
-     *
-     * 读完整份覆盖（而不是只补一张图）是刻意的：写下去的图片列表必须来自同一份读到内存的数据，
-     * 只改其中一张会让「写进去的图」和「读出来的图」对不上，标签里的其它图片也会被动到。
+     * 把 [source] 写进 [song]：读取当前标签，按该歌的艺术家字段算出描述，再整份写回。
+     * 必须整份覆盖：只改一张会让写入与读取的图片列表对不上。
      */
     private suspend fun writeArtistPicture(
         song: SongEntity,

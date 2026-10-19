@@ -196,8 +196,7 @@ interface SongDao {
 
     // ================= 查询操作 (同步与元数据) =================
     /**
-     * 获取同步所需信息
-     * 关键修改：确保 SELECT 的列名与 SongSyncInfo 的字段名匹配
+     * 获取同步所需信息；SELECT 的列名必须与 [SongSyncInfo] 的字段名一致。
      */
     @Query("SELECT id, uri, filePath, fileLastModified, fileSize, durationMilliseconds, folderId, source FROM songs")
     suspend fun getAllSyncInfo(): List<SongSyncInfo>
@@ -502,8 +501,7 @@ interface SongDao {
     suspend fun getLibraryIndexSongs(limit: Int, offset: Int): List<LibraryIndexSong>
 
     /**
-     * 使用指定的查询来获取歌曲列表
-     * 使用 RawQuery，并指定 observedEntities 参数，以监听数据库变化
+     * 使用 RawQuery 获取歌曲列表，并通过 observedEntities 监听数据库变化。
      */
     @RawQuery(observedEntities = [SongEntity::class, FolderEntity::class])
     fun getSongs(query: SupportSQLiteQuery): Flow<List<SongEntity>>
@@ -512,8 +510,7 @@ interface SongDao {
     suspend fun getDistinctSongFieldValues(query: SupportSQLiteQuery): List<SongFieldValue>
 
     /**
-     * 根据专辑和艺术家获取歌曲列表
-     * 优先返回同专辑且同艺术家的歌曲，然后返回同专辑的歌曲
+     * 获取专辑下的歌曲；同专辑且同艺术家的歌曲排在最前。
      */
     @Query("""
         SELECT s.* FROM songs AS s

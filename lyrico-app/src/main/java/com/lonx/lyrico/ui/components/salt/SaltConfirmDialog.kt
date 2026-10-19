@@ -21,7 +21,7 @@ import com.moriafly.salt.ui.ButtonAppearance
 import com.moriafly.salt.ui.SaltTheme
 import com.moriafly.salt.ui.dialog.DialogTitle
 
-/** Salt 原生确认弹窗：SaltUI 的 YesNoDialog 不支持禁用确认，这里用 BasicDialog 补齐， 同时保留标题、说明、自定义内容与取消/确认语义。 */
+/** Salt 原生确认弹窗。SaltUI 的 YesNoDialog 不支持禁用确认，这里用 BasicDialog 补齐。 */
 @Composable
 @OptIn(ExperimentalLayoutApi::class)
 internal fun SaltConfirmDialog(

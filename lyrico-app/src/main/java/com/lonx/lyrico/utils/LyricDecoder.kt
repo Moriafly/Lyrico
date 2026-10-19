@@ -84,8 +84,7 @@ object LyricDecoder {
     }
 
     /**
-     * 对外安全解析入口：音频标签中的歌词是不可信输入，
-     * parser 异常不允许穿透到 UI / 扫描流程，解析失败返回 null。
+     * 安全解析入口：歌词是不可信输入，解析失败返回 null，异常不向 UI 抛出。
      */
     fun decode(lyricsText: String): LyricsResult? {
         val format = detectFormat(lyricsText) ?: return null
