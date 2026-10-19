@@ -25,7 +25,8 @@ fun UpdateDialog(
     versionName: String,
     releaseNote: String,
     onDismissRequest: () -> Unit,
-    onConfirm: () -> Unit
+    onConfirm: () -> Unit,
+    onDismissFinished: () -> Unit = {},
 ) {
     val scrollState = rememberScrollState()
 
@@ -33,6 +34,7 @@ fun UpdateDialog(
         show = show,
         onConfirm = onConfirm,
         onDismissRequest = onDismissRequest,
+        onDismissFinished = onDismissFinished,
         title = stringResource(
             id = R.string.dialog_title_update_available,
             versionName

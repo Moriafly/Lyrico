@@ -207,15 +207,16 @@ open class MainActivity : AppCompatActivity(), ExternalAudioEditHost {
 
                     updateState.releaseInfo?.let { releaseInfo ->
                         UpdateDialog(
-                            show = true,
+                            show = updateState.showUpdateDialog,
                             versionName = releaseInfo.versionName,
                             onConfirm = {
                                 openBrowser(this@MainActivity, releaseInfo.url)
-                                updateManager.resetUpdateState()
+                                updateManager.dismissUpdateDialog()
                             },
                             onDismissRequest = {
-                                updateManager.resetUpdateState()
+                                updateManager.dismissUpdateDialog()
                             },
+                            onDismissFinished = updateManager::resetUpdateState,
                             releaseNote = releaseInfo.releaseNotes,
                         )
                     }

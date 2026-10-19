@@ -7,11 +7,18 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.lonx.lyrico.R
 import com.lonx.lyrico.data.model.UiEngine
+import com.lonx.lyrico.ui.components.base.ActionBottomSheet
 import com.lonx.lyrico.ui.components.salt.SaltBottomSheet
 import com.lonx.lyrico.ui.components.salt.SaltDropdownRow
 import com.lonx.lyrico.ui.components.icons.PreferenceIconTone
@@ -27,6 +34,7 @@ import com.lonx.lyrico.ui.components.miuix.MiuixBottomSheet
 import com.moriafly.salt.ui.ItemSwitcher
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
+import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.preference.WindowDropdownPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -45,6 +53,32 @@ fun LyricRenderConfigBottomSheet(
     onConversionModeChange: (ConversionMode) -> Unit
 ) {
     val salt = LocalUiEngine.current == UiEngine.SALT
+    var showLineOrder by remember { mutableStateOf(false) }
+    LaunchedEffect(show) {
+        if (!show) showLineOrder = false
+    }
+    val context = LocalContext.current
+    val visibleTracks = config?.let {
+        visibleLyricLineTracks(it.showRomanization, it.showTranslation, it.onlyTranslationIfAvailable)
+    }.orEmpty()
+    val lineOrderSummary = config?.normalizedLineOrder.orEmpty()
+        .filter { it in visibleTracks }
+        .joinToString(" / ") { context.getString(it.labelRes) }
+    ActionBottomSheet(
+        show = showLineOrder && show,
+        title = stringResource(R.string.lyric_line_order),
+        onDismissRequest = { showLineOrder = false },
+        scrollContent = false,
+        content = {
+            config?.let { lyricConfig ->
+                LyricLineOrderBottomSheetContent(
+                    lineOrder = lyricConfig.normalizedLineOrder,
+                    visibleTracks = visibleTracks,
+                    onLineOrderChange = onLineOrderChange,
+                )
+            }
+        },
+    )
     if (salt) {
         SaltBottomSheet(
             show = show,
@@ -68,57 +102,53 @@ fun LyricRenderConfigBottomSheet(
                     .coerceAtLeast(0)
 
                 com.moriafly.salt.ui.RoundedColumn {
-                SaltDropdownRow(
-                    title = stringResource(R.string.lyric_mode),
-                    labels = lyricFormatItems,
-                    selectedIndex = selectedLyricFormatIndex,
-                ) { index ->
-                    onLyricFormatChange(LyricFormat.entries[index])
-                }
-                ItemSwitcher(
-                    text = stringResource(R.string.roma),
-                    sub = stringResource(R.string.roma_hint),
-                    state = lyricConfig.showRomanization,
-                    onChange = onRomaEnabledChange,
-                )
-                ItemSwitcher(
-                    text = stringResource(R.string.translation),
-                    sub = stringResource(R.string.translation_hint),
-                    state = lyricConfig.showTranslation,
-                    onChange = onTranslationEnabledChange,
-                )
-                AnimatedVisibility(visible = lyricConfig.showTranslation) {
+                    SaltDropdownRow(
+                        title = stringResource(R.string.lyric_mode),
+                        labels = lyricFormatItems,
+                        selectedIndex = selectedLyricFormatIndex,
+                    ) { index ->
+                        onLyricFormatChange(LyricFormat.entries[index])
+                    }
                     ItemSwitcher(
-                        text = stringResource(R.string.only_translation_if_available),
-                        sub = stringResource(R.string.only_translation_if_available_hint),
-                        state = lyricConfig.onlyTranslationIfAvailable,
-                        enabled = lyricConfig.showTranslation,
-                        onChange = onOnlyTranslationIfAvailableChange,
+                        text = stringResource(R.string.roma),
+                        sub = stringResource(R.string.roma_hint),
+                        state = lyricConfig.showRomanization,
+                        onChange = onRomaEnabledChange,
+                    )
+                    ItemSwitcher(
+                        text = stringResource(R.string.translation),
+                        sub = stringResource(R.string.translation_hint),
+                        state = lyricConfig.showTranslation,
+                        onChange = onTranslationEnabledChange,
+                    )
+                    AnimatedVisibility(visible = lyricConfig.showTranslation) {
+                        ItemSwitcher(
+                            text = stringResource(R.string.only_translation_if_available),
+                            sub = stringResource(R.string.only_translation_if_available_hint),
+                            state = lyricConfig.onlyTranslationIfAvailable,
+                            enabled = lyricConfig.showTranslation,
+                            onChange = onOnlyTranslationIfAvailableChange,
+                        )
+                    }
+                    ItemSwitcher(
+                        text = stringResource(R.string.remove_empty_lines),
+                        sub = stringResource(R.string.remove_empty_lines_hint),
+                        state = lyricConfig.removeEmptyLines,
+                        onChange = onRemoveEmptyLinesChange,
+                    )
+                    SaltDropdownRow(
+                        title = stringResource(R.string.conversion_mode),
+                        labels = conversionModeItems,
+                        selectedIndex = selectedConversionModeIndex,
+                    ) { index ->
+                        onConversionModeChange(ConversionMode.entries[index])
+                    }
+                    com.moriafly.salt.ui.Item(
+                        text = stringResource(R.string.lyric_line_order),
+                        sub = lineOrderSummary,
+                        onClick = { showLineOrder = true },
                     )
                 }
-                ItemSwitcher(
-                    text = stringResource(R.string.remove_empty_lines),
-                    sub = stringResource(R.string.remove_empty_lines_hint),
-                    state = lyricConfig.removeEmptyLines,
-                    onChange = onRemoveEmptyLinesChange,
-                )
-                SaltDropdownRow(
-                    title = stringResource(R.string.conversion_mode),
-                    labels = conversionModeItems,
-                    selectedIndex = selectedConversionModeIndex,
-                ) { index ->
-                    onConversionModeChange(ConversionMode.entries[index])
-                }
-                }
-                LyricLineOrderBottomSheetContent(
-                    lineOrder = lyricConfig.normalizedLineOrder,
-                    visibleTracks = visibleLyricLineTracks(
-                        lyricConfig.showRomanization,
-                        lyricConfig.showTranslation,
-                        lyricConfig.onlyTranslationIfAvailable,
-                    ),
-                    onLineOrderChange = onLineOrderChange,
-                )
             }
         }
         return
@@ -202,18 +232,14 @@ fun LyricRenderConfigBottomSheet(
                             onConversionModeChange(ConversionMode.entries[index])
                         }
                     )
+                    ArrowPreference(
+                        startAction = { PreferenceIcon(LucideIcons.ArrowDownUp, PreferenceIconTone.Lyrics) },
+                        title = stringResource(R.string.lyric_line_order),
+                        summary = lineOrderSummary,
+                        holdDownState = showLineOrder,
+                        onClick = { showLineOrder = true },
+                    )
                 }
-            }
-            config?.let { lyricConfig ->
-                LyricLineOrderBottomSheetContent(
-                    lineOrder = lyricConfig.normalizedLineOrder,
-                    visibleTracks = visibleLyricLineTracks(
-                        lyricConfig.showRomanization,
-                        lyricConfig.showTranslation,
-                        lyricConfig.onlyTranslationIfAvailable,
-                    ),
-                    onLineOrderChange = onLineOrderChange,
-                )
             }
         }
     }

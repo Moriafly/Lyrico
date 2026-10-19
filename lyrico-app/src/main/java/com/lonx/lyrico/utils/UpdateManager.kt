@@ -20,6 +20,7 @@ import kotlinx.coroutines.launch
 
 data class UpdateState(
     val isChecking: Boolean = false,
+    val showUpdateDialog: Boolean = false,
     val releaseInfo: ReleaseInfo? = null
 )
 data class UpdateEffect(
@@ -55,7 +56,7 @@ class UpdateManagerImpl(
                 repo = REPO_NAME
             )) {
                 is UpdateCheckResult.NewVersion -> {
-                    _state.update { it.copy(releaseInfo = result.info) }
+                    _state.update { it.copy(releaseInfo = result.info, showUpdateDialog = true) }
                 }
                 is UpdateCheckResult.NoUpdateAvailable -> {
                     _effect.emit(UpdateEffect(R.string.update_already_latest))
@@ -78,15 +79,13 @@ class UpdateManagerImpl(
     }
     override fun dismissUpdateDialog() {
         _state.update { it.copy(
-            releaseInfo = null
+            showUpdateDialog = false
         ) }
     }
     override fun resetUpdateState() {
         _state.update {
-            it.copy(
-                isChecking = false,
-                releaseInfo = null
-            )
+            // A new result may reopen the dialog before the previous dismissal finishes.
+            if (it.showUpdateDialog) it else it.copy(releaseInfo = null)
         }
     }
 

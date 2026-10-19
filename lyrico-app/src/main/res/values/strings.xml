@@ -105,7 +105,7 @@
     <string name="artist_separator_hint">Used when multiple artists exist</string>
     <string name="replay_gain_no_songs">No songs available for ReplayGain scanning</string>
     <string name="action_calculate_replay_gain">Calculate ReplayGain</string>
-    <string name="replay_gain_calculate_in_progress">Calculating, tap to stop</string>
+    <string name="replay_gain_calculate_in_progress">Abort calculation</string>
     <string name="replay_gain_calculate_success">ReplayGain calculated</string>
     <string name="replay_gain_calculate_cancelled">ReplayGain calculation cancelled</string>
     <string name="replay_gain_calculate_failed">ReplayGain calculation failed: %1$s</string>

@@ -101,7 +101,7 @@
     <string name="artist_separator_hint">存在多个艺术家时使用</string>
     <string name="replay_gain_no_songs">没有可用于回放增益扫描的歌曲</string>
     <string name="action_calculate_replay_gain">计算回放增益</string>
-    <string name="replay_gain_calculate_in_progress">正在计算回放增益，点击中止</string>
+    <string name="replay_gain_calculate_in_progress">中止计算</string>
     <string name="replay_gain_calculate_success">已计算回放增益</string>
     <string name="replay_gain_calculate_cancelled">已取消回放增益计算</string>
     <string name="replay_gain_calculate_failed">回放增益计算失败：%1$s</string>

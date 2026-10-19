@@ -896,13 +896,37 @@ Box(modifier = Modifier.fillMaxSize()) {
                         if (salt && block.kind == EditFieldKind.ReplayGain) {
                             Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
                                 verticalAlignment = Alignment.CenterVertically) {
-                                com.moriafly.salt.ui.Text(
-                                    if (uiState.isReplayGainCalculating) "${((replayGainCalculateProgress ?: 0f) * 100).toInt()}%" else "",
-                                    Modifier.weight(1f), style = SaltTheme.textStyles.sub, color = SaltTheme.colors.subText)
+                                Box(Modifier.weight(1f)) {
+                                    androidx.compose.animation.AnimatedVisibility(
+                                        visible = uiState.isReplayGainCalculating,
+                                        enter = fadeIn(),
+                                        exit = fadeOut(),
+                                    ) {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            androidx.compose.material3.CircularProgressIndicator(
+                                                progress = { replayGainCalculateProgress ?: 0f },
+                                                modifier = Modifier.size(20.dp),
+                                                color = SaltTheme.colors.highlight,
+                                                strokeWidth = 2.5.dp,
+                                                trackColor = SaltTheme.colors.highlight.copy(alpha = 0.2f),
+                                            )
+                                            Spacer(Modifier.width(8.dp))
+                                            com.moriafly.salt.ui.Text(
+                                                "${((replayGainCalculateProgress ?: 0f) * 100).toInt()}%",
+                                                style = SaltTheme.textStyles.sub,
+                                                color = SaltTheme.colors.highlight,
+                                            )
+                                        }
+                                    }
+                                }
                                 // 行内小胶囊：用应用密度映射，避免 Salt 原生 Small 的 40dp + 正文字号。
                                 PillButton(
                                     text = stringResource(if (uiState.isReplayGainCalculating) R.string.replay_gain_calculate_in_progress else R.string.action_calculate_replay_gain),
                                     onClick = { if (uiState.isReplayGainCalculating) viewModel.cancelScan() else viewModel.calculateReplayGain() },
+                                    colors = PillButtonDefaults.colors(
+                                        containerColor = SaltTheme.colors.highlight,
+                                        contentColor = SaltTheme.colors.onHighlight,
+                                    ),
                                     style = PillButtonDefaults.style(PillButtonSize.Small))
                             }
                         }
