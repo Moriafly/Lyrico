@@ -15,8 +15,8 @@ aboutLibraries {
     }
 }
 // 记得在发布版本时更新此处的值
-val baseVersionName = "1.6.0"
-val baseVersionCode = 20
+val baseVersionName = "1.7.0"
+val baseVersionCode = 21
 
 val releaseSigningEnv = listOf(
     "LYRICO_KEYSTORE_PATH",
