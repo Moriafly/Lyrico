@@ -57,7 +57,7 @@
     <string name="theme_mode">主题模式</string>
 
     <string name="lyric_index_title">歌词索引</string>
-    <string name="lyric_index_summary">扫描时建立歌词索引，用于本地歌词搜索，会增加扫描耗时。开启后，已有歌曲需重新扫描</string>
+    <string name="lyric_index_summary">用于本地歌词搜索，开启后需重新扫描已有歌曲</string>
     <!-- 扫描 -->
     <string name="folder_manager">文件夹管理</string>
     <string name="folder_manage_hint">管理 Lyrico 扫描的音乐文件夹</string>
@@ -67,7 +67,7 @@
 
     <!-- 搜索 -->
     <string name="search_limit">单次加载数量</string>
-    <string name="search_limit_tip">每个搜索源每次加载的结果数量，设置更大的值会消耗更多流量，同时产生更多图片缓存</string>
+    <string name="search_limit_tip">每个搜索源每次加载的结果数量</string>
     <string name="search_loading_more">正在加载更多…</string>
     <string name="search_load_more">加载更多</string>
     <string name="search_load_more_failed">加载失败，点击重试</string>
@@ -420,7 +420,6 @@
     <!-- 字符映射 -->
     <string name="configure_character_mapping">配置字符映射</string>
 
-    <string name="character_mapping_description">点击字符可修改其替换规则</string>
     <string name="character_to_replace">字符 %1$s</string>
     <string name="no_character_mappings">暂无字符映射</string>
     <string name="character_replacement_selector_subtitle">选择替换内容</string>
@@ -472,7 +471,7 @@
     <string name="chinese_conversion_mode_traditional_to_simplified">繁体转简体</string>
     <string name="chinese_conversion_mode_simplified_to_traditional">简体转繁体</string>
     <string name="conversion_mode">中文文本转换</string>
-    <string name="conversion_mode_hint">应用于搜索到的文本元数据和歌词；ID、日期、数字、URL、封面不会转换</string>
+    <string name="conversion_mode_hint">应用于搜索到的文本元数据和歌词</string>
     <string name="offset_adjust_hint">调整偏移</string>
     <string name="label_lyrics_offset">歌词偏移（毫秒）</string>
     <string name="action_manual_input">手动输入</string>
@@ -583,9 +582,9 @@
     <string name="lyrics_remove_tag_lines_settings_hint">使用设置中的“非歌词内容过滤规则”处理当前歌词</string>
     <string name="lyrics_remove_empty_lines_manual_hint">手动删除当前歌词中无内容或仅包含占位符的行</string>
     <string name="non_lyrics_cleanup_rules_title">非歌词内容过滤规则</string>
-    <string name="non_lyrics_cleanup_rules_summary">用于“格式化歌词”的“移除非歌词内容”操作</string>
+    <string name="non_lyrics_cleanup_rules_summary">用于单曲或批量“移除非歌词内容”操作</string>
     <string name="non_lyrics_cleanup_rules_section">过滤规则</string>
-    <string name="non_lyrics_cleanup_rules_hint">这些规则只会在单曲或批量“格式化歌词”中勾选“移除非歌词内容”时使用；规则按完整文本匹配原始歌词行，逐字歌词会先拼成整行后再判断</string>
+    <string name="non_lyrics_cleanup_rules_hint">这些规则用于单曲或批量“移除非歌词内容”操作；规则按完整文本匹配原始歌词行，逐字歌词会先拼成整行后再判断</string>
     <string name="add_non_lyrics_cleanup_rule">添加规则</string>
     <string name="edit_non_lyrics_cleanup_rule">编辑规则</string>
     <string name="non_lyrics_cleanup_rule_input_hint">输入要移除的标签或短语，例如 [by:、作词：</string>
@@ -651,6 +650,7 @@
     <string name="app_log_summary">查看崩溃、元数据和批量操作日志</string>
     <string name="app_log_empty">暂无日志</string>
     <string name="action_copy_log">复制日志</string>
+    <string name="action_copy_lyrics">复制歌词</string>
     <string name="action_export_logs">导出</string>
     <string name="app_log_delete_title">删除日志？</string>
     <string name="app_log_delete_message">确认删除 %d 条日志吗？此操作不可撤销</string>
@@ -834,4 +834,7 @@
     <string name="poster_preview_info">图片信息</string>
     <string name="poster_preview_dimensions">尺寸</string>
     <string name="poster_preview_format">格式</string>
+    <string name="ui_engine">界面风格</string>
+    <string name="common_edit">编辑</string>
+    <string name="batch_edit_unchanged_field_label">%1$s（无修改）</string>
 </resources>

@@ -8,8 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.ButtonColors
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,10 +16,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.lonx.lyrico.R
+import com.lonx.lyrico.data.model.UiEngine
 import com.lonx.lyrico.ui.components.base.ActionBottomSheet
+import com.lonx.lyrico.ui.components.base.AppLinearProgressIndicator
+import com.lonx.lyrico.ui.theme.LocalUiEngine
 import com.lonx.lyrico.viewmodel.AlbumActionsUiState
-import top.yukonga.miuix.kmp.basic.LinearProgressIndicator
+import com.moriafly.salt.ui.SaltTheme
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
+import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -31,12 +34,19 @@ fun AlbumReplayGainProgressBottomSheet(
     onDismissFinished: () -> Unit,
     onAbort: () -> Unit
 ) {
+    val salt = LocalUiEngine.current == UiEngine.SALT
     ActionBottomSheet(
+        saltFooter = {
+            com.lonx.lyrico.ui.components.base.SheetProgressAction(
+                running = uiState.isCalculatingAlbumReplayGain, onAbort = onAbort, onClose = onDismissRequest,
+            )
+        },
         show = uiState.showAlbumReplayGainProgressDialog,
         onDismissRequest = onDismissRequest,
         onDismissFinished = onDismissFinished,
         allowDismiss = !uiState.isCalculatingAlbumReplayGain,
         title = uiState.albumName,
+        groupContent = true,
         content = {
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -48,14 +58,22 @@ fun AlbumReplayGainProgressBottomSheet(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = when {
-                            uiState.isCalculatingAlbumReplayGain -> stringResource(R.string.album_replay_gain_calculating)
-                            else -> stringResource(
-                                R.string.batch_replay_gain_total_time,
-                                uiState.albumReplayGainTotalTimeMillis / 1000.0
-                            )
-                        },
+                    val statusText = when {
+                        uiState.isCalculatingAlbumReplayGain -> stringResource(R.string.album_replay_gain_calculating)
+                        else -> stringResource(
+                            R.string.batch_replay_gain_total_time,
+                            uiState.albumReplayGainTotalTimeMillis / 1000.0
+                        )
+                    }
+                    if (salt) com.moriafly.salt.ui.Text(
+                        text = statusText,
+                        style = SaltTheme.textStyles.sub,
+                        color = SaltTheme.colors.subText,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    ) else Text(
+                        text = statusText,
                         style = MiuixTheme.textStyles.subtitle,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -64,7 +82,12 @@ fun AlbumReplayGainProgressBottomSheet(
 
                     Spacer(modifier = Modifier.width(8.dp))
 
-                    Text(
+                    if (salt) com.moriafly.salt.ui.Text(
+                        text = "${(progress * 100).toInt()}%",
+                        style = SaltTheme.textStyles.main,
+                        color = SaltTheme.colors.text,
+                        textAlign = TextAlign.End
+                    ) else Text(
                         text = "${(progress * 100).toInt()}%",
                         style = MiuixTheme.textStyles.main,
                         textAlign = TextAlign.End
@@ -72,15 +95,14 @@ fun AlbumReplayGainProgressBottomSheet(
 
                 }
 
-                LinearProgressIndicator(
+                AppLinearProgressIndicator(
                     progress = progress,
                     modifier = Modifier.fillMaxWidth()
                 )
 
                     Column(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 12.dp),
+                            .fillMaxWidth(),
                         verticalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         Row(
@@ -88,14 +110,26 @@ fun AlbumReplayGainProgressBottomSheet(
                                 .fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text(
+                            if (salt) com.moriafly.salt.ui.Text(
+                                text = stringResource(
+                                    R.string.batch_replay_gain_success,
+                                    uiState.albumReplayGainWrittenCount
+                                ),
+                                style = SaltTheme.textStyles.main,
+                                color = SaltTheme.colors.text
+                            ) else Text(
                                 text = stringResource(
                                     R.string.batch_replay_gain_success,
                                     uiState.albumReplayGainWrittenCount
                                 ),
                                 style = MiuixTheme.textStyles.main
                             )
-                            Text(
+                            if (salt) com.moriafly.salt.ui.Text(
+                                text = "${uiState.albumReplayGainWrittenCount} / ${uiState.albumReplayGainSongCount}",
+                                style = SaltTheme.textStyles.main,
+                                color = SaltTheme.colors.text,
+                                textAlign = TextAlign.End
+                            ) else Text(
                                 text = "${uiState.albumReplayGainWrittenCount} / ${uiState.albumReplayGainSongCount}",
                                 style = MiuixTheme.textStyles.main,
                                 textAlign = TextAlign.End
@@ -105,36 +139,23 @@ fun AlbumReplayGainProgressBottomSheet(
 
 
 
-                Spacer(modifier = Modifier.height(12.dp))
             }
         },
-        endAction = {
-            TextButton(
-                colors = ButtonColors(
-                    containerColor = MiuixTheme.colorScheme.surface,
-                    contentColor = MiuixTheme.colorScheme.primary,
-                    disabledContainerColor = MiuixTheme.colorScheme.surface,
-                    disabledContentColor = MiuixTheme.colorScheme.disabledPrimary
-                ),
-                onClick = {
-                    if (uiState.isCalculatingAlbumReplayGain) {
-                        onAbort()
-                    } else {
-                        onDismissRequest()
-                    }
-                }
-            ) {
-                Text(
-                    text = when {
-                        uiState.isCalculatingAlbumReplayGain -> stringResource(R.string.action_abort)
-                        else -> stringResource(R.string.action_close)
-                    },
-                    color = when {
-                        uiState.isCalculatingAlbumReplayGain -> MiuixTheme.colorScheme.error
-                        else -> MiuixTheme.colorScheme.primary
-                    }
-                )
+        footer = {
+            val actionLabel = if (uiState.isCalculatingAlbumReplayGain) {
+                stringResource(R.string.action_abort)
+            } else {
+                stringResource(R.string.action_close)
             }
+            val onAction = {
+                if (uiState.isCalculatingAlbumReplayGain) onAbort() else onDismissRequest()
+            }
+            TextButton(
+                text = actionLabel,
+                onClick = onAction,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.textButtonColorsPrimary(),
+            )
         }
     )
 }

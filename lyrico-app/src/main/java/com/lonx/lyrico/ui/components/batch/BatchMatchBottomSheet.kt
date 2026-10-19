@@ -9,21 +9,24 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ButtonColors
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.lonx.lyrico.R
+import com.lonx.lyrico.data.model.UiEngine
+import com.lonx.lyrico.ui.components.base.SheetStatisticsRow
 import com.lonx.lyrico.ui.components.base.ActionBottomSheet
+import com.lonx.lyrico.ui.components.base.AppLinearProgressIndicator
+import com.lonx.lyrico.ui.theme.LocalUiEngine
 import com.lonx.lyrico.viewmodel.BatchMatchUiState
-import top.yukonga.miuix.kmp.basic.LinearProgressIndicator
+import com.moriafly.salt.ui.SaltTheme
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
+import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -34,10 +37,21 @@ fun BatchMatchBottomSheet(
     enableNestedScroll: Boolean = true,
     onAbort: () -> Unit
 ) {
+    val salt = LocalUiEngine.current == UiEngine.SALT
     ActionBottomSheet(
+        saltFooter = {
+            com.lonx.lyrico.ui.components.base.SheetProgressAction(
+                running = uiState.isRunning, onAbort = onAbort, onClose = onDismissRequest,
+            )
+        },
         show = uiState.isRunning || uiState.batchProgress != null,
         title = stringResource(R.string.batch_matching_title),
         enableNestedScroll = enableNestedScroll,
+        groupContent = true,
+        // 内容自带 verticalScroll，外壳不再提供滚动出口。
+        scrollContent = false,
+        // 进行中真正禁止关闭（返回键/外部点击/下拉）。
+        allowDismiss = !uiState.isRunning,
         content = {
             Column(
                 modifier = Modifier
@@ -57,7 +71,21 @@ fun BatchMatchBottomSheet(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(
+                            if (salt) com.moriafly.salt.ui.Text(
+                                text = if (uiState.isRunning) {
+                                    stringResource(R.string.batch_edit_processing)
+                                } else {
+                                    stringResource(
+                                        R.string.batch_matching_total_time,
+                                        uiState.batchTimeMillis / 1000.0
+                                    )
+                                },
+                                style = SaltTheme.textStyles.sub,
+                                color = SaltTheme.colors.subText,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f)
+                            ) else Text(
                                 text = if (uiState.isRunning) {
                                     stringResource(R.string.batch_edit_processing)
                                 } else {
@@ -74,14 +102,19 @@ fun BatchMatchBottomSheet(
 
                             Spacer(modifier = Modifier.width(8.dp))
 
-                            Text(
+                            if (salt) com.moriafly.salt.ui.Text(
+                                text = "$current / $total",
+                                style = SaltTheme.textStyles.main,
+                                color = SaltTheme.colors.text,
+                                textAlign = TextAlign.End
+                            ) else Text(
                                 text = "$current / $total",
                                 style = MiuixTheme.textStyles.main,
                                 textAlign = TextAlign.End
                             )
                         }
 
-                        LinearProgressIndicator(
+                        AppLinearProgressIndicator(
                             progress = progress,
                             modifier = Modifier.fillMaxWidth()
                         )
@@ -98,7 +131,14 @@ fun BatchMatchBottomSheet(
                                         horizontalArrangement = Arrangement.SpaceBetween,
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        Text(
+                                        if (salt) com.moriafly.salt.ui.Text(
+                                            text = fileName,
+                                            style = SaltTheme.textStyles.sub,
+                                            color = SaltTheme.colors.subText,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                            modifier = Modifier.weight(1f)
+                                        ) else Text(
                                             text = fileName,
                                             style = MiuixTheme.textStyles.footnote1,
                                             color = MiuixTheme.colorScheme.onSurfaceContainer,
@@ -107,13 +147,17 @@ fun BatchMatchBottomSheet(
                                             modifier = Modifier.weight(1f)
                                         )
                                         Spacer(modifier = Modifier.width(8.dp))
-                                        Text(
+                                        if (salt) com.moriafly.salt.ui.Text(
+                                            text = "$progressPercent%",
+                                            style = SaltTheme.textStyles.sub,
+                                            color = SaltTheme.colors.subText
+                                        ) else Text(
                                             text = "$progressPercent%",
                                             style = MiuixTheme.textStyles.footnote1,
                                             color = MiuixTheme.colorScheme.onSurfaceContainer
                                         )
                                     }
-                                    LinearProgressIndicator(
+                                    AppLinearProgressIndicator(
                                         progress = fileProgress,
                                         modifier = Modifier.fillMaxWidth()
                                     )
@@ -123,35 +167,58 @@ fun BatchMatchBottomSheet(
                     }
                 }
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 12.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                SheetStatisticsRow(
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(
-                        text = stringResource(
-                            R.string.batch_matching_success,
-                            uiState.successCount
-                        ),
-                        style = MiuixTheme.textStyles.main
-                    )
-                    Text(
-                        text = stringResource(
-                            R.string.batch_matching_skipped,
-                            uiState.skippedCount
-                        ),
-                        style = MiuixTheme.textStyles.main
-                    )
-                    Text(
-                        text = stringResource(
-                            R.string.batch_matching_failure,
-                            uiState.failureCount
-                        ),
-                        style = MiuixTheme.textStyles.main
-                    )
+                    if (salt) {
+                        com.moriafly.salt.ui.Text(
+                            text = stringResource(
+                                R.string.batch_matching_success,
+                                uiState.successCount
+                            ),
+                            style = SaltTheme.textStyles.main,
+                            color = SaltTheme.colors.text
+                        )
+                        com.moriafly.salt.ui.Text(
+                            text = stringResource(
+                                R.string.batch_matching_skipped,
+                                uiState.skippedCount
+                            ),
+                            style = SaltTheme.textStyles.main,
+                            color = SaltTheme.colors.text
+                        )
+                        com.moriafly.salt.ui.Text(
+                            text = stringResource(
+                                R.string.batch_matching_failure,
+                                uiState.failureCount
+                            ),
+                            style = SaltTheme.textStyles.main,
+                            color = SaltTheme.colors.text
+                        )
+                    } else {
+                        Text(
+                            text = stringResource(
+                                R.string.batch_matching_success,
+                                uiState.successCount
+                            ),
+                            style = MiuixTheme.textStyles.main
+                        )
+                        Text(
+                            text = stringResource(
+                                R.string.batch_matching_skipped,
+                                uiState.skippedCount
+                            ),
+                            style = MiuixTheme.textStyles.main
+                        )
+                        Text(
+                            text = stringResource(
+                                R.string.batch_matching_failure,
+                                uiState.failureCount
+                            ),
+                            style = MiuixTheme.textStyles.main
+                        )
+                    }
                 }
-                Spacer(modifier = Modifier.padding(vertical = 12.dp))
             }
         },
         onDismissRequest = {
@@ -160,33 +227,22 @@ fun BatchMatchBottomSheet(
         onDismissFinished = {
             onDismissFinished()
         },
-        endAction = {
-            TextButton(
-                colors = ButtonColors(
-                    containerColor = Color.Transparent,
-                    contentColor = MiuixTheme.colorScheme.primary,
-                    disabledContainerColor = Color.Transparent,
-                    disabledContentColor = MiuixTheme.colorScheme.disabledPrimary
-                ),
-                onClick = {
-                    if (uiState.isRunning) {
-                        onAbort()
-                    } else {
-                        onDismissRequest()
-                    }
+        footer = {
+            val actionLabel = if (uiState.isRunning) stringResource(R.string.action_abort)
+            else stringResource(R.string.action_close)
+            val onAction = {
+                if (uiState.isRunning) {
+                    onAbort()
+                } else {
+                    onDismissRequest()
                 }
-            ) {
-                Text(
-                    text = if (uiState.isRunning) stringResource(R.string.action_abort) else stringResource(
-                        R.string.action_close
-                    ),
-                    color = if (uiState.isRunning){
-                        MiuixTheme.colorScheme.error
-                    } else {
-                        MiuixTheme.colorScheme.primary
-                    }
-                )
             }
+            TextButton(
+                text = actionLabel,
+                onClick = onAction,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.textButtonColorsPrimary(),
+            )
         }
     )
 }

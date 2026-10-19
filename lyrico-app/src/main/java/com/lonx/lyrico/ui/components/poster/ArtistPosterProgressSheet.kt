@@ -6,10 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.ButtonColors
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,11 +15,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.lonx.lyrico.R
+import com.lonx.lyrico.data.model.UiEngine
 import com.lonx.lyrico.ui.components.base.ActionBottomSheet
+import com.lonx.lyrico.ui.components.base.AppLinearProgressIndicator
+import com.lonx.lyrico.ui.theme.LocalUiEngine
 import com.lonx.lyrico.viewmodel.ArtistPosterEmbedUiState
-import top.yukonga.miuix.kmp.basic.CircularProgressIndicator
-import top.yukonga.miuix.kmp.basic.LinearProgressIndicator
+import com.moriafly.salt.ui.SaltTheme
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
+import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /**
@@ -44,47 +45,52 @@ fun ArtistPosterProgressSheet(
     onCancel: () -> Unit,
     onGrantPermission: () -> Unit
 ) {
+    val salt = LocalUiEngine.current == UiEngine.SALT
     ActionBottomSheet(
+        saltFooter = {
+            com.lonx.lyrico.ui.components.base.SheetProgressAction(
+                running = state.isRunning, onAbort = onCancel,
+                onClose = {
+                    if (state.permissionIntentSender != null) onGrantPermission() else onDismissRequest()
+                },
+                label = stringResource(when {
+                    state.isRunning -> R.string.action_abort
+                    state.permissionIntentSender != null -> R.string.action_grant_permission
+                    state.message != null -> R.string.action_done
+                    else -> R.string.action_close
+                }),
+            )
+        },
         show = show,
         title = title,
         enableNestedScroll = false,
         allowDismiss = !state.isRunning,
         onDismissRequest = onDismissRequest,
         onDismissFinished = onDismissFinished,
-        startAction = {
-            if (state.isRunning) CircularProgressIndicator(size = 20.dp)
-        },
-        endAction = {
+        // Salt 侧裸内容需要分组获得标准内边距（内容不长，由外壳负责滚动）。
+        groupContent = true,
+        footer = {
             val message = state.message
             val permissionSender = state.permissionIntentSender
-            TextButton(
-                colors = ButtonColors(
-                    containerColor = MiuixTheme.colorScheme.surface,
-                    contentColor = MiuixTheme.colorScheme.primary,
-                    disabledContainerColor = MiuixTheme.colorScheme.surface,
-                    disabledContentColor = MiuixTheme.colorScheme.disabledPrimary
-                ),
-                onClick = {
-                    when {
-                        state.isRunning -> onCancel()
-                        permissionSender != null -> onGrantPermission()
-                        else -> onDismissRequest()
-                    }
-                }
-            ) {
-                Text(
-                    text = when {
-                        state.isRunning -> stringResource(R.string.action_abort)
-                        permissionSender != null -> stringResource(R.string.action_grant_permission)
-                        message != null -> stringResource(R.string.action_done)
-                        else -> stringResource(R.string.action_close)
-                    },
-                    color = when {
-                        state.isRunning -> MiuixTheme.colorScheme.error
-                        else -> MiuixTheme.colorScheme.primary
-                    }
-                )
+            val actionLabel = when {
+                state.isRunning -> stringResource(R.string.action_abort)
+                permissionSender != null -> stringResource(R.string.action_grant_permission)
+                message != null -> stringResource(R.string.action_done)
+                else -> stringResource(R.string.action_close)
             }
+            val onAction = {
+                when {
+                    state.isRunning -> onCancel()
+                    permissionSender != null -> onGrantPermission()
+                    else -> onDismissRequest()
+                }
+            }
+            TextButton(
+                text = actionLabel,
+                onClick = onAction,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.textButtonColorsPrimary(),
+            )
         },
         content = {
             Column(
@@ -93,7 +99,11 @@ fun ArtistPosterProgressSheet(
             ) {
                 // 结果只在结束后出现；进行中靠下面那行「正在写入哪首歌」说明进展
                 state.message?.let { message ->
-                    Text(
+                    if (salt) com.moriafly.salt.ui.Text(
+                        text = message,
+                        style = SaltTheme.textStyles.main,
+                        color = SaltTheme.colors.subText
+                    ) else Text(
                         text = message,
                         style = MiuixTheme.textStyles.main,
                         color = MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -105,7 +115,14 @@ fun ArtistPosterProgressSheet(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
+                    if (salt) com.moriafly.salt.ui.Text(
+                        text = state.activeSong ?: title,
+                        style = SaltTheme.textStyles.sub,
+                        color = SaltTheme.colors.subText,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    ) else Text(
                         text = state.activeSong
                             ?: title,
                         style = MiuixTheme.textStyles.subtitle,
@@ -114,14 +131,19 @@ fun ArtistPosterProgressSheet(
                         modifier = Modifier.weight(1f)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(
+                    if (salt) com.moriafly.salt.ui.Text(
+                        text = "${(state.progress * 100).toInt()}%",
+                        style = SaltTheme.textStyles.main,
+                        color = SaltTheme.colors.text,
+                        textAlign = TextAlign.End
+                    ) else Text(
                         text = "${(state.progress * 100).toInt()}%",
                         style = MiuixTheme.textStyles.main,
                         textAlign = TextAlign.End
                     )
                 }
 
-                LinearProgressIndicator(
+                AppLinearProgressIndicator(
                     progress = state.progress,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -130,7 +152,15 @@ fun ArtistPosterProgressSheet(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(
+                    if (salt) com.moriafly.salt.ui.Text(
+                        text = stringResource(
+                            R.string.label_artist_poster_write_count,
+                            state.done,
+                            state.total
+                        ),
+                        style = SaltTheme.textStyles.main,
+                        color = SaltTheme.colors.text
+                    ) else Text(
                         text = stringResource(
                             R.string.label_artist_poster_write_count,
                             state.done,
@@ -139,7 +169,14 @@ fun ArtistPosterProgressSheet(
                         style = MiuixTheme.textStyles.main
                     )
                     if (state.failures.isNotEmpty()) {
-                        Text(
+                        if (salt) com.moriafly.salt.ui.Text(
+                            text = stringResource(
+                                R.string.label_artist_poster_write_failed,
+                                state.failures.size
+                            ),
+                            style = SaltTheme.textStyles.main,
+                            color = SaltTheme.colors.error
+                        ) else Text(
                             text = stringResource(
                                 R.string.label_artist_poster_write_failed,
                                 state.failures.size
@@ -150,7 +187,6 @@ fun ArtistPosterProgressSheet(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(12.dp))
             }
         }
     )

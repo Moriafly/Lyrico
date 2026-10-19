@@ -1,3 +1,5 @@
+@file:OptIn(com.moriafly.salt.ui.UnstableSaltUiApi::class)
+
 package com.lonx.lyrico.screens
 
 import androidx.activity.compose.BackHandler
@@ -35,7 +37,26 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.core.net.toUri
+import androidx.compose.foundation.layout.ColumnScope
+import com.lonx.lyrico.data.model.UiEngine
+import com.lonx.lyrico.ui.theme.LocalUiEngine
+import com.lonx.lyrico.ui.components.library.LibraryDetailPage
+import com.lonx.lyrico.ui.components.library.LibraryDetailTabs
+import com.lonx.lyrico.ui.components.library.libraryDetailScroll
+import com.lonx.lyrico.ui.components.salt.SaltIconButton
+import com.lonx.lyrico.ui.components.salt.SaltBottomSheet
+import com.lonx.lyrico.ui.components.salt.SaltConfirmDialog
+import com.lonx.lyrico.ui.components.base.ItemMenuBottomSheet
+import com.lonx.lyrico.ui.components.base.ItemMenuAction
+import com.lonx.lyrico.ui.components.base.SheetProgressAction
+import com.lonx.lyrico.ui.components.base.AppLinearProgressIndicator
+import com.lonx.lyrico.ui.components.base.SheetStatisticsRow
+import com.moriafly.salt.ui.SaltTheme
+import com.moriafly.salt.ui.RoundedColumn
+import com.moriafly.salt.ui.Item
+import com.lonx.lyrico.ui.components.editor.SaltEditorField
+import com.moriafly.salt.ui.ItemOuterTitle
+import com.moriafly.salt.ui.Text as SaltText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -62,7 +83,7 @@ import coil3.compose.AsyncImage
 import com.lonx.lyrico.R
 import com.lonx.lyrico.ui.components.icons.PreferenceIconTone
 import com.lonx.lyrico.ui.components.icons.PreferenceIcon
-import com.lonx.lyrico.ui.components.icons.FilledIcons
+import com.lonx.lyrico.ui.components.icons.LucideIcons
 import com.lonx.lyrico.ui.components.library.EmptyStateKind
 import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.data.editfield.toEditFieldBlocks
@@ -82,6 +103,7 @@ import com.lonx.lyrico.viewmodel.BatchEditSelectableCover
 import com.lonx.lyrico.viewmodel.BatchEditSelectableValue
 import com.lonx.lyrico.viewmodel.BatchEditUiState
 import com.lonx.lyrico.viewmodel.BatchEditViewModel
+import com.lonx.lyrico.ui.components.miuix.MiuixBottomSheet
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.EditFieldSettingsDestination
@@ -96,10 +118,8 @@ import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.LinearProgressIndicator
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
-import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
-import top.yukonga.miuix.kmp.basic.TabRowWithContour
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TextField
@@ -107,7 +127,6 @@ import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
-import top.yukonga.miuix.kmp.window.WindowBottomSheet
 import top.yukonga.miuix.kmp.window.WindowDialog
 import androidx.compose.foundation.lazy.grid.items as gridItems
 
@@ -132,6 +151,7 @@ fun BatchEditScreen(
     var showSelectedCoverSheet by remember { mutableStateOf(false) }
     var selectedCoverOptions by remember { mutableStateOf<List<BatchEditSelectableCover>>(emptyList()) }
     var selectedCoverOptionsLoading by remember { mutableStateOf(false) }
+    var selectedCoverRequest by remember { mutableStateOf(0) }
     var showInfoDialog by remember { mutableStateOf(false) }
     var showAddCustomTagDialog by remember { mutableStateOf(false) }
     var showSelectedValueSheet by remember { mutableStateOf(false) }
@@ -139,6 +159,7 @@ fun BatchEditScreen(
     var selectedCustomValueKey by remember { mutableStateOf<String?>(null) }
     var selectedValueOptions by remember { mutableStateOf<List<BatchEditSelectableValue>>(emptyList()) }
     var selectedValueOptionsLoading by remember { mutableStateOf(false) }
+    var selectedValueRequest by remember { mutableStateOf(0) }
     var expandedFabMenu by remember { mutableStateOf(false) }
 
     val tabs = remember { BatchEditTab.entries }
@@ -191,26 +212,34 @@ fun BatchEditScreen(
     }
 
     fun openSelectedValueSheet(field: BatchEditField) {
+        val request = ++selectedValueRequest
         selectedValueField = field
         selectedCustomValueKey = null
         selectedValueOptions = emptyList()
         selectedValueOptionsLoading = true
         showSelectedValueSheet = true
         scope.launch {
-            selectedValueOptions = viewModel.getSelectedSongFieldValues(field)
-            selectedValueOptionsLoading = false
+            val values = viewModel.getSelectedSongFieldValues(field)
+            if (request == selectedValueRequest && showSelectedValueSheet) {
+                selectedValueOptions = values
+                selectedValueOptionsLoading = false
+            }
         }
     }
 
     fun openSelectedCustomValueSheet(key: String) {
+        val request = ++selectedValueRequest
         selectedValueField = null
         selectedCustomValueKey = key
         selectedValueOptions = emptyList()
         selectedValueOptionsLoading = true
         showSelectedValueSheet = true
         scope.launch {
-            selectedValueOptions = viewModel.getSelectedSongCustomTagValues(key)
-            selectedValueOptionsLoading = false
+            val values = viewModel.getSelectedSongCustomTagValues(key)
+            if (request == selectedValueRequest && showSelectedValueSheet) {
+                selectedValueOptions = values
+                selectedValueOptionsLoading = false
+            }
         }
     }
 
@@ -226,12 +255,16 @@ fun BatchEditScreen(
     }
 
     fun openSelectedCoverSheet() {
+        val request = ++selectedCoverRequest
         selectedCoverOptions = emptyList()
         selectedCoverOptionsLoading = true
         showSelectedCoverSheet = true
         scope.launch {
-            selectedCoverOptions = viewModel.getSelectedSongCovers()
-            selectedCoverOptionsLoading = false
+            val covers = viewModel.getSelectedSongCovers()
+            if (request == selectedCoverRequest && showSelectedCoverSheet) {
+                selectedCoverOptions = covers
+                selectedCoverOptionsLoading = false
+            }
         }
     }
 
@@ -250,6 +283,7 @@ fun BatchEditScreen(
         }
     }
 
+    val salt = LocalUiEngine.current == UiEngine.SALT
     val topAppBarScrollBehavior = MiuixScrollBehavior()
 
     BackHandler(
@@ -263,263 +297,257 @@ fun BatchEditScreen(
             }
         }
     }
-    Box(
-        modifier = Modifier.fillMaxSize()
-    ){
-        Scaffold(
-            modifier = Modifier.fillMaxSize(),
-            topBar = {
-                SmallTopAppBar(
-                    title = stringResource(R.string.batch_edit_title),
-                    navigationIcon = {
-                        IconButton(
-                            onClick = {
-                                if (!uiState.isSaving) navigator.popBackStack()
-                            }
-                        ) {
-                            Icon(
-                                imageVector = FilledIcons.ArrowLeft,
-                                contentDescription = stringResource(R.string.action_back)
-                            )
+Box(
+    modifier = Modifier.fillMaxSize()
+){
+    LibraryDetailPage(
+        title = stringResource(R.string.batch_edit_title),
+        onBack = { if (!uiState.isSaving) navigator.popBackStack() },
+        actions = { SaltIconButton(LucideIcons.Check, stringResource(R.string.confirm),
+            { viewModel.saveBatchEdit() }, enabled = !uiState.isSaving) },
+        miuixTopBar = {
+            SmallTopAppBar(
+                title = stringResource(R.string.batch_edit_title),
+                navigationIcon = {
+                    IconButton(
+                        onClick = {
+                            if (!uiState.isSaving) navigator.popBackStack()
                         }
-                    },
-                    actions = {
-                        IconButton(
-                            onClick = { viewModel.saveBatchEdit() },
-                            enabled = !uiState.isSaving
-                        ) {
-                            Icon(
-                                imageVector = FilledIcons.Check,
-                                contentDescription = null
-                            )
-                        }
-                    },
-                    scrollBehavior = topAppBarScrollBehavior
-                )
-            }
-        ) { paddingValues ->
-            Box(modifier = Modifier.fillMaxSize()) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(scaffoldTopHorizontalPadding(paddingValues))
-                ) {
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 12.dp)
-                            .padding(bottom = 8.dp)
                     ) {
-                        val tabLabels = tabs.map { tab ->
-                            when (tab) {
-                                BatchEditTab.Config -> stringResource(tab.labelRes)
-                                BatchEditTab.Preview -> stringResource(
-                                    tab.labelRes,
-                                    editPreviews.size
-                                )
-                            }
-                        }
-                        TabRowWithContour(
-                            tabs = tabLabels,
-                            selectedTabIndex = pagerState.currentPage,
-                            onTabSelected = { index ->
-                                scope.launch {
-                                    expandedFabMenu = false
-                                    pagerState.animateScrollToPage(index)
-                                }
-                            }
+                        Icon(
+                            imageVector = LucideIcons.ArrowLeft,
+                            contentDescription = stringResource(R.string.action_back)
                         )
                     }
+                },
+                actions = {
+                    IconButton(
+                        onClick = { viewModel.saveBatchEdit() },
+                        enabled = !uiState.isSaving
+                    ) {
+                        Icon(
+                            imageVector = LucideIcons.Check,
+                            contentDescription = null
+                        )
+                    }
+                },
+                scrollBehavior = topAppBarScrollBehavior
+            )
+        }
+    ) { paddingValues ->
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(scaffoldTopHorizontalPadding(paddingValues))
+            ) {
+                val tabLabels = tabs.map { tab ->
+                    if (tab == BatchEditTab.Preview) stringResource(tab.labelRes, editPreviews.size)
+                    else stringResource(tab.labelRes)
+                }
+                LibraryDetailTabs(tabLabels, pagerState.currentPage, { index ->
+                    scope.launch { expandedFabMenu = false; pagerState.animateScrollToPage(index) }
+                })
 
-                    HorizontalPager(
-                        state = pagerState,
-                        modifier = Modifier.fillMaxSize(),
-                        key = { index -> tabs[index].name }
-                    ) { page ->
-                        when (tabs[page]) {
-                            BatchEditTab.Config ->
-                                LazyColumn(
-                                    modifier = Modifier
-                                        .scrollEndHaptic()
-                                        .overScrollVertical()
-                                        .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
-                                        .fillMaxHeight()
-                                        .imePadding(),
-                                    contentPadding = PaddingValues(
-                                        bottom = scaffoldBottomPadding(paddingValues, bottomExtra = 80.dp),
-                                    ),
-                                    overscrollEffect = null,
-                                ) {
-                                    // 歌曲数量信息
-                                    item(key = "song_count") {
-                                        SmallTitle(
-                                            text = stringResource(
-                                                R.string.batch_edit_song_count,
-                                                uiState.songCount
-                                            )
-                                        )
-                                    }
-
-                                    fieldBlocks.forEach { block ->
-                                        val field = block.fields.first()
-                                        val fieldCode = field.code
-
-                                        // 自定义标签没有内置字段枚举，单独渲染。
-                                        if (field.custom) {
-                                            val key = EditFieldRegistry.customTagKeyOf(fieldCode)
-                                            if (key != null) {
-                                                item(key = fieldCode) {
-                                                    Card(
-                                                        modifier = Modifier.padding(
-                                                            horizontal = 12.dp,
-                                                            vertical = 6.dp
-                                                        )
-                                                    ) {
-                                                        Column(modifier = Modifier.padding(vertical = 6.dp)) {
-                                                            BatchEditCustomFieldItem(
-                                                                keyName = key,
-                                                                value = uiState.customFields
-                                                                    .firstOrNull { it.key == key }
-                                                                    ?.value
-                                                                    ?: "<keep>",
-                                                                onValueChange = { value ->
-                                                                    viewModel.setCustomFieldValue(
-                                                                        key = key,
-                                                                        value = value
-                                                                    )
-                                                                },
-                                                                onKeep = {
-                                                                    viewModel.keepCustomField(key)
-                                                                },
-                                                                onSelectFromSongs = {
-                                                                    openSelectedCustomValueSheet(key)
-                                                                },
-                                                            )
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                            return@forEach
-                                        }
-
-                                        item(key = block.key) {
-                                            Card(modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)) {
-                                                Column(modifier = Modifier.padding(vertical = 6.dp)) {
-                                                    block.fields.forEach { member ->
-                                                        val editField = BatchEditField.entries.firstOrNull { it.target == member.target }
-                                                        when (member.code) {
-                                                            // 封面和评级共用一张卡片，分别保留显隐开关。
-                                                            "picture" -> BatchEditCoverSection(
-                                                                coverUri = uiState.coverUri,
-                                                                isRemoved = uiState.removeCover,
-                                                                onCoverClick = {
-                                                                    showCoverOptionsSheet = true
-                                                                }
-                                                            )
-
-                                                            "rating" -> BatchEditRatingItem(
-                                                                rating = uiState.rating,
-                                                                isModified = uiState.ratingModified,
-                                                                onRatingChange = {
-                                                                    viewModel.updateRating(it)
-                                                                },
-                                                                onRevert = { viewModel.resetRating() }
-                                                            )
-
-                                                            // 歌词偏移是数值调整控件，不是标签字段；正负号由控件本身表达，无需额外说明。
-                                                            "lyrics_offset" -> {
-                                                                LyricsOffsetField(
-                                                                    offset = uiState.lyricsOffset,
-                                                                    onOffsetChange = {
-                                                                        viewModel.updateLyricsOffset(it)
-                                                                    },
-                                                                    enabled = !uiState.isSaving,
-                                                                    modifier = Modifier.padding(
-                                                                        horizontal = 12.dp,
-                                                                        vertical = 6.dp
-                                                                    )
-                                                                )
-                                                            }
-
-                                                            else -> BatchEditFieldItem(
-                                                                field = requireNotNull(editField),
-                                                                value = editField.currentValueIn(uiState),
-                                                                onValueChange = { newValue ->
-                                                                    editField.applyTo(viewModel, newValue)
-                                                                },
-                                                                onSelectFromSongs = {
-                                                                    openSelectedValueSheet(editField)
-                                                                },
-                                                                isMultiline = editField == BatchEditField.LYRICS
-                                                            )
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier.fillMaxSize(),
+                    key = { index -> tabs[index].name }
+                ) { page ->
+                    when (tabs[page]) {
+                        BatchEditTab.Config ->
+                            LazyColumn(
+                                modifier = Modifier
+                                    .libraryDetailScroll(topAppBarScrollBehavior)
+                                    .fillMaxHeight()
+                                    .then(if (salt) Modifier else Modifier.imePadding()),
+                                contentPadding = PaddingValues(
+                                    bottom = scaffoldBottomPadding(paddingValues, bottomExtra = 80.dp),
+                                ),
+                            ) {
+                                // 歌曲数量信息
+                                item(key = "song_count") {
+                                    if (salt) ItemOuterTitle(stringResource(R.string.batch_edit_song_count, uiState.songCount))
+                                    else SmallTitle(stringResource(R.string.batch_edit_song_count, uiState.songCount))
                                 }
 
-                            BatchEditTab.Preview -> BatchEditPreviewTab(
-                                previews = editPreviews,
-                                bottomPadding = scaffoldBottomPadding(paddingValues),
-                                topAppBarNestedScrollConnection = topAppBarScrollBehavior.nestedScrollConnection
-                            )
-                        }
+                                fieldBlocks.forEach { block ->
+                                    val field = block.fields.first()
+                                    val fieldCode = field.code
+
+                                    // 自定义标签没有内置字段枚举，单独渲染。
+                                    if (field.custom) {
+                                        val key = EditFieldRegistry.customTagKeyOf(fieldCode)
+                                        if (key != null) {
+                                            item(key = fieldCode) {
+                                                BatchEditorGroup {
+                                                    Column {
+                                                        BatchEditCustomFieldItem(
+                                                            keyName = key,
+                                                            value = uiState.customFields
+                                                                .firstOrNull { it.key == key }
+                                                                ?.value
+                                                                ?: "<keep>",
+                                                            onValueChange = { value ->
+                                                                viewModel.setCustomFieldValue(
+                                                                    key = key,
+                                                                    value = value
+                                                                )
+                                                            },
+                                                            onKeep = {
+                                                                viewModel.keepCustomField(key)
+                                                            },
+                                                            onSelectFromSongs = {
+                                                                openSelectedCustomValueSheet(key)
+                                                            },
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        return@forEach
+                                    }
+
+                                    item(key = block.key) {
+                                        BatchEditorGroup {
+                                            Column {
+                                                block.fields.forEach { member ->
+                                                    val editField = BatchEditField.entries.firstOrNull { it.target == member.target }
+                                                    when (member.code) {
+                                                        // 封面和评级共用一张卡片，分别保留显隐开关。
+                                                        "picture" -> BatchEditCoverSection(
+                                                            coverUri = uiState.coverUri,
+                                                            isRemoved = uiState.removeCover,
+                                                            onCoverClick = {
+                                                                showCoverOptionsSheet = true
+                                                            }
+                                                        )
+
+                                                        "rating" -> BatchEditRatingItem(
+                                                            rating = uiState.rating,
+                                                            isModified = uiState.ratingModified,
+                                                            onRatingChange = {
+                                                                viewModel.updateRating(it)
+                                                            },
+                                                            onRevert = { viewModel.resetRating() }
+                                                        )
+
+                                                        // 歌词偏移是数值调整控件，不是标签字段；正负号由控件本身表达，无需额外说明。
+                                                        "lyrics_offset" -> {
+                                                            LyricsOffsetField(
+                                                                offset = uiState.lyricsOffset,
+                                                                onOffsetChange = {
+                                                                    viewModel.updateLyricsOffset(it)
+                                                                },
+                                                                enabled = !uiState.isSaving,
+                                                                modifier = Modifier.padding(
+                                                                    horizontal = 12.dp,
+                                                                    vertical = 6.dp
+                                                                )
+                                                            )
+                                                        }
+
+                                                        else -> BatchEditFieldItem(
+                                                            field = requireNotNull(editField),
+                                                            value = editField.currentValueIn(uiState),
+                                                            onValueChange = { newValue ->
+                                                                editField.applyTo(viewModel, newValue)
+                                                            },
+                                                            onSelectFromSongs = {
+                                                                openSelectedValueSheet(editField)
+                                                            },
+                                                            isMultiline = editField == BatchEditField.LYRICS
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                            }
+
+                        BatchEditTab.Preview -> BatchEditPreviewTab(
+                            previews = editPreviews,
+                            bottomPadding = scaffoldBottomPadding(paddingValues),
+                            topAppBarNestedScrollConnection = topAppBarScrollBehavior.nestedScrollConnection
+                        )
                     }
                 }
             }
         }
-        ExpandableFabMenu(
-            visible = currentTab == BatchEditTab.Config,
-            expanded = expandedFabMenu,
-            enabled = !uiState.isSaving,
-            style = ExpandableFabMenuStyle.default().copy(
-                mainIcon = FilledIcons.Plus
-            ),
-            itemCount = 3,
-            onExpandedChange = { expandedFabMenu = it }
-        ) {
-            FabMenuItem(
-                label = stringResource(R.string.action_add_custom_tag),
-                icon = FilledIcons.Plus,
-                enabled = !uiState.isSaving,
-                onClick = {
-                    expandedFabMenu = false
-                    showAddCustomTagDialog = true
-                }
-            )
-            FabMenuItem(
-                label = stringResource(R.string.edit_field_settings_title),
-                icon = FilledIcons.Settings,
-                enabled = !uiState.isSaving,
-                onClick = {
-                    expandedFabMenu = false
-                    navigator.navigate(EditFieldSettingsDestination())
-                }
-            )
-            FabMenuItem(
-                label = stringResource(R.string.batch_edit_info_summary),
-                icon = FilledIcons.Info,
-                enabled = !uiState.isSaving,
-                onClick = {
-                    expandedFabMenu = false
-                    showInfoDialog = true
-                }
-            )
-        }
     }
+    ExpandableFabMenu(
+        visible = currentTab == BatchEditTab.Config,
+        expanded = expandedFabMenu,
+        enabled = !uiState.isSaving,
+        style = ExpandableFabMenuStyle.default().copy(
+            mainIcon = LucideIcons.Plus
+        ),
+        itemCount = 3,
+        onExpandedChange = { expandedFabMenu = it }
+    ) {
+        FabMenuItem(
+            label = stringResource(R.string.action_add_custom_tag),
+            icon = LucideIcons.Plus,
+            enabled = !uiState.isSaving,
+            onClick = {
+                expandedFabMenu = false
+                showAddCustomTagDialog = true
+            }
+        )
+        FabMenuItem(
+            label = stringResource(R.string.edit_field_settings_title),
+            icon = LucideIcons.Settings,
+            enabled = !uiState.isSaving,
+            onClick = {
+                expandedFabMenu = false
+                navigator.navigate(EditFieldSettingsDestination())
+            }
+        )
+        FabMenuItem(
+            label = stringResource(R.string.batch_edit_info_summary),
+            icon = LucideIcons.Info,
+            enabled = !uiState.isSaving,
+            onClick = {
+                expandedFabMenu = false
+                showInfoDialog = true
+            }
+        )
+    }
+}
 
+    if (salt) {
+    SaltBatchOverlays(
+        viewModel, uiState, showCoverOptionsSheet, { showCoverOptionsSheet = false },
+        onPickCover = { photoPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
+        onSelectCover = { openSelectedCoverSheet() }, onAlbumCover = { loadSameAlbumCovers() },
+        showSelectedValueSheet, { showSelectedValueSheet = false },
+        selectedValueField?.let { stringResource(it.labelResId) } ?: selectedCustomValueKey.orEmpty(),
+        selectedValueOptionsLoading, selectedValueOptions,
+        onValue = { value ->
+            selectedValueField?.let { applySelectedValue(it, value) }
+            selectedCustomValueKey?.let { viewModel.setCustomFieldValue(it, value) }
+            showSelectedValueSheet = false
+        },
+        showSelectedCoverSheet, { showSelectedCoverSheet = false },
+        selectedCoverOptionsLoading, selectedCoverOptions,
+        onCover = { option -> scope.launch {
+            viewModel.getSelectedSongCover(option.sourceUri)?.let { applyCoverSource(it); showSelectedCoverSheet = false }
+        } },
+        showInfoDialog, { showInfoDialog = false },
+        showAddCustomTagDialog, { showAddCustomTagDialog = false },
+        onSaved = { if (uiState.saveSuccess == true) navigator.popBackStack() },
+    )
+    } else {
     // 封面操作 BottomSheet
-    WindowBottomSheet(
+    MiuixBottomSheet(
         show = showCoverOptionsSheet,
         onDismissRequest = { showCoverOptionsSheet = false }
     ) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 32.dp)
                 .scrollEndHaptic()
                 .overScrollVertical(),
             overscrollEffect = null
@@ -529,7 +557,7 @@ fun BatchEditScreen(
                     colors = CardDefaults.defaultColors(color = MiuixTheme.colorScheme.secondaryContainer)
                 ) {
                     ArrowPreference(
-                        startAction = { PreferenceIcon(FilledIcons.ImageAdd, PreferenceIconTone.Library) },
+                        startAction = { PreferenceIcon(LucideIcons.ImageAdd, PreferenceIconTone.Appearance) },
                         title = stringResource(R.string.batch_edit_cover_change),
                         onClick = {
                             showCoverOptionsSheet = false
@@ -541,7 +569,7 @@ fun BatchEditScreen(
                         }
                     )
                     ArrowPreference(
-                        startAction = { PreferenceIcon(FilledIcons.ImageLibrary, PreferenceIconTone.Library) },
+                        startAction = { PreferenceIcon(LucideIcons.ImageLibrary, PreferenceIconTone.Tools) },
                         title = stringResource(R.string.batch_edit_select_cover_from_selected_songs),
                         onClick = {
                             showCoverOptionsSheet = false
@@ -549,7 +577,7 @@ fun BatchEditScreen(
                         }
                     )
                     ArrowPreference(
-                        startAction = { PreferenceIcon(FilledIcons.Disc, PreferenceIconTone.Library) },
+                        startAction = { PreferenceIcon(LucideIcons.Disc, PreferenceIconTone.Library) },
                         title = stringResource(R.string.label_select_same_album_cover),
                         onClick = {
                             showCoverOptionsSheet = false
@@ -557,7 +585,7 @@ fun BatchEditScreen(
                         }
                     )
                     ArrowPreference(
-                        startAction = { PreferenceIcon(FilledIcons.Trash, PreferenceIconTone.Danger) },
+                        startAction = { PreferenceIcon(LucideIcons.Trash, PreferenceIconTone.Danger) },
                         title = stringResource(R.string.batch_edit_cover_remove),
                         onClick = {
                             showCoverOptionsSheet = false
@@ -566,7 +594,7 @@ fun BatchEditScreen(
                     )
                     if (uiState.coverUri != null || uiState.removeCover) {
                         ArrowPreference(
-                            startAction = { PreferenceIcon(FilledIcons.Undo, PreferenceIconTone.Tools) },
+                            startAction = { PreferenceIcon(LucideIcons.Undo, PreferenceIconTone.Lyrics) },
                             title = stringResource(R.string.batch_edit_cover_revert),
                             onClick = {
                                 showCoverOptionsSheet = false
@@ -579,7 +607,7 @@ fun BatchEditScreen(
         }
     }
 
-    WindowBottomSheet(
+    MiuixBottomSheet(
         show = showSelectedValueSheet,
         enableNestedScroll = false,
         title = selectedValueField?.let { stringResource(it.labelResId) }
@@ -588,7 +616,6 @@ fun BatchEditScreen(
     ) {
         Column(
             modifier = Modifier
-                .padding(bottom = 32.dp)
                 .fillMaxWidth()
         ) {
 
@@ -638,7 +665,7 @@ fun BatchEditScreen(
         }
     }
 
-    WindowBottomSheet(
+    MiuixBottomSheet(
         show = showSelectedCoverSheet,
         enableNestedScroll = false,
         title = stringResource(R.string.batch_edit_select_cover_from_selected_songs),
@@ -647,7 +674,6 @@ fun BatchEditScreen(
         LazyVerticalGrid(
             columns = GridCells.Adaptive(minSize = 96.dp),
             modifier = Modifier
-                .padding(bottom = 32.dp)
                 .fillMaxWidth()
                 .scrollEndHaptic()
                 .overScrollVertical(),
@@ -721,7 +747,7 @@ fun BatchEditScreen(
     }
 
     // 保存进度对话框
-    WindowBottomSheet(
+    MiuixBottomSheet(
         show = uiState.saveProgressBottomSheet,
         onDismissRequest = {
             if (!uiState.isSaving) viewModel.closeSaveBottomSheet()
@@ -733,10 +759,25 @@ fun BatchEditScreen(
         },
         allowDismiss = !uiState.isSaving,
         title = stringResource(R.string.batch_edit_title),
+        footer = {
+            TextButton(
+                text = if (uiState.isSaving) stringResource(R.string.action_abort) else stringResource(
+                    R.string.confirm
+                ),
+                onClick = {
+                    if (uiState.isSaving) {
+                        viewModel.abortSave()
+                    } else {
+                        viewModel.closeSaveBottomSheet()
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.textButtonColorsPrimary(),
+            )
+        },
     ) {
         Column(
             modifier = Modifier
-                .padding(bottom = 32.dp)
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
         ) {
@@ -780,9 +821,7 @@ fun BatchEditScreen(
             }
 
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 12.dp),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
@@ -808,20 +847,7 @@ fun BatchEditScreen(
                 )
             }
 
-            TextButton(
-                text = if (uiState.isSaving) stringResource(R.string.action_abort) else stringResource(
-                    R.string.confirm
-                ),
-                onClick = {
-                    if (uiState.isSaving) {
-                        viewModel.abortSave()
-                    } else {
-                        viewModel.closeSaveBottomSheet()
-                    }
-                },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.textButtonColorsPrimary(),
-            )
+
 
         }
     }
@@ -874,6 +900,7 @@ fun BatchEditScreen(
         }
     }
 
+    }
 }
 
 @Composable
@@ -939,8 +966,10 @@ private fun BatchEditValueOptionItem(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
+                .heightIn(min = 56.dp)
                 .clickable { onClick() }
-                .padding(horizontal = 14.dp, vertical = 6.dp)
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            contentAlignment = Alignment.CenterStart,
         ) {
             Text(
                 text = option.value,
@@ -959,6 +988,19 @@ private fun BatchEditRatingItem(
     onRatingChange: (Int) -> Unit,
     onRevert: () -> Unit
 ) {
+    if (LocalUiEngine.current == UiEngine.SALT) {
+        Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically) {
+            Row(Modifier.weight(1f)) { (1..5).forEach { value ->
+                SaltIconButton(LucideIcons.Star, "$value", { onRatingChange(if (rating == value) 0 else value) },
+                    tint = if (value <= rating) SaltTheme.colors.highlight else SaltTheme.colors.subText,
+                    size = 36.dp, iconSize = 24.dp)
+            } }
+            if (isModified) SaltIconButton(LucideIcons.Undo, stringResource(R.string.action_undo_changes), onRevert, size = 36.dp)
+            else SaltText("<keep>", style = SaltTheme.textStyles.sub, color = SaltTheme.colors.subText)
+        }
+        return
+    }
     val onSurfaceDim = MiuixTheme.colorScheme.onSurfaceVariantActions
 
     Column(
@@ -1048,6 +1090,18 @@ private fun BatchEditCoverSection(
     isRemoved: Boolean,
     onCoverClick: () -> Unit
 ) {
+    if (LocalUiEngine.current == UiEngine.SALT) {
+        Column(Modifier.fillMaxWidth().clickable(onClick = onCoverClick).padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (coverUri != null && !isRemoved) AsyncImage(coverUri, null,
+                modifier = Modifier.size(128.dp).clip(RoundedCornerShape(8.dp)), contentScale = ContentScale.Fit)
+            else com.moriafly.salt.ui.Icon(androidx.compose.ui.graphics.vector.rememberVectorPainter(LucideIcons.Image),
+                null, modifier = Modifier.size(40.dp), tint = SaltTheme.colors.subText)
+            SaltText(stringResource(if (isRemoved) R.string.batch_edit_cover_remove else R.string.batch_edit_cover_hint),
+                style = SaltTheme.textStyles.sub, color = if (isRemoved) SaltTheme.colors.error else SaltTheme.colors.subText)
+        }
+        return
+    }
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -1105,6 +1159,31 @@ private fun BatchEditPreviewTab(
     bottomPadding: androidx.compose.ui.unit.Dp,
     topAppBarNestedScrollConnection: NestedScrollConnection
 ) {
+    if (LocalUiEngine.current == UiEngine.SALT) {
+        var expandedKey by remember { mutableStateOf<String?>(null) }
+        LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = bottomPadding + 12.dp)) {
+            if (previews.isEmpty()) item { IllustratedEmptyState(kind = EmptyStateKind.Tasks,
+                title = stringResource(R.string.batch_edit_preview_empty), modifier = Modifier.fillMaxWidth()) }
+            items(previews, key = { it.songUri }) { preview ->
+                RoundedColumn {
+                    Item(text = preview.fileName, sub = stringResource(R.string.batch_edit_preview_change_count, preview.changes.size),
+                        onClick = { expandedKey = if (expandedKey == preview.songUri) null else preview.songUri })
+                    AnimatedVisibility(expandedKey == preview.songUri) {
+                        Column(Modifier.padding(horizontal = 16.dp).padding(bottom = 16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            preview.changes.forEach { change ->
+                                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                    SaltText(change.labelResId?.let { stringResource(it) } ?: change.customLabel.orEmpty(), color = SaltTheme.colors.highlight)
+                                    SaltText(stringResource(R.string.batch_edit_preview_old_value, displayBatchEditPreviewValue(change.oldValue)), style = SaltTheme.textStyles.sub, color = SaltTheme.colors.subText)
+                                    SaltText(stringResource(R.string.batch_edit_preview_new_value, displayBatchEditPreviewValue(change.newValue)), style = SaltTheme.textStyles.sub)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return
+    }
     var expandedPreviewKey by remember { mutableStateOf<String?>(null) }
 
     LazyColumn(
@@ -1220,6 +1299,11 @@ private fun BatchEditFieldItem(
     onSelectFromSongs: () -> Unit,
     isMultiline: Boolean = false
 ) {
+    if (LocalUiEngine.current == UiEngine.SALT) {
+        SaltBatchField(stringResource(field.labelResId), value, onValueChange,
+            onKeep = { onValueChange("<keep>") }, onSelectFromSongs, isMultiline)
+        return
+    }
     val isKeep = value == "<keep>"
 
     if (isMultiline) {
@@ -1268,7 +1352,7 @@ private fun BatchEditFieldItem(
                 }
                 IconButton(onClick = onSelectFromSongs) {
                     Icon(
-                        imageVector = FilledIcons.ArrowDownUp,
+                        imageVector = LucideIcons.ListCheck,
                         contentDescription = stringResource(R.string.batch_edit_select_from_selected_songs)
                     )
                 }
@@ -1277,7 +1361,7 @@ private fun BatchEditFieldItem(
                 textStyle = MiuixTheme.textStyles.body2,
                 modifier = Modifier.fillMaxWidth(),
                 value = value,
-                label = stringResource(field.labelResId) + if (isKeep) " (无修改)" else "",
+                label = if (isKeep) stringResource(R.string.batch_edit_unchanged_field_label, stringResource(field.labelResId)) else stringResource(field.labelResId),
                 onValueChange = onValueChange,
                 singleLine = false,
                 minLines = 6
@@ -1290,14 +1374,14 @@ private fun BatchEditFieldItem(
                 .padding(horizontal = 12.dp, vertical = 6.dp),
             value = value,
             onValueChange = onValueChange,
-            label = stringResource(field.labelResId) + if (isKeep) " (无修改)" else "",
+            label = if (isKeep) stringResource(R.string.batch_edit_unchanged_field_label, stringResource(field.labelResId)) else stringResource(field.labelResId),
             trailingIcon = {
                 Row {
                     IconButton(onClick = {
                         onValueChange(if (isKeep) "" else "<keep>")
                     }) {
                         Icon(
-                            imageVector = if (isKeep) FilledIcons.Close else FilledIcons.Undo,
+                            imageVector = if (isKeep) LucideIcons.Close else LucideIcons.Undo,
                             contentDescription = null,
                             tint = if (isKeep)
                                 MiuixTheme.colorScheme.primary
@@ -1307,7 +1391,7 @@ private fun BatchEditFieldItem(
                     }
                     IconButton(onClick = onSelectFromSongs) {
                         Icon(
-                            imageVector = FilledIcons.ArrowDownUp,
+                            imageVector = LucideIcons.ListCheck,
                             contentDescription = stringResource(R.string.batch_edit_select_from_selected_songs)
                         )
                     }
@@ -1328,6 +1412,10 @@ private fun BatchEditCustomFieldItem(
     onKeep: () -> Unit,
     onSelectFromSongs: () -> Unit,
 ) {
+    if (LocalUiEngine.current == UiEngine.SALT) {
+        SaltBatchField(keyName, value, onValueChange, onKeep, onSelectFromSongs)
+        return
+    }
     val isKeep = value == "<keep>"
 
     TextField(
@@ -1336,7 +1424,7 @@ private fun BatchEditCustomFieldItem(
             .padding(horizontal = 12.dp, vertical = 6.dp),
         value = value,
         onValueChange = onValueChange,
-        label = keyName + if (isKeep) " (无修改)" else "",
+        label = if (isKeep) stringResource(R.string.batch_edit_unchanged_field_label, keyName) else keyName,
         trailingIcon = {
             Row {
                 IconButton(onClick = {
@@ -1347,7 +1435,7 @@ private fun BatchEditCustomFieldItem(
                     }
                 }) {
                     Icon(
-                        imageVector = if (isKeep) FilledIcons.Close else FilledIcons.Undo,
+                        imageVector = if (isKeep) LucideIcons.Close else LucideIcons.Undo,
                         contentDescription = null,
                         tint = if (isKeep)
                             MiuixTheme.colorScheme.primary
@@ -1357,7 +1445,7 @@ private fun BatchEditCustomFieldItem(
                 }
                 IconButton(onClick = onSelectFromSongs) {
                     Icon(
-                        imageVector = FilledIcons.ArrowDownUp,
+                        imageVector = LucideIcons.ListCheck,
                         contentDescription = stringResource(R.string.batch_edit_select_from_selected_songs)
                     )
                 }
@@ -1415,5 +1503,138 @@ private fun BatchEditField.applyTo(viewModel: BatchEditViewModel, value: String)
             viewModel.updateReplayGainReferenceLoudness(value)
         // 封面与评级走各自的组合件回调。
         BatchEditField.COVER, BatchEditField.RATING -> Unit
+    }
+}
+
+
+@Composable
+private fun BatchEditorGroup(content: @Composable ColumnScope.() -> Unit) {
+    if (LocalUiEngine.current == UiEngine.SALT) RoundedColumn(content = content)
+    else Card(Modifier.padding(horizontal = 12.dp, vertical = 6.dp)) {
+        Column(Modifier.padding(vertical = 6.dp), content = content)
+    }
+}
+
+@Composable
+private fun SaltBatchField(
+    label: String, value: String, onChange: (String) -> Unit,
+    onKeep: () -> Unit, onSelect: () -> Unit, multiline: Boolean = false,
+) {
+    val keep = value == "<keep>"
+    val fieldLabel = if (keep) stringResource(R.string.batch_edit_unchanged_field_label, label) else label
+    SaltEditorField(fieldLabel, value, onChange, multiline = multiline, grouped = false) {
+        SaltIconButton(if (keep) LucideIcons.Close else LucideIcons.Undo,
+            stringResource(if (keep) R.string.action_delete else R.string.action_undo_changes),
+            { if (keep) onChange("") else onKeep() },
+            tint = if (keep) SaltTheme.colors.highlight else SaltTheme.colors.error,
+            size = 32.dp, iconSize = 18.dp)
+        SaltIconButton(LucideIcons.ListCheck,
+            stringResource(R.string.batch_edit_select_from_selected_songs), onSelect,
+            size = 32.dp, iconSize = 18.dp)
+    }
+}
+
+@Composable
+private fun SaltBatchOverlays(
+    viewModel: BatchEditViewModel, state: BatchEditUiState,
+    showCoverMenu: Boolean, closeCoverMenu: () -> Unit,
+    onPickCover: () -> Unit, onSelectCover: () -> Unit, onAlbumCover: () -> Unit,
+    showValues: Boolean, closeValues: () -> Unit, valueTitle: String,
+    valuesLoading: Boolean, values: List<BatchEditSelectableValue>, onValue: (String) -> Unit,
+    showCovers: Boolean, closeCovers: () -> Unit,
+    coversLoading: Boolean, covers: List<BatchEditSelectableCover>, onCover: (BatchEditSelectableCover) -> Unit,
+    showInfo: Boolean, closeInfo: () -> Unit,
+    showCustom: Boolean, closeCustom: () -> Unit, onSaved: () -> Unit,
+) {
+    ItemMenuBottomSheet(show = showCoverMenu, label = stringResource(R.string.label_cover), onDismissRequest = closeCoverMenu) {
+        ItemMenuAction(stringResource(R.string.batch_edit_cover_change), LucideIcons.ImageAdd, PreferenceIconTone.Appearance) { closeCoverMenu(); onPickCover() }
+        ItemMenuAction(stringResource(R.string.batch_edit_select_cover_from_selected_songs), LucideIcons.ImageLibrary, PreferenceIconTone.Tools) { closeCoverMenu(); onSelectCover() }
+        ItemMenuAction(stringResource(R.string.label_select_same_album_cover), LucideIcons.Disc, PreferenceIconTone.Library) { closeCoverMenu(); onAlbumCover() }
+        ItemMenuAction(stringResource(R.string.batch_edit_cover_remove), LucideIcons.Trash, PreferenceIconTone.Danger) { closeCoverMenu(); viewModel.removeCover() }
+        if (state.coverUri != null || state.removeCover) ItemMenuAction(stringResource(R.string.batch_edit_cover_revert), LucideIcons.Undo, PreferenceIconTone.Lyrics) { closeCoverMenu(); viewModel.revertCover() }
+    }
+    SaltBottomSheet(showValues, closeValues, header = { ItemOuterTitle(valueTitle) }) {
+        when {
+            valuesLoading -> RoundedColumn { SaltText(stringResource(R.string.batch_edit_loading_selected_values), modifier = Modifier.padding(16.dp)) }
+            values.isEmpty() -> IllustratedEmptyState(title = stringResource(R.string.batch_edit_no_selected_values), compact = true, modifier = Modifier.fillMaxWidth())
+            else -> {
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth().heightIn(max = 420.dp),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    items(values, key = { "${it.sourceUri}\n${it.value}" }) { option ->
+                        com.moriafly.salt.ui.Card(modifier = Modifier.fillMaxWidth()) {
+                            Box(
+                                modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)
+                                    .clickable { onValue(option.value) }
+                                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                                contentAlignment = Alignment.CenterStart,
+                            ) {
+                                SaltText(option.value, maxLines = 3, overflow = TextOverflow.Ellipsis)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    SaltBottomSheet(showCovers, closeCovers,
+        header = { ItemOuterTitle(stringResource(R.string.batch_edit_select_cover_from_selected_songs)) }) {
+        LazyVerticalGrid(GridCells.Adaptive(96.dp), Modifier.heightIn(max = 420.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (coversLoading || covers.isEmpty()) item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }) {
+                if (coversLoading) SaltText(stringResource(R.string.batch_edit_loading_selected_values), modifier = Modifier.padding(16.dp))
+                else IllustratedEmptyState(kind = EmptyStateKind.Cover, title = stringResource(R.string.batch_edit_no_selected_covers), compact = true, modifier = Modifier.fillMaxWidth())
+            }
+            if (!coversLoading) gridItems(covers, key = { "${it.sourceUri}\n${it.fileLastModified}" }) { option ->
+                com.moriafly.salt.ui.Card {
+                    Column(Modifier.clickable { onCover(option) }.padding(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        AsyncImage(CoverRequest(option.previewUri.toUri(), option.fileLastModified), null,
+                            modifier = Modifier.fillMaxWidth().aspectRatio(1f).clip(RoundedCornerShape(8.dp)), contentScale = ContentScale.Crop)
+                        SaltText(option.title, style = SaltTheme.textStyles.sub, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        if (option.summary.isNotBlank()) SaltText(option.summary, style = SaltTheme.textStyles.sub,
+                            color = SaltTheme.colors.subText, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    }
+                }
+            }
+        }
+    }
+    SaltConfirmDialog(showInfo, stringResource(R.string.batch_edit_info_summary), closeInfo, closeInfo,
+        stringResource(R.string.cancel), stringResource(R.string.confirm), summary = stringResource(R.string.batch_edit_info_content))
+    SaltBottomSheet(state.saveProgressBottomSheet,
+        onDismissRequest = { if (!state.isSaving) viewModel.closeSaveBottomSheet() },
+        onDismissFinished = onSaved, allowDismiss = !state.isSaving,
+        header = { ItemOuterTitle(stringResource(R.string.batch_edit_title)) },
+        groupContent = true, scrollContent = true,
+        footer = { SheetProgressAction(state.isSaving, { viewModel.abortSave() }, { viewModel.closeSaveBottomSheet() },
+            label = stringResource(if (state.isSaving) R.string.action_abort else R.string.confirm)) }) {
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            SaltText(if (state.isSaving) state.currentFile.ifEmpty { stringResource(R.string.batch_edit_processing) }
+                else stringResource(R.string.batch_matching_total_time, state.saveTimeMillis / 1000.0),
+                maxLines = 2, overflow = TextOverflow.Ellipsis)
+            SaltText("${state.saveProgress} / ${state.saveTotal}", style = SaltTheme.textStyles.sub, color = SaltTheme.colors.subText)
+            AppLinearProgressIndicator(if (state.saveTotal > 0) state.saveProgress.toFloat() / state.saveTotal else 0f, Modifier.fillMaxWidth())
+            SheetStatisticsRow {
+                SaltText(stringResource(R.string.batch_matching_success, state.successCount))
+                SaltText(stringResource(R.string.batch_replay_gain_skipped, state.skippedCount))
+                SaltText(stringResource(R.string.batch_matching_failure, state.failureCount))
+            }
+        }
+    }
+    if (showCustom) {
+        var key by remember { mutableStateOf("") }
+        var value by remember { mutableStateOf("") }
+        SaltConfirmDialog(true, stringResource(R.string.action_add_custom_tag), closeCustom,
+            onConfirm = {
+                if (key.isNotBlank()) { viewModel.addCustomFieldAndShow(key, value); closeCustom() }
+            }, cancelText = stringResource(R.string.cancel), confirmText = stringResource(R.string.confirm),
+            dismissOnConfirm = false, confirmEnabled = key.isNotBlank(), content = {
+                RoundedColumn(paddingValues = PaddingValues(0.dp)) {
+                    SaltEditorField(stringResource(R.string.label_custom_tag_name), key, { key = it }, grouped = false)
+                    SaltEditorField(stringResource(R.string.label_custom_tag_value), value, { value = it }, grouped = false)
+                }
+            })
     }
 }
