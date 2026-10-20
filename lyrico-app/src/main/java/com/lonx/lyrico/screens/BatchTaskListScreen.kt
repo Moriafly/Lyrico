@@ -51,7 +51,7 @@ import com.lonx.lyrico.ui.components.scaffoldContentPadding
 import com.lonx.lyrico.ui.theme.LocalUiEngine
 import com.lonx.lyrico.viewmodel.BatchTaskListViewModel
 import com.moriafly.salt.ui.SaltTheme
-import com.moriafly.salt.ui.dialog.YesNoDialog as SaltYesNoDialog
+import com.lonx.lyrico.ui.components.salt.SaltConfirmDialog
 import com.moriafly.salt.ui.screen.ScreenCard
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
@@ -126,9 +126,9 @@ fun BatchTaskListScreen(
     }
 
     if (salt) {
-        if (showDeleteDialog) SaltYesNoDialog(
+        if (showDeleteDialog) SaltConfirmDialog(
             title = stringResource(R.string.batch_task_delete_title),
-            content = deleteMessage,
+            summary = deleteMessage,
             onDismissRequest = {
                 showDeleteDialog = false
                 selectedTaskId = null
@@ -148,9 +148,9 @@ fun BatchTaskListScreen(
             cancelText = stringResource(R.string.cancel),
             confirmText = stringResource(R.string.confirm),
         )
-        if (showClearDialog) SaltYesNoDialog(
+        if (showClearDialog) SaltConfirmDialog(
             title = stringResource(R.string.batch_task_clear_title),
-            content = stringResource(R.string.batch_task_clear_message),
+            summary = stringResource(R.string.batch_task_clear_message),
             onDismissRequest = { showClearDialog = false },
             onConfirm = {
                 viewModel.deleteTasks(deletableFilteredTaskIds)

@@ -576,7 +576,7 @@ private fun ArtistSplitInputDialog(
             val focusRequester = remember { FocusRequester() }
             LaunchedEffect(Unit) { focusRequester.requestFocus() }
             Column(Modifier.fillMaxWidth().weight(1f, fill = false).verticalScroll(rememberScrollState())) {
-                com.moriafly.salt.ui.dialog.DialogTitle(title)
+                com.lonx.lyrico.ui.components.salt.SaltDialogTitle(title)
                 com.moriafly.salt.ui.RoundedColumn(paddingValues = PaddingValues(0.dp)) {
                     SaltTextInput(
                         text = text, onChange = { text = it }, hint = hint,
@@ -585,21 +585,21 @@ private fun ArtistSplitInputDialog(
                 }
                 ItemTip(hint)
             }
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(16.dp))
             FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End,
                 verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 if (showDelete) {
-                    com.moriafly.salt.ui.Button(
+                    com.lonx.lyrico.ui.components.salt.SaltDialogButton(
                         text = stringResource(R.string.common_delete), onClick = onDelete,
                         appearance = com.moriafly.salt.ui.ButtonAppearance.Plain,
                         intent = com.moriafly.salt.ui.ButtonIntent.Destructive
                     )
                 }
-                com.moriafly.salt.ui.Button(
+                com.lonx.lyrico.ui.components.salt.SaltDialogButton(
                     text = stringResource(R.string.cancel), onClick = onDismiss,
                     appearance = com.moriafly.salt.ui.ButtonAppearance.Subtle
                 )
-                com.moriafly.salt.ui.Button(
+                com.lonx.lyrico.ui.components.salt.SaltDialogButton(
                     text = stringResource(R.string.confirm), onClick = { onSave(text) },
                 )
             }
@@ -659,9 +659,9 @@ private fun ConfirmRuleDeleteDialog(
 ) {
     if (LocalUiEngine.current == UiEngine.SALT) {
         pendingDelete?.let { rule ->
-            com.moriafly.salt.ui.dialog.YesNoDialog(
+            com.lonx.lyrico.ui.components.salt.SaltConfirmDialog(
                 title = stringResource(R.string.artist_split_delete_rule_title),
-                content = stringResource(R.string.artist_split_delete_rule_message, rule.label),
+                summary = stringResource(R.string.artist_split_delete_rule_message, rule.label),
                 onDismissRequest = onDismiss,
                 onConfirm = { onConfirm(rule) },
                 cancelText = stringResource(R.string.cancel),

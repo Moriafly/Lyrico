@@ -23,10 +23,9 @@ internal fun SettingsCacheDialog(
 ) {
     if (LocalUiEngine.current == UiEngine.SALT) {
         if (show)
-            com.moriafly.salt.ui.dialog.YesNoDialog(
+            com.lonx.lyrico.ui.components.salt.SaltConfirmDialog(
                 title = stringResource(R.string.clear_cache),
-                content = "",
-                drawContent = {
+                content = {
                     Text(
                         text,
                         modifier =

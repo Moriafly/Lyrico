@@ -1739,18 +1739,17 @@ Box(modifier = Modifier.fillMaxSize()) {
         if (salt) SaltBasicDialog(onDismissRequest = { pendingRebind = null }) {
             Column(Modifier.fillMaxWidth()) {
                 Column(Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState())) {
-                    com.moriafly.salt.ui.dialog.DialogTitle(stringResource(R.string.label_artist_image_conflict_title, pending.artistName))
+                    com.lonx.lyrico.ui.components.salt.SaltDialogTitle(stringResource(R.string.label_artist_image_conflict_title, pending.artistName))
                     com.moriafly.salt.ui.Text(stringResource(R.string.label_artist_image_conflict_message),
-                        modifier = Modifier.padding(top = 12.dp), style = SaltTheme.textStyles.sub,
-                        color = SaltTheme.colors.subText)
+                        style = SaltTheme.textStyles.main, color = SaltTheme.colors.text)
                 }
                 Spacer(Modifier.height(16.dp))
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp),
                     maxItemsInEachRow = if (androidx.compose.ui.platform.LocalDensity.current.fontScale >= 1.3f) 1 else 2) {
-                    com.moriafly.salt.ui.Button(text = stringResource(R.string.label_artist_image_swap), modifier = Modifier.weight(1f),
+                    com.lonx.lyrico.ui.components.salt.SaltDialogButton(text = stringResource(R.string.label_artist_image_swap), modifier = Modifier.weight(1f),
                         appearance = com.moriafly.salt.ui.ButtonAppearance.Subtle,
                         onClick = { pendingRebind = null; applyRebind(pending.target, pending.artistName, swap = true) })
-                    com.moriafly.salt.ui.Button(text = stringResource(R.string.label_artist_image_replace), modifier = Modifier.weight(1f),
+                    com.lonx.lyrico.ui.components.salt.SaltDialogButton(text = stringResource(R.string.label_artist_image_replace), modifier = Modifier.weight(1f),
                         onClick = { pendingRebind = null; applyRebind(pending.target, pending.artistName) })
                 }
             }

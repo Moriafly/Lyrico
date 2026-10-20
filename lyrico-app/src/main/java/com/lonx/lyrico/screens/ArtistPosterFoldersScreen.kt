@@ -289,9 +289,9 @@ fun ArtistPosterFoldersScreen(navigator: DestinationsNavigator) {
             // Salt 原生弹窗：保留取消、点击外部、关闭完成与校验失败不关窗的语义。
             val folder = state.folder
             if (showDeleteFile && file != null) {
-                com.moriafly.salt.ui.dialog.YesNoDialog(
+                com.lonx.lyrico.ui.components.salt.SaltConfirmDialog(
                     title = stringResource(R.string.dialog_delete_file_title),
-                    content = stringResource(R.string.dialog_delete_file_content, file.name),
+                    summary = stringResource(R.string.dialog_delete_file_content, file.name),
                     onDismissRequest = { showDeleteFile = false },
                     onConfirm = { file.let(viewModel::deleteFile); showDeleteFile = false },
                     cancelText = stringResource(R.string.cancel),
@@ -338,8 +338,8 @@ fun ArtistPosterFoldersScreen(navigator: DestinationsNavigator) {
                     modifier = Modifier.padding(top = 8.dp))
             }
             if (showHelp) {
-                com.moriafly.salt.ui.dialog.BasicDialog(onDismissRequest = { showHelp = false }) {
-                    com.moriafly.salt.ui.dialog.DialogTitle(stringResource(R.string.artist_poster_naming))
+                com.lonx.lyrico.ui.components.salt.SaltBasicDialog(onDismissRequest = { showHelp = false }) {
+                    com.lonx.lyrico.ui.components.salt.SaltDialogTitle(stringResource(R.string.artist_poster_naming))
                     Column(Modifier.fillMaxWidth().heightIn(max = 360.dp).verticalScroll(rememberScrollState())) {
                         com.moriafly.salt.ui.Text(
                             stringResource(R.string.artist_poster_folders_summary),
@@ -359,10 +359,10 @@ fun ArtistPosterFoldersScreen(navigator: DestinationsNavigator) {
                 }
             }
             if (folder != null && showFolderDetails) {
-                com.moriafly.salt.ui.dialog.BasicDialog(onDismissRequest = { showFolderDetails = false }) {
-                    com.moriafly.salt.ui.dialog.DialogTitle(stringResource(R.string.artist_poster_folder_details))
+                com.lonx.lyrico.ui.components.salt.SaltBasicDialog(onDismissRequest = { showFolderDetails = false }) {
+                    com.lonx.lyrico.ui.components.salt.SaltDialogTitle(stringResource(R.string.artist_poster_folder_details))
                     Column(Modifier.verticalScroll(rememberScrollState())) {
-                        com.moriafly.salt.ui.Text(folder.name, style = com.moriafly.salt.ui.SaltTheme.textStyles.largeTitle)
+                        com.moriafly.salt.ui.Text(folder.name, style = com.moriafly.salt.ui.SaltTheme.textStyles.main)
                         com.moriafly.salt.ui.Text(
                             folder.path,
                             color = com.moriafly.salt.ui.SaltTheme.colors.subText,
@@ -377,9 +377,9 @@ fun ArtistPosterFoldersScreen(navigator: DestinationsNavigator) {
                 }
             }
             if (showRemoveDialog && folder != null) {
-                com.moriafly.salt.ui.dialog.YesNoDialog(
+                com.lonx.lyrico.ui.components.salt.SaltConfirmDialog(
                     title = stringResource(R.string.dialog_remove_folder_title),
-                    content = folder.path + "\n\n" + stringResource(R.string.artist_poster_folder_remove_tip),
+                    summary = folder.path + "\n\n" + stringResource(R.string.artist_poster_folder_remove_tip),
                     onDismissRequest = { showRemoveDialog = false },
                     onConfirm = { viewModel.removeFolder(); showRemoveDialog = false },
                     cancelText = stringResource(R.string.cancel),

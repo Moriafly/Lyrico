@@ -2,6 +2,18 @@
 
 package com.lonx.lyrico.ui.components.salt
 
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextOverflow
+import com.moriafly.salt.ui.BasicButton
+import com.moriafly.salt.ui.ButtonAppearance
+import com.moriafly.salt.ui.ButtonIntent
+import com.moriafly.salt.ui.ButtonDefaults
+import com.moriafly.salt.ui.Text
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -62,9 +74,9 @@ internal fun SaltBasicDialog(
                     ProvideControlSize(DialogDefaults.controlSize) {
                         CompositionLocalProvider(
                             LocalContentColor provides SaltTheme.colors.text,
-                            LocalTextStyle provides SaltTheme.textStyles.main,
+                            LocalTextStyle provides SaltTheme.textStyles.main.copy(fontWeight = FontWeight.Normal),
                         ) {
-                            val shape = DialogDefaults.shape
+                            val shape = RoundedCornerShape(24.dp)
                             val border = DialogDefaults.border
                             Column(
                                 modifier =
@@ -86,5 +98,41 @@ internal fun SaltBasicDialog(
                 }
             }
         }
+    }
+}
+
+/** Shared title without the legacy DialogTitle's extra item padding. */
+@Composable
+internal fun SaltDialogTitle(text: String) {
+    Text(
+        text = text,
+        style = SaltTheme.textStyles.main.copy(
+            fontSize = 18.sp,
+            lineHeight = 24.sp,
+            fontWeight = FontWeight.Bold,
+        ),
+        color = SaltTheme.colors.text,
+        modifier = Modifier.padding(bottom = 12.dp).semantics { heading() },
+    )
+}
+
+/** Keep Salt sizing and colors while reducing pill-shaped dialog actions. */
+@Composable
+internal fun SaltDialogButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    appearance: ButtonAppearance = ButtonAppearance.Filled,
+    intent: ButtonIntent = ButtonIntent.Normal,
+) {
+    BasicButton(
+        onClick = onClick,
+        modifier = modifier,
+        enabled = enabled,
+        shape = RoundedCornerShape(16.dp),
+        colors = ButtonDefaults.colors(appearance = appearance, intent = intent),
+    ) {
+        Text(text = text, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }

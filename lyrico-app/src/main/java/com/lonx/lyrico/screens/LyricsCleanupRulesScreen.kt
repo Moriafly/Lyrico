@@ -50,9 +50,7 @@ import com.moriafly.salt.ui.ItemOuterTitle
 import com.moriafly.salt.ui.RoundedColumn
 import com.moriafly.salt.ui.SaltTheme
 import com.moriafly.salt.ui.Text as SaltText
-import com.moriafly.salt.ui.dialog.BasicDialog
-import com.moriafly.salt.ui.dialog.DialogTitle
-import com.moriafly.salt.ui.dialog.YesNoDialog as SaltYesNoDialog
+import com.lonx.lyrico.ui.components.salt.SaltConfirmDialog
 import com.moriafly.salt.ui.screen.ScreenCard
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
@@ -257,9 +255,9 @@ fun LyricsCleanupRulesScreen(
     )
 
     if (salt) {
-        if (deletingRule != null) SaltYesNoDialog(
+        if (deletingRule != null) SaltConfirmDialog(
             title = stringResource(R.string.non_lyrics_cleanup_delete_rule_title),
-            content = stringResource(
+            summary = stringResource(
                 R.string.non_lyrics_cleanup_delete_rule_message,
                 deletingRule.orEmpty()
             ),

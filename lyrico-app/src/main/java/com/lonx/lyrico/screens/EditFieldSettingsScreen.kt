@@ -77,7 +77,7 @@ import com.lonx.lyrico.ui.components.miuix.MiuixBottomSheet
 import com.moriafly.salt.ui.RoundedColumn
 import com.moriafly.salt.ui.SaltTheme
 import com.moriafly.salt.ui.Switcher
-import com.moriafly.salt.ui.dialog.YesNoDialog as SaltYesNoDialog
+import com.lonx.lyrico.ui.components.salt.SaltConfirmDialog
 import com.moriafly.salt.ui.innerPadding
 import com.moriafly.salt.ui.outerPadding
 import com.moriafly.salt.ui.popup.PopupMenu
@@ -326,9 +326,9 @@ fun EditFieldSettingsScreen(
     )
 
     if (salt) {
-        if (pendingDeleteKey != null) SaltYesNoDialog(
+        if (pendingDeleteKey != null) SaltConfirmDialog(
             title = stringResource(R.string.custom_tag_delete_title),
-            content = stringResource(R.string.custom_tag_delete_message, pendingDeleteKey.orEmpty()),
+            summary = stringResource(R.string.custom_tag_delete_message, pendingDeleteKey.orEmpty()),
             onDismissRequest = { pendingDeleteKey = null },
             onConfirm = {
                 pendingDeleteKey?.let(viewModel::removeCustomTag)
@@ -337,9 +337,9 @@ fun EditFieldSettingsScreen(
             cancelText = stringResource(R.string.cancel),
             confirmText = stringResource(R.string.common_delete),
         )
-        if (showResetDialog) SaltYesNoDialog(
+        if (showResetDialog) SaltConfirmDialog(
             title = stringResource(R.string.reset_to_default),
-            content = stringResource(R.string.edit_field_settings_reset_message),
+            summary = stringResource(R.string.edit_field_settings_reset_message),
             onDismissRequest = { showResetDialog = false },
             onConfirm = {
                 viewModel.resetAll()

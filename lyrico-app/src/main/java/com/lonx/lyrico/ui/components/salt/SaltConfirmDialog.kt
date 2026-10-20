@@ -9,23 +9,21 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import com.moriafly.salt.ui.Button
+import androidx.compose.ui.text.font.FontWeight
 import com.moriafly.salt.ui.ButtonAppearance
 import com.moriafly.salt.ui.SaltTheme
-import com.moriafly.salt.ui.dialog.DialogTitle
 
-/** Salt 原生确认弹窗。SaltUI 的 YesNoDialog 不支持禁用确认，这里用 BasicDialog 补齐。 */
+/** Shared Salt decision/input dialog with consistent title, body and fixed actions. */
 @Composable
 @OptIn(ExperimentalLayoutApi::class)
 internal fun SaltConfirmDialog(
-    show: Boolean,
+    show: Boolean = true,
     title: String?,
     onDismissRequest: () -> Unit,
     onConfirm: () -> Unit,
@@ -51,19 +49,18 @@ internal fun SaltConfirmDialog(
                     .weight(1f, fill = false)
                     .verticalScroll(rememberScrollState())
             ) {
-                title?.takeIf { it.isNotBlank() }?.let { DialogTitle(it) }
+                title?.takeIf { it.isNotBlank() }?.let { SaltDialogTitle(it) }
                 summary
                     ?.takeIf { it.isNotBlank() }
                     ?.let {
                         com.moriafly.salt.ui.Text(
                             text = it,
-                            style = SaltTheme.textStyles.main,
+                            style = SaltTheme.textStyles.main.copy(fontWeight = FontWeight.Normal),
                             color = SaltTheme.colors.text,
-                            modifier = Modifier.padding(top = 12.dp),
                         )
                     }
                 content?.let {
-                    Spacer(Modifier.height(12.dp))
+                    if (!summary.isNullOrBlank()) Spacer(Modifier.height(12.dp))
                     it()
                 }
             }
@@ -74,13 +71,13 @@ internal fun SaltConfirmDialog(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 maxItemsInEachRow = if (LocalDensity.current.fontScale >= 1.3f) 1 else 2,
             ) {
-                Button(
+                SaltDialogButton(
                     modifier = Modifier.weight(1f),
                     onClick = onDismissRequest,
                     text = cancelText,
                     appearance = ButtonAppearance.Subtle,
                 )
-                Button(
+                SaltDialogButton(
                     modifier = Modifier.weight(1f),
                     onClick = {
                         onConfirm()

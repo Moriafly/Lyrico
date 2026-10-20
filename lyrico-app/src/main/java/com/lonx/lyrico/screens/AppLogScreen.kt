@@ -71,7 +71,7 @@ import com.lonx.lyrico.viewmodel.AppLogEvent
 import com.lonx.lyrico.viewmodel.AppLogViewModel
 import com.lonx.lyrico.ui.components.miuix.MiuixBottomSheet
 import com.moriafly.salt.ui.SaltTheme
-import com.moriafly.salt.ui.dialog.YesNoDialog as SaltYesNoDialog
+import com.lonx.lyrico.ui.components.salt.SaltConfirmDialog
 import com.moriafly.salt.ui.screen.ScreenCard
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
@@ -363,9 +363,9 @@ fun AppLogScreen(
     )
 
     if (salt) {
-        if (showDeleteConfirmDialog) SaltYesNoDialog(
+        if (showDeleteConfirmDialog) SaltConfirmDialog(
             title = stringResource(R.string.app_log_delete_title),
-            content = stringResource(R.string.app_log_delete_message, pendingDeleteIds.size),
+            summary = stringResource(R.string.app_log_delete_message, pendingDeleteIds.size),
             onDismissRequest = { showDeleteConfirmDialog = false },
             onConfirm = {
                 viewModel.deleteLogs(pendingDeleteIds)

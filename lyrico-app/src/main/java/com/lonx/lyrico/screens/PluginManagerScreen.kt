@@ -106,7 +106,7 @@ import com.moriafly.salt.ui.ItemTip
 import com.moriafly.salt.ui.SaltTheme
 import com.moriafly.salt.ui.Switcher
 import com.moriafly.salt.ui.innerPadding
-import com.moriafly.salt.ui.dialog.YesNoDialog as SaltYesNoDialog
+import com.lonx.lyrico.ui.components.salt.SaltConfirmDialog
 import org.koin.androidx.compose.koinViewModel
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
@@ -431,9 +431,9 @@ fun PluginManagerScreen(
     }
 
     if (salt) {
-        if (showUninstallDialog) SaltYesNoDialog(
+        if (showUninstallDialog) SaltConfirmDialog(
             title = stringResource(R.string.plugin_uninstall),
-            content = uninstallMessage.orEmpty(),
+            summary = uninstallMessage.orEmpty(),
             onDismissRequest = {
                 showUninstallDialog = false
                 pendingUninstallPluginId = null
