@@ -837,4 +837,5 @@
     <string name="ui_engine">界面风格</string>
     <string name="common_edit">编辑</string>
     <string name="batch_edit_unchanged_field_label">%1$s（无修改）</string>
+    <string name="action_clear_search">清空搜索</string>
 </resources>
