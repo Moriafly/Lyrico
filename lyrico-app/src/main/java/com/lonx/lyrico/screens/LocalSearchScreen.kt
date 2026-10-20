@@ -42,6 +42,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -111,6 +113,7 @@ fun LocalSearchScreen(
     val selectionViewModel: SongSelectionViewModel = koinViewModel()
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val lyricSearchEnabled by viewModel.lyricSearchEnabled.collectAsStateWithLifecycle()
     val isSelectionMode by selectionViewModel.isSelectionMode.collectAsStateWithLifecycle()
     val selectedSongUris by selectionViewModel.selectedSongUris.collectAsStateWithLifecycle()
     val swipeAnchorUri by selectionViewModel.swipeAnchorUri.collectAsStateWithLifecycle()
@@ -132,7 +135,7 @@ fun LocalSearchScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val searchTabs = LocalSearchTab.entries.filter {
-        it != LocalSearchTab.Lyrics || uiState.lyricSearchEnabled
+        it != LocalSearchTab.Lyrics || lyricSearchEnabled == true
     }
     val pagerState = rememberPagerState(pageCount = { searchTabs.size })
     LaunchedEffect(searchTabs) {
@@ -197,6 +200,7 @@ fun LocalSearchScreen(
                 searchState = searchState,
                 onSearch = { keyword -> viewModel.onQueryChange(keyword) },
                 searchTabs = searchTabs,
+                tabsReady = lyricSearchEnabled != null,
                 pagerState = pagerState,
                 onTabSelected = { index -> scope.launch { pagerState.animateScrollToPage(index) } },
                 pages = {
@@ -331,6 +335,7 @@ fun LocalSearchScreen(
                             )
                             LocalSearchPillTabRow(
                                 tabs = searchTabs,
+                                ready = lyricSearchEnabled != null,
                                 selectedTabIndex = pagerState.targetPage,
                                 onTabSelected = { index ->
                                     scope.launch {
@@ -444,15 +449,19 @@ private fun LocalSearchPillTabRow(
     tabs: List<LocalSearchTab>,
     selectedTabIndex: Int,
     onTabSelected: (Int) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    ready: Boolean = true,
 ) {
     val scrollState = rememberScrollState()
 
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .horizontalScroll(scrollState)
-            .padding(horizontal = 12.dp),
+            .horizontalScroll(scrollState, enabled = ready)
+            .padding(horizontal = 12.dp)
+            .then(if (ready) Modifier else Modifier
+                .graphicsLayer { alpha = 0f }
+                .clearAndSetSemantics {}),
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -461,6 +470,7 @@ private fun LocalSearchPillTabRow(
             PillButton(
                 text = stringResource(tab.labelRes),
                 selected = index == selectedTabIndex,
+                enabled = ready,
                 style = PillButtonDefaults.style(PillButtonSize.Medium),
                 colors = if (salt) PillButtonDefaults.colors() else PillButtonDefaults.colors(
                     containerColor = MiuixTheme.colorScheme.surfaceVariant.copy(alpha = 0.72f)
@@ -841,6 +851,7 @@ private fun LocalSearchSaltShell(
     searchState: androidx.compose.foundation.text.input.TextFieldState,
     onSearch: (String) -> Unit,
     searchTabs: List<LocalSearchTab>,
+    tabsReady: Boolean,
     pagerState: androidx.compose.foundation.pager.PagerState,
     onTabSelected: (Int) -> Unit,
     pages: @Composable () -> Unit,
@@ -868,6 +879,7 @@ private fun LocalSearchSaltShell(
                 )
                 LocalSearchPillTabRow(
                     tabs = searchTabs,
+                    ready = tabsReady,
                     selectedTabIndex = pagerState.targetPage,
                     onTabSelected = onTabSelected,
                     modifier = Modifier.padding(bottom = 8.dp)

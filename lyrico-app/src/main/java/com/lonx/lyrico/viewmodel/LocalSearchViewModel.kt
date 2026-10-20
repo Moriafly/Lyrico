@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 
@@ -28,9 +29,16 @@ class LocalSearchViewModel(
 
     val searchQuery: StateFlow<String> = query
 
+    // null means the preference has not been read; tabs must not render a guessed disabled state.
+    val lyricSearchEnabled: StateFlow<Boolean?> = settingsRepository.lyricIndexEnabled.stateIn(
+        viewModelScope,
+        SharingStarted.Eagerly,
+        null,
+    )
+
     val uiState: StateFlow<LocalSearchUiState> = combine(
-        query.debounce(250).distinctUntilChanged(),
-        settingsRepository.lyricIndexEnabled.distinctUntilChanged()
+        query.debounce { if (it.isBlank()) 0L else 250L }.distinctUntilChanged(),
+        lyricSearchEnabled.filterNotNull()
     ) { keyword, enabled -> keyword to enabled }
         .flatMapLatest { (keyword, enabled) ->
             if (keyword.isBlank()) {
