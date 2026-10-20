@@ -306,6 +306,7 @@
     <string name="folder_action_show">Show Folder</string>
 
     <!-- General Actions -->
+    <string name="action_undo">Undo</string>
     <string name="action_undo_changes">Undo changes</string>
     <string name="action_back">Back</string>
     <string name="action_search">Search</string>

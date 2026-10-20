@@ -307,6 +307,7 @@
     <string name="folder_action_show">显示文件夹</string>
 
     <!-- 通用操作 -->
+    <string name="action_undo">撤销</string>
     <string name="action_undo_changes">撤销修改</string>
     <string name="action_back">返回</string>
     <string name="action_search">搜索</string>

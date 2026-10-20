@@ -307,6 +307,7 @@
     <string name="folder_action_show">顯示資料夾</string>
 
     <!-- 一般操作 -->
+    <string name="action_undo">復原</string>
     <string name="action_undo_changes">復原修改</string>
     <string name="action_back">返回</string>
     <string name="action_search">搜尋</string>

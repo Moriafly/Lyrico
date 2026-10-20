@@ -195,9 +195,6 @@ private const val LIMITED_LYRICS_INPUT_MAX_LINES = 30
 /** 艺术家海报描述对不上任何艺术家时，角标的警示底色。 */
 private val ArtistImageUnmatchedBadgeColor = Color(0xFFB45309).copy(alpha = 0.9f)
 
-/** 压在封面上的角标底色；两个引擎共用同一套角标观感。 */
-private val PictureBadgeBackground = Color.Black.copy(alpha = 0.6f)
-
 @SuppressLint("LocalContextGetResourceValueCall")
 @OptIn(
     ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class
@@ -2049,7 +2046,7 @@ private fun CoverSection(
     }
 
     if (LocalUiEngine.current == UiEngine.SALT) {
-        // Salt 用 RoundedColumn 作为卡片容器，但封面尺寸、角标位置和文字层级与 Miuix 保持一致。
+        // 两个引擎共用图片角标排列，尺寸与来源分行显示。
         RoundedColumn {
             Box(Modifier.fillMaxWidth().height(220.dp)) {
                 AsyncImage(
@@ -2099,11 +2096,7 @@ private fun CoverSection(
                                     placeholder = painterResource(id = R.drawable.ic_album_24dp),
                                     error = painterResource(id = R.drawable.ic_album_24dp)
                                 )
-                                PictureOverlayBadges(
-                                    item = item,
-                                    isCurrentPage = page == currentPage,
-                                    imageSize = imageSize
-                                )
+                                PictureOverlayBadges(item, page == currentPage, imageSize)
                             }
                         }
                         if (picturePages.size > 1) {
@@ -2210,7 +2203,7 @@ private fun CoverSection(
                             ) {
                                 AsyncImage(
                                     model = item.source,
-                                    contentDescription = null,
+                                    contentDescription = item.editLabel,
                                     contentScale = ContentScale.Crop,
                                     modifier = Modifier.matchParentSize(),
                                     placeholder = rememberTintedPainter(
@@ -2223,11 +2216,7 @@ private fun CoverSection(
                                     )
                                 )
 
-                                PictureOverlayBadges(
-                                    item = item,
-                                    isCurrentPage = page == currentPage,
-                                    imageSize = imageSize
-                                )
+                                PictureOverlayBadges(item, page == currentPage, imageSize)
                             }
                         }
                         if (picturePages.size > 1) {
@@ -2281,76 +2270,63 @@ private fun CoverSection(
 
 
 
-/**
- * 封面 / 艺术家海报上的角标排列：左上标签、左下尺寸与来源、右下编辑入口、右上已修改撤销。
- * 两个引擎共用这套排列，只有文字控件按引擎作用域取各自的排版实现。
- */
+/** 类型与撤销分列上方，尺寸、来源分行放在下方；各角标随内容收缩。 */
 @Composable
 private fun BoxScope.PictureOverlayBadges(
     item: PicturePagerItem,
     isCurrentPage: Boolean,
     imageSize: Pair<Int, Int>?,
 ) {
-    PictureBadge(
-        text = item.label,
-        modifier = Modifier.align(Alignment.TopStart).padding(8.dp),
-        // 对不上艺术家的海报用警示色提示需要重新指定归属
-        background = if (item.isUnmatched) ArtistImageUnmatchedBadgeColor else PictureBadgeBackground
-    )
-
-    if (isCurrentPage) {
-        // 尺寸 + 图片来源（内嵌在标签里 / 来自外置海报文件夹）
-        val info = listOfNotNull(
-            imageSize?.let { "${it.first}×${it.second}" },
-            item.sourceLabel
-        ).joinToString(" / ")
-        if (info.isNotEmpty()) {
-            PictureBadge(
-                text = info,
-                modifier = Modifier.align(Alignment.BottomStart).padding(8.dp),
-                fontSize = 9.sp
-            )
-        }
-    }
-
-    PictureBadge(
-        text = item.editLabel,
-        modifier = Modifier.align(Alignment.BottomEnd).padding(8.dp)
-    )
-
-    AnimatedVisibility(
-        visible = item.isModified,
-        enter = scaleIn() + fadeIn(),
-        exit = scaleOut() + fadeOut(),
-        modifier = Modifier.align(Alignment.TopEnd).padding(8.dp)
+    Column(
+        modifier = Modifier.fillMaxSize().padding(6.dp),
+        verticalArrangement = Arrangement.SpaceBetween,
     ) {
-        Box(
-            modifier = Modifier
-                .clip(CircleShape)
-                .background(LyricoColors.modifiedBadgeBackground.copy(alpha = 0.95f))
-                .clickable { item.onRevertClick() }
-                .padding(horizontal = 8.dp, vertical = 4.dp)
-        ) {
-            PictureBadgeText(text = stringResource(R.string.action_undo_changes),
-                color = LyricoColors.modifiedText)
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
+            Box(Modifier.weight(1f)) {
+                PictureBadge(
+                    text = item.label,
+                    background = if (item.isUnmatched) ArtistImageUnmatchedBadgeColor
+                        else Color.Black.copy(alpha = 0.6f),
+                )
+            }
+            AnimatedVisibility(
+                visible = item.isModified,
+                enter = scaleIn() + fadeIn(),
+                exit = scaleOut() + fadeOut(),
+            ) {
+                Box(
+                    modifier = Modifier.padding(start = 4.dp)
+                        .clip(CircleShape)
+                        .background(LyricoColors.modifiedBadgeBackground.copy(alpha = 0.95f))
+                        .clickable { item.onRevertClick() }
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                ) {
+                    PictureBadgeText(
+                        text = stringResource(R.string.action_undo),
+                        color = LyricoColors.modifiedText,
+                    )
+                }
+            }
         }
+        val info = listOfNotNull(
+            imageSize?.takeIf { isCurrentPage }?.let { "${it.first}×${it.second}" },
+            // 外部文件是候选来源；成功读到图片尺寸后才确认展示，避免空位误报来源。
+            item.sourceLabel?.takeIf { isCurrentPage && imageSize != null },
+        ).joinToString("\n")
+        if (info.isNotEmpty()) PictureBadge(text = info, fontSize = 9.sp)
     }
 }
 
-/** 半透明底的小角标；字号保持应用既有规格，不随正文缩放。 */
 @Composable
 private fun PictureBadge(
     text: String,
     modifier: Modifier = Modifier,
-    background: Color = PictureBadgeBackground,
+    background: Color = Color.Black.copy(alpha = 0.6f),
     fontSize: TextUnit = 10.sp,
 ) {
-    Box(
-        modifier = modifier
-            .background(color = background, shape = RoundedCornerShape(4.dp))
-            .padding(horizontal = 6.dp, vertical = 2.dp)
-    ) {
-        PictureBadgeText(text = text, color = Color.White, fontSize = fontSize)
+    Box(modifier.background(background, RoundedCornerShape(4.dp))
+        .padding(horizontal = 6.dp, vertical = 2.dp)) {
+        PictureBadgeText(text, Color.White, fontSize)
     }
 }
 
@@ -2362,14 +2338,18 @@ private fun PictureBadgeText(text: String, color: Color, fontSize: TextUnit = 10
             text = text,
             color = color,
             fontSize = fontSize,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
         )
     } else {
         Text(
             text = text,
             color = color,
             fontSize = fontSize,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }
