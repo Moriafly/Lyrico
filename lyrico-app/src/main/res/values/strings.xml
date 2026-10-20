@@ -538,8 +538,8 @@
     <string name="search_type_album">Album</string>
     <string name="search_type_filename">File name</string>
     <string name="action_lyrics_options">Lyrics options</string>
-    <string name="limit_lyrics_input_lines">Limit editor lines</string>
-    <string name="limit_lyrics_input_lines_hint">Keep the lyrics editor at a fixed height so very long lyrics are easier to select and edit</string>
+    <string name="limit_lyrics_input_lines">Limit input lines</string>
+    <string name="limit_lyrics_input_lines_hint">Show up to 30 lines; scroll to view the rest</string>
     <string name="label_cover_options">Cover options</string>
     <string name="label_artist_image_options">Artist poster options</string>
     <string name="label_crop_cover">Crop cover</string>

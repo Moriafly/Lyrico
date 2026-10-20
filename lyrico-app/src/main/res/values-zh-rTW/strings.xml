@@ -540,8 +540,8 @@
     <string name="search_type_album">專輯</string>
     <string name="search_type_filename">檔名</string>
     <string name="action_lyrics_options">歌詞選項</string>
-    <string name="limit_lyrics_input_lines">限制編輯框行數</string>
-    <string name="limit_lyrics_input_lines_hint">將歌詞編輯框保持在固定高度，方便選擇和編輯長歌詞</string>
+    <string name="limit_lyrics_input_lines">限制輸入框行數</string>
+    <string name="limit_lyrics_input_lines_hint">最多顯示 30 行，超出部分可捲動查看</string>
     <string name="label_cover_options">封面選項</string>
     <string name="label_artist_image_options">演出者海報選項</string>
     <string name="label_crop_cover">裁切封面</string>

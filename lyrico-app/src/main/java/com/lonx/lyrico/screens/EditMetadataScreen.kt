@@ -1411,11 +1411,14 @@ Box(modifier = Modifier.fillMaxSize()) {
                     )
                 }
                 if (salt) ItemSwitcher(
+                    iconPainter = androidx.compose.ui.graphics.vector.rememberVectorPainter(LucideIcons.Captions),
+                    iconColor = PreferenceIconTone.Appearance.color(),
                     text = stringResource(R.string.limit_lyrics_input_lines),
                     sub = stringResource(R.string.limit_lyrics_input_lines_hint),
                     state = limitLyricsInputLines,
                     onChange = { viewModel.setLimitLyricsInputLines(it) }
                 ) else SwitchPreference(
+                    startAction = { com.lonx.lyrico.ui.components.icons.PreferenceIcon(LucideIcons.Captions, PreferenceIconTone.Appearance) },
                     title = stringResource(R.string.limit_lyrics_input_lines),
                     summary = stringResource(R.string.limit_lyrics_input_lines_hint),
                     checked = limitLyricsInputLines,
