@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lonx.lyrico.BuildConfig
 import com.lonx.lyrico.R
+import com.lonx.lyrico.data.model.log.AppLogLevel
 import com.lonx.lyrico.data.model.log.AppLogType
 import com.lonx.lyrico.data.model.entity.AppLogEntity
 import com.lonx.lyrico.data.repository.AppLogRepository
@@ -42,11 +43,11 @@ class AppLogViewModel(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = LogRetentionOption.THIRTY_DAYS
         )
-    val logs: StateFlow<List<AppLogEntity>> = appLogRepository.observeLatest().stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = emptyList()
-    )
+    fun observeLogs(level: AppLogLevel?, type: AppLogType?) =
+        appLogRepository.observeFiltered(level, type)
+
+    suspend fun getMatchingIds(level: AppLogLevel?, type: AppLogType?) =
+        appLogRepository.getMatchingIds(level, type)
     private val _events = MutableSharedFlow<AppLogEvent>()
     val events = _events.asSharedFlow()
 

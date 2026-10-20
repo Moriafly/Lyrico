@@ -23,6 +23,12 @@ class AppLogRepositoryImpl(
     override fun observeLatest(limit: Int): Flow<List<AppLogEntity>> =
         dao.observeLatest(limit)
 
+    override fun observeFiltered(level: AppLogLevel?, type: AppLogType?): Flow<List<AppLogEntity>> =
+        dao.observeFiltered(level, type)
+
+    override suspend fun getMatchingIds(level: AppLogLevel?, type: AppLogType?): List<Long> =
+        dao.getMatchingIds(level, type)
+
     override fun observeByRelatedId(relatedId: String): Flow<List<AppLogEntity>> =
         dao.observeByRelatedId(relatedId)
 
@@ -107,7 +113,7 @@ class AppLogRepositoryImpl(
 
     override suspend fun deleteByIds(ids: List<Long>) {
         if (ids.isEmpty()) return
-        dao.deleteByIds(ids)
+        ids.chunked(500).forEach { dao.deleteByIds(it) }
     }
 
     override suspend fun trim() {

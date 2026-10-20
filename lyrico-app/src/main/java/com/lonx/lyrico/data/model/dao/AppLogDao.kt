@@ -1,5 +1,7 @@
 package com.lonx.lyrico.data.model.dao
 
+import com.lonx.lyrico.data.model.log.AppLogLevel
+import com.lonx.lyrico.data.model.log.AppLogType
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
@@ -16,6 +18,12 @@ interface AppLogDao {
 
     @Query("SELECT * FROM app_logs ORDER BY createdAt DESC LIMIT :limit")
     suspend fun getLatest(limit: Int = 1000): List<AppLogEntity>
+
+    @Query("SELECT * FROM app_logs WHERE (:level IS NULL OR level = :level) AND (:type IS NULL OR type = :type) ORDER BY createdAt DESC LIMIT 300")
+    fun observeFiltered(level: AppLogLevel?, type: AppLogType?): Flow<List<AppLogEntity>>
+
+    @Query("SELECT id FROM app_logs WHERE (:level IS NULL OR level = :level) AND (:type IS NULL OR type = :type)")
+    suspend fun getMatchingIds(level: AppLogLevel?, type: AppLogType?): List<Long>
 
     @Query("SELECT * FROM app_logs WHERE id IN (:ids) ORDER BY createdAt DESC")
     suspend fun getByIds(ids: List<Long>): List<AppLogEntity>

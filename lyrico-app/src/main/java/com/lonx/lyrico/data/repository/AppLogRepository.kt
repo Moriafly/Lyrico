@@ -7,6 +7,8 @@ import kotlinx.coroutines.flow.Flow
 
 interface AppLogRepository {
     fun observeLatest(limit: Int = 300): Flow<List<AppLogEntity>>
+    fun observeFiltered(level: AppLogLevel?, type: AppLogType?): Flow<List<AppLogEntity>>
+    suspend fun getMatchingIds(level: AppLogLevel?, type: AppLogType?): List<Long>
     fun observeByRelatedId(relatedId: String): Flow<List<AppLogEntity>>
     suspend fun getLatest(limit: Int = 1000): List<AppLogEntity>
     suspend fun getByIds(ids: List<Long>): List<AppLogEntity>
