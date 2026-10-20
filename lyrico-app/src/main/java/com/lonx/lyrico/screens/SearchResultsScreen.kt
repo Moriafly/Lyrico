@@ -1212,14 +1212,16 @@ private fun SearchResultApplyBottomSheet(
         content = {
             Column(Modifier.fillMaxWidth()) {
                 if (supportsLyrics) {
-                    ApplySheetPillTabs(
-                        selectedTabIndex = applyPagerState.targetPage,
-                        onTabSelected = { index ->
-                            scope.launch {
-                                applyPagerState.animateScrollToPage(index)
+                    Box(if (salt) Modifier.padding(horizontal = 16.dp, vertical = 8.dp) else Modifier) {
+                        ApplySheetPillTabs(
+                            selectedTabIndex = applyPagerState.targetPage,
+                            onTabSelected = { index ->
+                                scope.launch {
+                                    applyPagerState.animateScrollToPage(index)
+                                }
                             }
-                        }
-                    )
+                        )
+                    }
                 }
                 HorizontalPager(
                     state = applyPagerState,
