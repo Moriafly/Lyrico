@@ -85,12 +85,13 @@ fun ArtistPosterDestinationPreferences(
     hasPosterFolder: Boolean,
     enabled: Boolean,
     onEmbedToSongs: () -> Unit,
-    onSaveToFolder: () -> Unit
+    onSaveToFolder: () -> Unit,
+    embedSummary: String = stringResource(R.string.artist_poster_embed_summary),
 ) {
     ItemMenuAction(
         icon = LucideIcons.FileMusic, tone = PreferenceIconTone.Lyrics,
         title = stringResource(R.string.label_artist_poster_embed_to_songs),
-        summary = stringResource(R.string.artist_poster_embed_summary),
+        summary = embedSummary,
         enabled = enabled,
         onClick = onEmbedToSongs
     )

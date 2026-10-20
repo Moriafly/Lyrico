@@ -1,9 +1,7 @@
 package com.lonx.lyrico.ui.components.poster
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -18,8 +16,10 @@ import androidx.compose.ui.unit.dp
 import com.lonx.audiotag.model.AudioPicture
 import com.lonx.lyrico.R
 import com.lonx.lyrico.ui.components.icons.PreferenceIconTone
-import com.lonx.lyrico.ui.components.icons.PreferenceIcon
 import com.lonx.lyrico.ui.components.icons.LucideIcons
+import com.lonx.lyrico.domain.poster.ResolvedArtistPoster
+import com.lonx.lyrico.ui.components.base.ItemMenuBottomSheet
+import com.lonx.lyrico.ui.components.base.ItemMenuAction
 import com.lonx.lyrico.domain.poster.ArtistPictureEntry
 import com.lonx.lyrico.domain.poster.ArtistPosterGrouping
 import com.lonx.lyrico.ui.components.miuix.MiuixBottomSheet
@@ -122,6 +122,11 @@ fun ArtistPosterMenu(
     onCrop: (target: AudioPicture) -> Unit,
     onReassign: (target: AudioPicture, artistName: String) -> Unit,
     onMissingArtist: () -> Unit,
+    externalPoster: ResolvedArtistPoster.File?,
+    externalActionsEnabled: Boolean,
+    onCropExternal: (ResolvedArtistPoster.File) -> Unit,
+    onExportExternal: (ResolvedArtistPoster.File) -> Unit,
+    onDeleteExternal: (ResolvedArtistPoster.File) -> Unit,
 ) {
     val untaggedLabel = stringResource(R.string.artist_image_untagged)
 
@@ -148,8 +153,8 @@ fun ArtistPosterMenu(
     }
 
     /**
-     * 移除/保存/裁剪只对**标签里的内嵌图片**有意义。
-     * 站在一个只有外置海报文件夹兜底的艺术家位上时，这些项不显示——否则会去动别的艺术家的图。
+     * 内嵌操作只作用于当前位的内嵌图片；站在外置海报位时，不得误动其他艺术家的内嵌图片。
+     * 外部操作另取实际解析出的文件，不把“可尝试文件夹兜底”当成文件存在。
      */
     val canActOnEmbedded = if (currentPageIsArtistSlot) currentEntry != null else entries.isNotEmpty()
 
@@ -185,34 +190,63 @@ fun ArtistPosterMenu(
         if (request != null) runEntryAction(request, entry)
     }
 
-    if (com.lonx.lyrico.ui.theme.LocalUiEngine.current == com.lonx.lyrico.data.model.UiEngine.SALT) {
-        com.lonx.lyrico.ui.components.base.ItemMenuBottomSheet(
-            show = state.showOptions,
-            label = stringResource(R.string.label_artist_image_options),
-            onDismissRequest = state::closeOptions,
-        ) {
-            com.lonx.lyrico.ui.components.base.ItemMenuAction(
-                title = stringResource(R.string.label_change_artist_image), icon = LucideIcons.ImageAdd,
-                onClick = { state.closeOptions(); chooseLocalImage() })
-            if (canActOnEmbedded) {
-                com.lonx.lyrico.ui.components.base.ItemMenuAction(
-                    title = stringResource(R.string.label_remove_artist_image), icon = LucideIcons.Trash,
-                    tone = PreferenceIconTone.Danger,
-                    onClick = { state.closeOptions(); requestEntryAction(PosterPickerRequest.Remove) })
-                com.lonx.lyrico.ui.components.base.ItemMenuAction(
-                    title = stringResource(R.string.label_save_artist_image), icon = LucideIcons.Download,
-                    onClick = { state.closeOptions(); requestEntryAction(PosterPickerRequest.Export) })
-                com.lonx.lyrico.ui.components.base.ItemMenuAction(
-                    title = stringResource(R.string.label_crop_artist_image), icon = LucideIcons.Crop,
-                    onClick = { state.closeOptions(); requestEntryAction(PosterPickerRequest.Crop) })
-            }
-            currentEntry?.let { entry ->
-                com.lonx.lyrico.ui.components.base.ItemMenuAction(
-                    title = stringResource(R.string.label_reassign_artist_image, entry.displayName(untaggedLabel)),
-                    icon = LucideIcons.UserSwitch,
-                    onClick = { state.closeOptions(); reassign(entry.picture) })
-            }
+    ItemMenuBottomSheet(
+        show = state.showOptions,
+        label = stringResource(R.string.label_artist_image_options),
+        onDismissRequest = state::closeOptions,
+    ) {
+        ItemMenuAction(
+            title = stringResource(R.string.label_change_artist_image), icon = LucideIcons.ImageAdd,
+            tone = PreferenceIconTone.Tools,
+            onClick = { state.closeOptions(); chooseLocalImage() },
+        )
+        if (canActOnEmbedded) {
+            ItemMenuAction(
+                title = stringResource(R.string.label_save_artist_image), icon = LucideIcons.Download,
+                tone = PreferenceIconTone.Library,
+                onClick = { state.closeOptions(); requestEntryAction(PosterPickerRequest.Export) },
+            )
+            ItemMenuAction(
+                title = stringResource(R.string.label_crop_artist_image), icon = LucideIcons.Crop,
+                tone = PreferenceIconTone.Pink,
+                onClick = { state.closeOptions(); requestEntryAction(PosterPickerRequest.Crop) },
+            )
         }
+        externalPoster?.let { file ->
+            ItemMenuAction(
+                title = stringResource(R.string.label_save_artist_image), icon = LucideIcons.Download,
+                tone = PreferenceIconTone.Library, enabled = externalActionsEnabled,
+                onClick = { state.closeOptions(); onExportExternal(file) },
+            )
+            if (file.canCrop) ItemMenuAction(
+                title = stringResource(R.string.label_crop_artist_image), icon = LucideIcons.Crop,
+                tone = PreferenceIconTone.Pink, enabled = externalActionsEnabled,
+                onClick = { state.closeOptions(); onCropExternal(file) },
+            )
+        }
+        currentEntry?.let { entry ->
+            ItemMenuAction(
+                title = stringResource(R.string.label_reassign_artist_image, entry.displayName(untaggedLabel)),
+                icon = LucideIcons.UserSwitch, tone = PreferenceIconTone.Lyrics,
+                onClick = { state.closeOptions(); reassign(entry.picture) },
+            )
+        }
+        // Destructive operations stay last and target only the currently displayed source.
+        if (canActOnEmbedded) ItemMenuAction(
+            title = stringResource(R.string.label_remove_artist_image), icon = LucideIcons.Trash,
+            tone = PreferenceIconTone.Danger,
+            onClick = { state.closeOptions(); requestEntryAction(PosterPickerRequest.Remove) },
+        )
+        externalPoster?.let { file ->
+            ItemMenuAction(
+                title = stringResource(R.string.action_delete), icon = LucideIcons.Trash,
+                tone = PreferenceIconTone.Danger, enabled = externalActionsEnabled,
+                onClick = { state.closeOptions(); onDeleteExternal(file) },
+            )
+        }
+    }
+
+    if (com.lonx.lyrico.ui.theme.LocalUiEngine.current == com.lonx.lyrico.data.model.UiEngine.SALT) {
         val request = state.pickerRequest
         com.lonx.lyrico.ui.components.base.ItemMenuBottomSheet(
             show = request != null,
@@ -232,80 +266,6 @@ fun ArtistPosterMenu(
             } else ArtistPicturePickerItems(entries, untaggedLabel, ::onEntryPicked)
         }
         return
-    }
-
-    MiuixBottomSheet(
-        show = state.showOptions,
-        enableNestedScroll = false,
-        title = stringResource(R.string.label_artist_image_options),
-        onDismissRequest = { state.closeOptions() }
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .verticalScroll(rememberScrollState()),
-        ) {
-            Card(
-                colors = CardDefaults.defaultColors(color = MiuixTheme.colorScheme.secondaryContainer)
-            ) {
-                // 一个艺术家只有一张海报，所以「从本地选择」同时就是新增和替换
-                ArrowPreference(
-                    startAction = { PreferenceIcon(LucideIcons.ImageAdd, PreferenceIconTone.Appearance) },
-                    title = stringResource(R.string.label_change_artist_image),
-                    onClick = {
-                        state.closeOptions()
-                        chooseLocalImage()
-                    }
-                )
-                if (canActOnEmbedded) {
-                    ArrowPreference(
-                        startAction = { PreferenceIcon(LucideIcons.Trash, PreferenceIconTone.Danger) },
-                        title = stringResource(R.string.label_remove_artist_image),
-                        onClick = {
-                            state.closeOptions()
-                            requestEntryAction(PosterPickerRequest.Remove)
-                        }
-                    )
-                    ArrowPreference(
-                        startAction = { PreferenceIcon(LucideIcons.Download, PreferenceIconTone.Tools) },
-                        title = stringResource(R.string.label_save_artist_image),
-                        onClick = {
-                            state.closeOptions()
-                            requestEntryAction(PosterPickerRequest.Export)
-                        }
-                    )
-                    ArrowPreference(
-                        startAction = { PreferenceIcon(LucideIcons.Crop, PreferenceIconTone.Library) },
-                        title = stringResource(R.string.label_crop_artist_image),
-                        onClick = {
-                            state.closeOptions()
-                            requestEntryAction(PosterPickerRequest.Crop)
-                        }
-                    )
-                }
-            }
-
-            // 重新绑定：描述对不上（空的、或对不上任何艺术家）要能绑，已经对上的也要能改。
-            // 作用于当前这一页的海报，所以在封面页打开菜单时不显示。
-            if (currentEntry != null) {
-                Spacer(modifier = Modifier.height(12.dp))
-                Card(
-                    colors = CardDefaults.defaultColors(color = MiuixTheme.colorScheme.secondaryContainer)
-                ) {
-                    ArrowPreference(
-                        startAction = { PreferenceIcon(LucideIcons.UserSwitch, PreferenceIconTone.Lyrics) },
-                        title = stringResource(
-                            R.string.label_reassign_artist_image,
-                            currentEntry.displayName(untaggedLabel)
-                        ),
-                        onClick = {
-                            state.closeOptions()
-                            reassign(currentEntry.picture)
-                        }
-                    )
-                }
-            }
-        }
     }
 
     // 选择目标：选艺术家（设置/重挂）或选具体某张图片（移除/保存/裁剪）

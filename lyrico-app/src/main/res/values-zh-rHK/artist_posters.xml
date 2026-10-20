@@ -47,4 +47,5 @@
     <string name="artist_poster_save_folder_summary">依藝術家名稱儲存圖片，不修改歌曲檔案</string>
     <string name="artist_poster_select_folder_summary">先選擇海報資料夾，再依藝術家名稱儲存圖片</string>
     <string name="msg_artist_poster_embed_result">已內嵌：%1$d，略過不支援的格式：%2$d，失敗：%3$d</string>
+    <string name="artist_poster_embed_current_song_summary">新增至目前歌曲，儲存後寫入音訊檔案</string>
 </resources>

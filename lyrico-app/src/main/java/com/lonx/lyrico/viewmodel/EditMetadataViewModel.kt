@@ -66,6 +66,7 @@ import com.lonx.lyrico.utils.ReplayGainCalculateState
 import com.lonx.lyrico.utils.ReplayGainError
 import com.lonx.lyrico.utils.ReplayGainScanner
 import com.lonx.lyrico.utils.SafSiblingFileWriter
+import com.lonx.lyrico.utils.ArtistPosterFileWriter
 import com.lonx.lyrico.utils.UiMessage
 import com.lonx.lyrico.utils.getCoverSourceType
 import com.lonx.lyrico.utils.lyrics.LyricsColumnSorter
@@ -102,6 +103,7 @@ data class EditMetadataUiState(
     val coverUri: Any? = null,
     val exportCoverResult: Boolean? = null,
     val exportArtistImageResult: Boolean? = null,
+    val isSavingArtistPoster: Boolean = false,
     val isSaving: Boolean = false,
     val saveSuccess: Boolean? = null,
     val originalCover: Any? = null,
@@ -486,6 +488,64 @@ class EditMetadataViewModel(
         )
     }
 
+    fun setArtistPosterFolder(uri: Uri, onAdded: () -> Unit, onFailure: (UiMessage) -> Unit) {
+        viewModelScope.launch {
+            try {
+                settingsRepository.setArtistPosterFolder(uri.toString())
+                settingsRepository.refreshArtistPosters()
+                onAdded()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.e(TAG, "添加艺术家海报文件夹失败", e)
+                onFailure(UiMessage.StringResource(R.string.artist_poster_folder_error))
+            }
+        }
+    }
+
+    /** Folder saves apply immediately and never change the song's metadata draft. */
+    fun saveArtistImageToFolder(context: Context, uri: Uri, artistName: String, onResult: (UiMessage) -> Unit) {
+        if (_uiState.value.isSavingArtistPoster) return
+        _uiState.update { it.copy(isSavingArtistPoster = true) }
+        val appContext = context.applicationContext
+        readPictureBytes(appContext, uri) { bytes, mimeType ->
+            viewModelScope.launch {
+                try {
+                    if (bytes == null || bytes.isEmpty()) {
+                        onResult(UiMessage.StringResource(R.string.msg_read_artist_image_failed))
+                        return@launch
+                    }
+                    val writtenName = ArtistPosterFileWriter.write(
+                        context = appContext,
+                        artistName = artistName,
+                        data = bytes,
+                        mimeType = mimeType,
+                        posterFolder = settingsRepository.artistPosterFolder.first(),
+                    )
+                    if (writtenName != null) {
+                        try {
+                            settingsRepository.refreshArtistPosters()
+                        } catch (e: CancellationException) {
+                            throw e
+                        } catch (e: Exception) {
+                            Log.w(TAG, "刷新艺术家海报缓存失败", e)
+                        }
+                    }
+                    onResult(if (writtenName != null)
+                        UiMessage.StringResource(R.string.msg_artist_poster_saved_to_folder, writtenName)
+                        else UiMessage.StringResource(R.string.msg_artist_poster_folder_save_failed))
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    Log.e(TAG, "保存艺术家海报文件失败", e)
+                    onResult(UiMessage.StringResource(R.string.msg_artist_poster_folder_save_failed))
+                } finally {
+                    _uiState.update { it.copy(isSavingArtistPoster = false) }
+                }
+            }
+        }
+    }
+
     /** 移除某一张艺术家图片（标签里若残留多张，只删这一张）。 */
     fun removeArtistImage(target: AudioPicture) {
         updateArtistPictures { pictures, _ -> ArtistPosterEdits.remove(pictures, target) }
@@ -527,10 +587,12 @@ class EditMetadataViewModel(
     }
 
     /** 导出某张艺术家海报到系统相册。 */
-    fun exportArtistImage(context: Context, target: AudioPicture) {
+    fun exportArtistImage(context: Context, target: AudioPicture) = exportArtistImage(context, target.data)
+
+    fun exportArtistImage(context: Context, bytes: ByteArray) {
         exportPictureToGallery(
             context = context,
-            source = target.data,
+            source = bytes,
             albumName = "ArtistPosters",
             filenamePrefix = "Artist",
             failureLogMessage = "Failed to export artist poster",

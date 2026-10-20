@@ -181,6 +181,35 @@ class ArtistPosterEditViewModel(
         }
     }
 
+    fun deletePosterFile(target: ResolvedArtistPoster.File) {
+        if (_state.value.isRunning) return
+        val runGeneration = ++generation
+        cropPending = false
+        _titleRes.value = R.string.action_delete
+        _state.value = ArtistPosterEmbedUiState(isRunning = true, total = 1, activeSong = target.name)
+        job = viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val files = SafDocuments.children(application, target.folderUri.toUri()) ?: error("Folder unavailable")
+                check(files.any { it.uri.toString() == target.uri && it.displayName == target.name }) { "File changed" }
+                check(DocumentsContract.deleteDocument(application.contentResolver, target.uri.toUri()))
+                refreshPosters()
+                if (generation == runGeneration) _state.update {
+                    it.copy(isRunning = false, done = 1, activeSong = null,
+                        message = application.getString(R.string.msg_save_success))
+                }
+            } catch (e: CancellationException) {
+                withContext(NonCancellable) { refreshPosters() }
+                throw e
+            } catch (e: Exception) {
+                Log.e("ArtistPosterEdit", "Failed to delete poster file", e)
+                if (generation == runGeneration) _state.update {
+                    it.copy(isRunning = false, activeSong = null,
+                        message = application.getString(R.string.poster_operation_failed))
+                }
+            }
+        }
+    }
+
     fun start(ids: Set<Long>) = launchOperation(ids, Operation.Remove)
 
     fun export(ids: Set<Long>) = launchOperation(ids, Operation.Export)

@@ -32,58 +32,23 @@ fun ArtistPosterAddHost(
     val artistPosterState by viewModel.artistPosterEmbedState.collectAsStateWithLifecycle()
     var showArtistPosterProgress by remember { mutableStateOf(false) }
     var pickedArtistImage by remember { mutableStateOf<ArtistImageSource?>(null) }
-    var pendingArtistPosterTarget by remember { mutableStateOf<ArtistPosterTarget?>(null) }
 
-    fun applyPickedArtistImage(target: ArtistPosterTarget, uri: Uri?) {
+    fun applyPickedArtistImage(name: String, target: ArtistPosterTarget, uri: Uri?) {
         if (uri == null) return
         viewModel.prepareArtistImage(context, uri) { source ->
             pickedArtistImage = source
             showArtistPosterProgress = true
             when (target) {
                 ArtistPosterTarget.EmbedIntoSongs ->
-                    viewModel.embedArtistImageForAllSongs(artistName, songs, source)
+                    viewModel.embedArtistImageForAllSongs(name, songs, source)
 
                 ArtistPosterTarget.SaveToFolder ->
-                    viewModel.saveArtistImageToFolder(artistName, source)
+                    viewModel.saveArtistImageToFolder(name, source)
             }
         }
     }
 
-    val artistPhotoPickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickVisualMedia()
-    ) { uri ->
-        val target = pendingArtistPosterTarget
-        pendingArtistPosterTarget = null
-        if (target != null) applyPickedArtistImage(target, uri)
-    }
-
     val message = stringResource(R.string.permission_denied_cannot_save)
-    val folderPickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.OpenDocumentTree()
-    ) { uri ->
-        if (uri == null) return@rememberLauncherForActivityResult
-        val permissionTaken = runCatching {
-            context.contentResolver.takePersistableUriPermission(
-                uri,
-                Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-            )
-        }.isSuccess
-        if (!permissionTaken) {
-            Toast.makeText(
-                context,
-                message,
-                Toast.LENGTH_SHORT
-            ).show()
-            return@rememberLauncherForActivityResult
-        }
-        viewModel.setArtistPosterFolder(uri) {
-            pendingArtistPosterTarget = ArtistPosterTarget.SaveToFolder
-            artistPhotoPickerLauncher.launch(
-                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-            )
-        }
-    }
-
     val artistPosterPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartIntentSenderForResult()
     ) { result ->
@@ -120,33 +85,15 @@ fun ArtistPosterAddHost(
         }
     }
 
-    fun startArtistImagePick(target: ArtistPosterTarget) {
-        pendingArtistPosterTarget = target
-        artistPhotoPickerLauncher.launch(
-            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-        )
-    }
-
-    com.lonx.lyrico.ui.components.base.ItemMenuBottomSheet(
+    ArtistPosterPickerHost(
         show = show,
-        label = stringResource(R.string.artist_poster_destination_title),
-        enableNestedScroll = false,
-        onDismissRequest = onDismissRequest
-    ) {
-        ArtistPosterDestinationPreferences(
-            hasPosterFolder = posterFolder != null,
-            enabled = enabled && !artistPosterState.isRunning && artist != null && songs.isNotEmpty(),
-            onEmbedToSongs = {
-                onDismissRequest()
-                startArtistImagePick(ArtistPosterTarget.EmbedIntoSongs)
-            },
-            onSaveToFolder = {
-                onDismissRequest()
-                if (posterFolder == null) folderPickerLauncher.launch(null)
-                else startArtistImagePick(ArtistPosterTarget.SaveToFolder)
-            }
-        )
-    }
+        artistName = artistName,
+        posterFolder = posterFolder,
+        onDismissRequest = onDismissRequest,
+        enabled = enabled && !artistPosterState.isRunning && artist != null && songs.isNotEmpty(),
+        onSetPosterFolder = viewModel::setArtistPosterFolder,
+        onImagePicked = ::applyPickedArtistImage,
+    )
     ArtistPosterProgressSheet(
         state = artistPosterState,
         show = showArtistPosterProgress && artistPosterState.hasContent,
@@ -170,4 +117,70 @@ fun ArtistPosterAddHost(
     )
 }
 
-private enum class ArtistPosterTarget { EmbedIntoSongs, SaveToFolder }
+internal enum class ArtistPosterTarget { EmbedIntoSongs, SaveToFolder }
+
+private data class ArtistPosterPickRequest(val artistName: String, val target: ArtistPosterTarget)
+
+/** Destination choice, folder permission and image selection shared by artist and song editors. */
+@Composable
+internal fun ArtistPosterPickerHost(
+    show: Boolean,
+    artistName: String,
+    posterFolder: String?,
+    onDismissRequest: () -> Unit,
+    onSetPosterFolder: (Uri, () -> Unit) -> Unit,
+    onImagePicked: (String, ArtistPosterTarget, Uri) -> Unit,
+    enabled: Boolean = true,
+    embedSummary: String = stringResource(R.string.artist_poster_embed_summary),
+) {
+    val context = LocalContext.current
+    val permissionMessage = stringResource(R.string.permission_denied_cannot_save)
+    var pendingRequest by remember { mutableStateOf<ArtistPosterPickRequest?>(null) }
+    val picked by rememberUpdatedState(onImagePicked)
+    val imagePicker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        val request = pendingRequest
+        pendingRequest = null
+        if (uri != null && request != null) picked(request.artistName, request.target, uri)
+    }
+    fun launchImagePicker(request: ArtistPosterPickRequest) {
+        pendingRequest = request
+        imagePicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+    }
+    val folderPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
+        val request = pendingRequest
+        pendingRequest = null
+        if (uri != null && request != null) {
+            val granted = runCatching {
+                context.contentResolver.takePersistableUriPermission(uri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+            }.isSuccess
+            if (granted) onSetPosterFolder(uri) { launchImagePicker(request) }
+            else Toast.makeText(context, permissionMessage, Toast.LENGTH_SHORT).show()
+        }
+    }
+    com.lonx.lyrico.ui.components.base.ItemMenuBottomSheet(
+        show = show,
+        label = stringResource(R.string.artist_poster_destination_title),
+        enableNestedScroll = false,
+        onDismissRequest = onDismissRequest,
+    ) {
+        ArtistPosterDestinationPreferences(
+            hasPosterFolder = posterFolder != null,
+            enabled = enabled && artistName.isNotBlank(),
+            embedSummary = embedSummary,
+            onEmbedToSongs = {
+                val request = ArtistPosterPickRequest(artistName, ArtistPosterTarget.EmbedIntoSongs)
+                onDismissRequest()
+                launchImagePicker(request)
+            },
+            onSaveToFolder = {
+                val request = ArtistPosterPickRequest(artistName, ArtistPosterTarget.SaveToFolder)
+                onDismissRequest()
+                if (posterFolder == null) {
+                    pendingRequest = request
+                    folderPicker.launch(null)
+                } else launchImagePicker(request)
+            },
+        )
+    }
+}

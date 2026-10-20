@@ -129,6 +129,7 @@ import com.lonx.lyrico.data.model.plugin.PluginSourceType
 import com.lonx.lyrico.data.model.search.LyricsSearchResult
 import com.lonx.lyrico.data.utils.ArtistNameSplitter
 import com.lonx.lyrico.domain.poster.ArtistPosterGrouping
+import com.lonx.lyrico.domain.poster.ResolvedArtistPoster
 import com.lonx.lyrico.domain.poster.ArtistPosterPages
 import com.lonx.lyrico.plugin.source.SearchSourceProvider
 import com.lonx.lyrico.ui.components.CoverRequest
@@ -299,7 +300,7 @@ fun EditMetadataScreen(
     var isSearchFabMenuExpanded by remember { mutableStateOf(false) }
     // 艺术家海报的菜单与选择面板由组件自己管理
     val artistPosterMenu = rememberArtistPosterMenuState()
-    var photoPickerArtistName by remember { mutableStateOf<String?>(null) }
+    var addPosterArtistName by remember { mutableStateOf<String?>(null) }
     val currentShiftOffset by viewModel.currentShiftOffset.collectAsState()
 
     val clipboardManager = LocalClipboard.current
@@ -422,6 +423,24 @@ fun EditMetadataScreen(
     // 封面区轮播：第 0 页是封面，其后每页对应一位艺术家的海报位
     val coverPagerState = rememberPagerState(pageCount = { picturePages.size })
     val currentArtistPage = artistPages.getOrNull(coverPagerState.currentPage - 1)
+    val externalPosterRequest = currentArtistPage?.takeIf { it.showExternalPoster }
+        ?.let { artistPosterFileRequest(it.artistName) }
+    val posterReader: ArtistPosterReader = org.koin.compose.koinInject()
+    var externalPoster by remember(externalPosterRequest) { mutableStateOf<ResolvedArtistPoster.File?>(null) }
+    LaunchedEffect(externalPosterRequest) {
+        externalPoster = try {
+            externalPosterRequest?.let { posterReader.resolve(it, strict = true) as? ResolvedArtistPoster.File }
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            android.util.Log.w("EditMetadata", "Cannot resolve external artist poster", e)
+            null
+        }
+    }
+    val posterFileEditor: com.lonx.lyrico.viewmodel.ArtistPosterEditViewModel = koinViewModel()
+    val posterFileEditState by posterFileEditor.state.collectAsState()
+    var pendingPosterFileDelete by remember { mutableStateOf<ResolvedArtistPoster.File?>(null) }
+
 
     // 各种 Launcher
     val photoPickerLauncher = rememberLauncherForActivityResult(
@@ -430,30 +449,38 @@ fun EditMetadataScreen(
         uri?.let { viewModel.updateCover(context, it) }
     }
 
-    val artistPhotoPickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickVisualMedia()
-    ) { uri ->
-        val artistName = photoPickerArtistName
-        photoPickerArtistName = null
-        if (uri == null || artistName == null) return@rememberLauncherForActivityResult
-        // 描述写入所选艺术家；该艺术家原有的海报会被替换（一个艺术家只有一张海报）
-        viewModel.setArtistImage(context, uri, artistName)
+    fun showPosterMessage(message: com.lonx.lyrico.utils.UiMessage) {
+        val text = message.asString(context) ?: return
+        if (salt) android.widget.Toast.makeText(context, text, android.widget.Toast.LENGTH_SHORT).show()
+        else scope.launch { snackbarHostState.showSnackbar(text) }
     }
 
-    /** 打开系统图片选择器，选中的图片会作为 [artistName] 的海报。 */
-    fun pickArtistImage(artistName: String) {
-        photoPickerArtistName = artistName
-        artistPhotoPickerLauncher.launch(
-            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-        )
-    }
+    com.lonx.lyrico.ui.components.poster.ArtistPosterPickerHost(
+        show = addPosterArtistName != null,
+        artistName = addPosterArtistName.orEmpty(),
+        posterFolder = artistPosterSource.folder,
+        onDismissRequest = { addPosterArtistName = null },
+        embedSummary = stringResource(R.string.artist_poster_embed_current_song_summary),
+        enabled = !uiState.isSaving && !uiState.isSavingArtistPoster,
+        onSetPosterFolder = { uri, onAdded ->
+            viewModel.setArtistPosterFolder(uri, onAdded, ::showPosterMessage)
+        },
+        onImagePicked = { artistName, target, uri ->
+            when (target) {
+                com.lonx.lyrico.ui.components.poster.ArtistPosterTarget.EmbedIntoSongs ->
+                    viewModel.setArtistImage(context, uri, artistName)
+                com.lonx.lyrico.ui.components.poster.ArtistPosterTarget.SaveToFolder ->
+                    viewModel.saveArtistImageToFolder(context, uri, artistName, ::showPosterMessage)
+            }
+        },
+    )
 
-    fun cropArtistImage(target: AudioPicture) {
+    fun cropArtistImage(bytes: ByteArray, request: CropRequest) {
         scope.launch(Dispatchers.IO) {
-            val bitmap = getBitmap(context, target.data)
+            val bitmap = getBitmap(context, bytes)
             withContext(Dispatchers.Main) {
                 if (bitmap != null) {
-                    cropRequest = CropRequest.ArtistImage(target)
+                    cropRequest = request
                     bitmapToCrop = bitmap
                     showCropSheet = true
                 } else {
@@ -1642,10 +1669,15 @@ Box(modifier = Modifier.fillMaxSize()) {
         entries = artistPictureEntries,
         currentEntry = currentArtistPage?.entry,
         currentPageIsArtistSlot = currentArtistPage != null,
-        onSetPoster = { pickArtistImage(it) },
+        onSetPoster = { addPosterArtistName = it },
         onRemove = { viewModel.removeArtistImage(it) },
         onExport = { viewModel.exportArtistImage(context, it) },
-        onCrop = { cropArtistImage(it) },
+        onCrop = { cropArtistImage(it.data, CropRequest.ArtistImage(it)) },
+        externalPoster = externalPoster,
+        externalActionsEnabled = !posterFileEditState.isRunning && !uiState.isSavingArtistPoster,
+        onCropExternal = { cropArtistImage(it.bytes, CropRequest.ExternalArtistImage(it)) },
+        onExportExternal = { viewModel.exportArtistImage(context, it.bytes) },
+        onDeleteExternal = { pendingPosterFileDelete = it },
         onReassign = { target, artistName ->
             val ownerKey = ArtistPosterGrouping.ownerKeyOf(artistName)
             val occupied = artistPictureEntries.any {
@@ -1666,14 +1698,27 @@ Box(modifier = Modifier.fillMaxSize()) {
             }
         },
     )
+    com.lonx.lyrico.ui.components.base.YesNoDialog(
+        show = pendingPosterFileDelete != null,
+        title = stringResource(R.string.dialog_delete_file_title),
+        summary = stringResource(R.string.dialog_delete_file_content, pendingPosterFileDelete?.name.orEmpty()),
+        onDismissRequest = { pendingPosterFileDelete = null },
+        onConfirm = { pendingPosterFileDelete?.let(posterFileEditor::deletePosterFile) },
+    )
+    com.lonx.lyrico.ui.components.poster.ArtistPosterRemovalHost(
+        viewModel = posterFileEditor,
+        pendingIds = emptySet(),
+        onDismissConfirmation = {},
+    )
     // 裁剪界面
     com.lonx.lyrico.ui.components.crop.ImageCropperSheet(
         show = showCropSheet, bitmap = bitmapToCrop,
-        title = stringResource(if (cropRequest is CropRequest.ArtistImage) R.string.label_crop_artist_image else R.string.label_crop_cover),
+        title = stringResource(if (cropRequest is CropRequest.Cover) R.string.label_crop_cover else R.string.label_crop_artist_image),
         onCrop = { bitmap ->
             when (val request = cropRequest) {
                 CropRequest.Cover -> viewModel.updateCover(bitmap)
                 is CropRequest.ArtistImage -> viewModel.replaceArtistImage(bitmap, request.target)
+                is CropRequest.ExternalArtistImage -> posterFileEditor.cropPoster(request.target, bitmap)
             }
         },
         onDismissRequest = { showCropSheet = false },
@@ -1934,6 +1979,7 @@ private sealed interface CropRequest {
 
     /** 只替换这一张艺术家图片的数据，保留它的归属。 */
     data class ArtistImage(val target: AudioPicture) : CropRequest
+    data class ExternalArtistImage(val target: ResolvedArtistPoster.File) : CropRequest
 }
 
 /** 这张艺术家海报和原始标签里的同名海报是否已经不同（新增或数据/描述被改过）。 */
