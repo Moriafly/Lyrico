@@ -8,11 +8,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.lonx.lyrico.R
 import com.lonx.lyrico.ui.components.icons.LucideIcons
 import com.lonx.lyrico.ui.components.salt.SaltIconButton
 import com.lonx.lyrico.ui.components.salt.SaltTextInput
 import com.moriafly.salt.ui.RoundedColumn
+import com.moriafly.salt.ui.SaltTheme
 
 /** Shared state-based input, styled with Salt surfaces and a stable title/action decoration. */
 @Composable
@@ -25,12 +27,16 @@ internal fun SaltEditorField(
     hint: String? = null,
     actions: @Composable RowScope.() -> Unit = {},
 ) {
+    val textStyle = if (lineLimits is TextFieldLineLimits.MultiLine) {
+        SaltTheme.textStyles.main.copy(fontSize = 14.sp, lineHeight = 20.sp)
+    } else SaltTheme.textStyles.main
     val input: @Composable () -> Unit = {
         SaltTextInput(
             state = state,
             label = label,
             hint = hint,
             lineLimits = lineLimits,
+            textStyle = textStyle,
             actionContent = {
                 Row(verticalAlignment = Alignment.CenterVertically, content = actions)
             },
@@ -38,31 +44,6 @@ internal fun SaltEditorField(
     }
     if (grouped) RoundedColumn(modifier = modifier) { input() }
     else Box(modifier.fillMaxWidth()) { input() }
-}
-
-@Composable
-internal fun SaltEditorField(
-    label: String,
-    value: String,
-    onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier,
-    multiline: Boolean = false,
-    grouped: Boolean = true,
-    hint: String? = null,
-    actions: @Composable RowScope.() -> Unit = {},
-) {
-    SaltEditorField(
-        label = label,
-        state = rememberEditorTextFieldState(value, onValueChange),
-        modifier = modifier,
-        lineLimits =
-            if (multiline)
-                TextFieldLineLimits.MultiLine(minHeightInLines = 6, maxHeightInLines = 12)
-            else TextFieldLineLimits.SingleLine,
-        grouped = grouped,
-        hint = hint,
-        actions = actions,
-    )
 }
 
 /** Keep the action slot measured when the field is unchanged, without an invisible click target. */

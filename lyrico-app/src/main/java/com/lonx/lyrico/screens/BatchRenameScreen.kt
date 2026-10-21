@@ -62,6 +62,7 @@ import com.ramcosta.composedestinations.generated.destinations.CharacterMappingD
 import com.lonx.lyrico.utils.TagField
 import com.lonx.lyrico.viewmodel.BatchRenameViewModel
 import com.lonx.lyrico.ui.components.miuix.MiuixBottomSheet
+import com.lonx.lyrico.ui.components.editor.rememberEditorTextFieldState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -97,6 +98,7 @@ import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.BasicComponent
+import androidx.compose.foundation.text.input.TextFieldLineLimits
 
 private enum class BatchRenameTab(val labelRes: Int) {
     Config(R.string.batch_rename_tab_config),
@@ -397,6 +399,7 @@ private fun BatchRenameConfigTab(
     errorMessage: String?
 ) {
     val salt = LocalUiEngine.current == UiEngine.SALT
+    val formatState = rememberEditorTextFieldState(renameFormat, onFormatChange)
     LazyColumn(
         modifier = (if (salt) Modifier else Modifier
             .scrollEndHaptic()
@@ -412,10 +415,9 @@ private fun BatchRenameConfigTab(
                 ScreenCard(modifier = Modifier.padding(bottom = 6.dp)) {
                     Box(Modifier.fillMaxWidth()) {
                         SaltTextInput(
-                            text = renameFormat,
+                            state = formatState,
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                             backgroundColor = SaltTheme.colors.background,
-                            onChange = onFormatChange,
                             actionContent = {
                                 SaltIconButton(
                                     icon = LucideIcons.FileMusic,
@@ -424,7 +426,7 @@ private fun BatchRenameConfigTab(
                                     size = 32.dp,
                                     iconSize = 18.dp,
                                 )
-                            }
+                            },
                         )
                         PopupMenu(
                             expanded = showDropdowns,
@@ -474,8 +476,7 @@ private fun BatchRenameConfigTab(
                 ) {
                     TextField(
                         modifier = Modifier.padding(12.dp),
-                        value = renameFormat,
-                        onValueChange = onFormatChange,
+                        state = formatState,
                         trailingIcon = {
                             Box {
                                 IconButton(
@@ -509,6 +510,7 @@ private fun BatchRenameConfigTab(
                                 }
                             }
                         },
+                        lineLimits = TextFieldLineLimits.MultiLine(),
                     )
                     Text(
                         modifier = Modifier.padding(12.dp),

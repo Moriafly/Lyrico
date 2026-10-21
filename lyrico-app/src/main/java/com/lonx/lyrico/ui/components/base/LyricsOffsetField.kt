@@ -29,6 +29,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -348,9 +350,10 @@ fun LyricsOffsetInputDialog(
 ) {
     // 每次打开都使用当前偏移值作为初始输入，关闭后输入态不残留。
     var negative by remember(show, initialValue) { mutableStateOf(initialValue < 0L) }
-    var magnitudeInput by remember(show, initialValue) {
-        mutableStateOf(kotlin.math.abs(initialValue).toString())
+    val magnitudeState = remember(show, initialValue) {
+        TextFieldState(kotlin.math.abs(initialValue).toString())
     }
+    val magnitudeInput = magnitudeState.text.toString()
     val magnitude = magnitudeInput.trim().toLongOrNull()
     val value = magnitude?.let { if (negative) -it else it }
     val isValid = value != null && value in minOffset..maxOffset
@@ -370,7 +373,7 @@ fun LyricsOffsetInputDialog(
                         appearance = com.moriafly.salt.ui.ButtonAppearance.Plain,
                     )
                     SaltTextInput(
-                        text = magnitudeInput, onChange = { magnitudeInput = it },
+                        state = magnitudeState,
                         modifier = Modifier.weight(1f),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     )
@@ -416,12 +419,11 @@ fun LyricsOffsetInputDialog(
                 }
                 Spacer(modifier = Modifier.width(10.dp))
                 TextField(
-                    value = magnitudeInput,
-                    onValueChange = { magnitudeInput = it },
+                    state = magnitudeState,
                     modifier = Modifier.weight(1f),
                     label = stringResource(R.string.label_lyrics_offset),
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    lineLimits = TextFieldLineLimits.SingleLine,
                 )
             }
             Spacer(modifier = Modifier.height(6.dp))

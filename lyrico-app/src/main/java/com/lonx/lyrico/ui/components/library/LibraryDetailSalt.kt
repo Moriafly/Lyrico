@@ -47,7 +47,9 @@ internal fun LibraryDetailPageSalt(
         LocalOverscrollFactory provides CupertinoOverscrollEffectFactory(),
     ) {
         BoxWithConstraints {
-            val padding = scaffoldPageWindowInsets().asPaddingValues()
+            // IME changes the viewport, rather than adding scrollable space behind the keyboard.
+            // Exclude it here so BasicScreen's bring-into-view spec does not subtract it again.
+            val padding = scaffoldPageWindowInsets().exclude(WindowInsets.ime).asPaddingValues()
             val direction = LocalLayoutDirection.current
             val width =
                 maxWidth -
@@ -55,7 +57,7 @@ internal fun LibraryDetailPageSalt(
                     padding.calculateEndPadding(direction)
             val compact = width < 360.dp
             BasicScreen(
-                modifier = Modifier.background(SaltTheme.colors.background),
+                modifier = Modifier.background(SaltTheme.colors.background).imePadding(),
                 contentPadding = padding,
                 actionButton = {
                     LibraryTopBarTransition(selection, Alignment.CenterStart) { selected ->

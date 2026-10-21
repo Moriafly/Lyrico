@@ -110,6 +110,8 @@ import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 import top.yukonga.miuix.kmp.window.WindowDialog
 import top.yukonga.miuix.kmp.window.WindowListPopup
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.TextFieldState
 
 /** 内置字段与自定义标签共用一份可排序列表。 */
 @Composable
@@ -758,7 +760,8 @@ private fun AddCustomTagDialog(
     onDismissFinished: () -> Unit,
     onConfirm: (String) -> Unit,
 ) {
-    var typed by remember(show) { mutableStateOf("") }
+    val inputState = remember(show) { TextFieldState("") }
+    val typed = inputState.text.toString()
 
     if (LocalUiEngine.current == UiEngine.SALT) {
         // Salt 弹窗同步销毁，用“曾显示”标记在关闭后补发一次完成回调。
@@ -815,8 +818,7 @@ private fun AddCustomTagDialog(
             Spacer(Modifier.height(16.dp))
             RoundedColumn(paddingValues = PaddingValues(0.dp)) {
                 SaltTextInput(
-                    text = typed,
-                    onChange = { typed = it },
+                    state = inputState,
                     hint = stringResource(R.string.custom_tag_key),
                 )
             }
@@ -867,10 +869,10 @@ private fun AddCustomTagDialog(
 
             Spacer(Modifier.height(16.dp))
             TextField(
-                value = typed,
-                onValueChange = { typed = it },
+                state = inputState,
                 label = stringResource(R.string.custom_tag_key),
                 modifier = Modifier.fillMaxWidth(),
+                lineLimits = TextFieldLineLimits.MultiLine(),
             )
             Spacer(Modifier.height(6.dp))
             Text(

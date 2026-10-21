@@ -5,6 +5,9 @@
 
 package com.lonx.lyrico.screens
 
+import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import android.content.Context
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -37,7 +40,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberOverscrollEffect
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -210,7 +212,8 @@ fun PluginManagerScreen(
     var pendingUninstallPluginId by rememberSaveable { mutableStateOf<String?>(null) }
     var showRenameDialog by rememberSaveable { mutableStateOf(false) }
     var pendingRenamePluginId by rememberSaveable { mutableStateOf<String?>(null) }
-    var customNameInput by rememberSaveable { mutableStateOf("") }
+    val nameState = rememberTextFieldState()
+    val customNameInput = nameState.text.toString()
     var showImportPreviewSheet by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(pendingImport) {
@@ -404,7 +407,7 @@ fun PluginManagerScreen(
                             },
                             onRename = {
                                 pendingRenamePluginId = plugin.id
-                                customNameInput = plugin.customName ?: plugin.name
+                                nameState.setTextAndPlaceCursorAtEnd(plugin.customName ?: plugin.name)
                                 showRenameDialog = true
                             },
                             onCheckChanged = { enabled ->
@@ -470,7 +473,6 @@ fun PluginManagerScreen(
 
     if (salt) {
         if (showRenameDialog) {
-            val nameState = rememberTextFieldState(initialText = customNameInput)
             com.lonx.lyrico.ui.components.salt.SaltInputDialog(
                 title = stringResource(R.string.plugin_custom_name),
                 state = nameState,
@@ -506,10 +508,9 @@ fun PluginManagerScreen(
         Column {
             TextField(
                 modifier = Modifier.fillMaxWidth(),
-                value = customNameInput,
+                state = nameState,
                 label = stringResource(R.string.plugin_custom_name),
-                singleLine = true,
-                onValueChange = { customNameInput = it }
+                lineLimits = TextFieldLineLimits.SingleLine,
             )
             Spacer(modifier = Modifier.height(6.dp))
             Text(

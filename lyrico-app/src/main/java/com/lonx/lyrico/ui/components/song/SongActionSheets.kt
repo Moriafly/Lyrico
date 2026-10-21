@@ -27,6 +27,8 @@ import com.lonx.lyrico.ui.components.player.PlayerPickerBottomSheet
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.TextFieldState
 
 @Composable
 fun SongActionSheets(
@@ -139,9 +141,8 @@ private fun RenameSongDialog(
 
     val oldName = song.fileName.substringBeforeLast('.')
 
-    var newName by remember(song.uri, song.fileName) {
-        mutableStateOf(oldName)
-    }
+    val nameState = remember(song.uri, song.fileName) { TextFieldState(oldName) }
+    val newName = nameState.text.toString()
 
     YesNoDialog(
         title = androidx.compose.ui.res.stringResource(R.string.dialog_rename_title),
@@ -159,8 +160,9 @@ private fun RenameSongDialog(
                 com.moriafly.salt.ui.RoundedColumn(
                     paddingValues = androidx.compose.foundation.layout.PaddingValues(0.dp)
                 ) {
-                    SaltTextInput(text = newName, onChange = { newName = it },
-                        hint = oldName)
+                    SaltTextInput(state = nameState,
+                        hint = oldName,
+                    )
                 }
                 if (extensionDot.isNotEmpty()) com.moriafly.salt.ui.Text(
                     text = extensionDot,
@@ -169,9 +171,7 @@ private fun RenameSongDialog(
                     modifier = Modifier.padding(top = 8.dp),
                 )
             } else TextField(
-                value = newName,
-                onValueChange = { newName = it },
-                maxLines = 1,
+                state = nameState,
                 modifier = Modifier.fillMaxWidth(),
                 trailingIcon = {
                     if (extensionDot.isNotEmpty()) {
@@ -181,7 +181,8 @@ private fun RenameSongDialog(
                             modifier = Modifier.padding(end = 12.dp)
                         )
                     }
-                }
+                },
+                lineLimits = TextFieldLineLimits.SingleLine,
             )
         }
     )

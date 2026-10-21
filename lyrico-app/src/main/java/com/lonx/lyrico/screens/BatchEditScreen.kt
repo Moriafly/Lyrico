@@ -55,6 +55,7 @@ import com.moriafly.salt.ui.SaltTheme
 import com.moriafly.salt.ui.RoundedColumn
 import com.moriafly.salt.ui.Item
 import com.lonx.lyrico.ui.components.editor.SaltEditorField
+import com.lonx.lyrico.ui.components.editor.rememberEditorTextFieldState
 import com.moriafly.salt.ui.ItemOuterTitle
 import com.moriafly.salt.ui.Text as SaltText
 import androidx.compose.runtime.Composable
@@ -129,6 +130,10 @@ import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 import top.yukonga.miuix.kmp.window.WindowDialog
 import androidx.compose.foundation.lazy.grid.items as gridItems
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 
 private enum class BatchEditTab(val labelRes: Int) {
     Config(R.string.batch_edit_tab_config),
@@ -856,21 +861,23 @@ Box(
         title = stringResource(R.string.action_add_custom_tag),
         onDismissRequest = { showAddCustomTagDialog = false }
     ) {
-        var newCustomTagKey by remember { mutableStateOf("") }
-        var newCustomTagValue by remember { mutableStateOf("") }
+        val newCustomTagKeyState = rememberTextFieldState()
+        val newCustomTagKey = newCustomTagKeyState.text.toString()
+        val newCustomTagValueState = rememberTextFieldState()
+        val newCustomTagValue = newCustomTagValueState.text.toString()
         Column(modifier = Modifier.fillMaxWidth()) {
             TextField(
-                value = newCustomTagKey,
-                onValueChange = { newCustomTagKey = it },
+                state = newCustomTagKeyState,
                 label = stringResource(R.string.label_custom_tag_name),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                lineLimits = TextFieldLineLimits.MultiLine(),
             )
             Spacer(modifier = Modifier.height(12.dp))
             TextField(
-                value = newCustomTagValue,
-                onValueChange = { newCustomTagValue = it },
+                state = newCustomTagValueState,
                 label = stringResource(R.string.label_custom_tag_value),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                lineLimits = TextFieldLineLimits.MultiLine(),
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -1298,8 +1305,9 @@ private fun BatchEditFieldItem(
     onSelectFromSongs: () -> Unit,
     isMultiline: Boolean = false
 ) {
+    val fieldState = rememberEditorTextFieldState(value, onValueChange)
     if (LocalUiEngine.current == UiEngine.SALT) {
-        SaltBatchField(stringResource(field.labelResId), value, onValueChange,
+        SaltBatchField(stringResource(field.labelResId), fieldState,
             onKeep = { onValueChange("<keep>") }, onSelectFromSongs, isMultiline)
         return
     }
@@ -1359,11 +1367,9 @@ private fun BatchEditFieldItem(
             TextField(
                 textStyle = MiuixTheme.textStyles.body2,
                 modifier = Modifier.fillMaxWidth(),
-                value = value,
+                state = fieldState,
                 label = if (isKeep) stringResource(R.string.batch_edit_unchanged_field_label, stringResource(field.labelResId)) else stringResource(field.labelResId),
-                onValueChange = onValueChange,
-                singleLine = false,
-                minLines = 6
+                lineLimits = TextFieldLineLimits.MultiLine(minHeightInLines = 6),
             )
         }
     } else {
@@ -1371,8 +1377,7 @@ private fun BatchEditFieldItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 12.dp, vertical = 6.dp),
-            value = value,
-            onValueChange = onValueChange,
+            state = fieldState,
             label = if (isKeep) stringResource(R.string.batch_edit_unchanged_field_label, stringResource(field.labelResId)) else stringResource(field.labelResId),
             trailingIcon = {
                 Row {
@@ -1395,7 +1400,8 @@ private fun BatchEditFieldItem(
                         )
                     }
                 }
-            }
+            },
+            lineLimits = TextFieldLineLimits.MultiLine(),
         )
     }
 }
@@ -1411,8 +1417,9 @@ private fun BatchEditCustomFieldItem(
     onKeep: () -> Unit,
     onSelectFromSongs: () -> Unit,
 ) {
+    val fieldState = rememberEditorTextFieldState(value, onValueChange)
     if (LocalUiEngine.current == UiEngine.SALT) {
-        SaltBatchField(keyName, value, onValueChange, onKeep, onSelectFromSongs)
+        SaltBatchField(keyName, fieldState, onKeep, onSelectFromSongs)
         return
     }
     val isKeep = value == "<keep>"
@@ -1421,8 +1428,7 @@ private fun BatchEditCustomFieldItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 12.dp, vertical = 6.dp),
-        value = value,
-        onValueChange = onValueChange,
+        state = fieldState,
         label = if (isKeep) stringResource(R.string.batch_edit_unchanged_field_label, keyName) else keyName,
         trailingIcon = {
             Row {
@@ -1449,7 +1455,8 @@ private fun BatchEditCustomFieldItem(
                     )
                 }
             }
-        }
+        },
+        lineLimits = TextFieldLineLimits.MultiLine(),
     )
 }
 
@@ -1516,15 +1523,22 @@ private fun BatchEditorGroup(content: @Composable ColumnScope.() -> Unit) {
 
 @Composable
 private fun SaltBatchField(
-    label: String, value: String, onChange: (String) -> Unit,
+    label: String, state: TextFieldState,
     onKeep: () -> Unit, onSelect: () -> Unit, multiline: Boolean = false,
 ) {
-    val keep = value == "<keep>"
+    val keep = state.text.toString() == "<keep>"
     val fieldLabel = if (keep) stringResource(R.string.batch_edit_unchanged_field_label, label) else label
-    SaltEditorField(fieldLabel, value, onChange, multiline = multiline, grouped = false) {
+    SaltEditorField(
+        label = fieldLabel,
+        state = state,
+        lineLimits = if (multiline) {
+            TextFieldLineLimits.MultiLine(minHeightInLines = 6, maxHeightInLines = 12)
+        } else TextFieldLineLimits.SingleLine,
+        grouped = false,
+    ) {
         SaltIconButton(if (keep) LucideIcons.Close else LucideIcons.Undo,
             stringResource(if (keep) R.string.action_delete else R.string.action_undo_changes),
-            { if (keep) onChange("") else onKeep() },
+            { if (keep) state.setTextAndPlaceCursorAtEnd("") else onKeep() },
             tint = if (keep) SaltTheme.colors.highlight else SaltTheme.colors.error,
             size = 32.dp, iconSize = 18.dp)
         SaltIconButton(LucideIcons.ListCheck,
@@ -1623,16 +1637,18 @@ private fun SaltBatchOverlays(
         }
     }
     if (showCustom) {
-        var key by remember { mutableStateOf("") }
-        var value by remember { mutableStateOf("") }
+        val keyState = rememberTextFieldState()
+        val valueState = rememberTextFieldState()
+        val key = keyState.text.toString()
+        val value = valueState.text.toString()
         SaltConfirmDialog(true, stringResource(R.string.action_add_custom_tag), closeCustom,
             onConfirm = {
                 if (key.isNotBlank()) { viewModel.addCustomFieldAndShow(key, value); closeCustom() }
             }, cancelText = stringResource(R.string.cancel), confirmText = stringResource(R.string.confirm),
             dismissOnConfirm = false, confirmEnabled = key.isNotBlank(), content = {
                 RoundedColumn(paddingValues = PaddingValues(0.dp)) {
-                    SaltEditorField(stringResource(R.string.label_custom_tag_name), key, { key = it }, grouped = false)
-                    SaltEditorField(stringResource(R.string.label_custom_tag_value), value, { value = it }, grouped = false)
+                    SaltEditorField(stringResource(R.string.label_custom_tag_name), keyState, grouped = false)
+                    SaltEditorField(stringResource(R.string.label_custom_tag_value), valueState, grouped = false)
                 }
             })
     }

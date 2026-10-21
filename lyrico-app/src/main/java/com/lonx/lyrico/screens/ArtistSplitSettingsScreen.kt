@@ -90,6 +90,8 @@ import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.window.WindowDialog
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.TextFieldState
 
 @Composable
 @OptIn(ExperimentalLayoutApi::class)
@@ -569,7 +571,8 @@ private fun ArtistSplitInputDialog(
     onSave: (String) -> Unit,
     onDelete: () -> Unit = {}
 ) {
-    var text by remember(show, initialValue) { mutableStateOf(initialValue) }
+    val inputState = remember(show, initialValue) { TextFieldState(initialValue) }
+    val text = inputState.text.toString()
 
     if (LocalUiEngine.current == UiEngine.SALT) {
         if (show) com.lonx.lyrico.ui.components.salt.SaltBasicDialog(onDismissRequest = onDismiss) {
@@ -579,8 +582,8 @@ private fun ArtistSplitInputDialog(
                 com.lonx.lyrico.ui.components.salt.SaltDialogTitle(title)
                 com.moriafly.salt.ui.RoundedColumn(paddingValues = PaddingValues(0.dp)) {
                     SaltTextInput(
-                        text = text, onChange = { text = it }, hint = hint,
-                        modifier = Modifier.focusRequester(focusRequester)
+                        state = inputState, hint = hint,
+                        modifier = Modifier.focusRequester(focusRequester),
                     )
                 }
                 ItemTip(hint)
@@ -614,9 +617,8 @@ private fun ArtistSplitInputDialog(
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             TextField(
-                value = text,
-                onValueChange = { text = it },
-                maxLines = 1
+                state = inputState,
+                lineLimits = TextFieldLineLimits.SingleLine,
             )
             Spacer(modifier = Modifier.height(6.dp))
             Text(

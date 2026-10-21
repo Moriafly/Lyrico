@@ -71,6 +71,8 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 import top.yukonga.miuix.kmp.window.WindowDialog
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.TextFieldState
 
 @Composable
 @Destination<RootGraph>(route = "lyrics_cleanup_rules")
@@ -313,7 +315,8 @@ private fun CleanupRuleInputDialog(
     onDismiss: () -> Unit,
     onSave: (String) -> Unit
 ) {
-    var text by remember(show, initialValue) { mutableStateOf(initialValue) }
+    val inputState = remember(show, initialValue) { TextFieldState(initialValue) }
+    val text = inputState.text.toString()
     val salt = LocalUiEngine.current == UiEngine.SALT
 
     if (salt) {
@@ -323,7 +326,8 @@ private fun CleanupRuleInputDialog(
             dismissOnConfirm = false,
         ) {
             RoundedColumn(paddingValues = PaddingValues(0.dp)) {
-                SaltTextInput(text = text, onChange = { text = it })
+                SaltTextInput(state = inputState,
+                )
             }
             Spacer(modifier = Modifier.height(6.dp))
             SaltText(
@@ -342,10 +346,9 @@ private fun CleanupRuleInputDialog(
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             TextField(
-                value = text,
-                onValueChange = { text = it },
-                maxLines = 1,
-                modifier = Modifier.fillMaxWidth()
+                state = inputState,
+                modifier = Modifier.fillMaxWidth(),
+                lineLimits = TextFieldLineLimits.SingleLine,
             )
             Spacer(modifier = Modifier.height(6.dp))
             Text(

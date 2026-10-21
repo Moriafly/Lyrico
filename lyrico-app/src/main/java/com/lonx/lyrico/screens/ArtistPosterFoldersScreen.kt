@@ -49,6 +49,9 @@ import top.yukonga.miuix.kmp.window.WindowDialog
 import com.lonx.lyrico.ui.components.base.ItemMenuAction
 import com.lonx.lyrico.viewmodel.ArtistPosterFile
 import com.lonx.lyrico.ui.components.base.YesNoDialog
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 
 @Composable
 @Destination<RootGraph>(route = "artist_poster_folders")
@@ -75,7 +78,8 @@ fun ArtistPosterFoldersScreen(navigator: DestinationsNavigator) {
     var previewUri by remember(state.folder?.uri) { mutableStateOf<String?>(null) }
     var showDeleteFile by remember { mutableStateOf(false) }
     var showRenameFile by remember { mutableStateOf(false) }
-    var renameStem by remember { mutableStateOf("") }
+    val renameState = rememberTextFieldState()
+    val renameStem = renameState.text.toString()
     var cropFile by remember { mutableStateOf<ArtistPosterFile?>(null) }
     var cropBitmap by remember { mutableStateOf<android.graphics.Bitmap?>(null) }
     var showCrop by remember { mutableStateOf(false) }
@@ -204,7 +208,7 @@ fun ArtistPosterFoldersScreen(navigator: DestinationsNavigator) {
                     onCrop = viewModel::cropFile,
                     onRename = { target ->
                         actionFile = target
-                        renameStem = target.name.substringBeforeLast('.')
+                        renameState.setTextAndPlaceCursorAtEnd(target.name.substringBeforeLast('.'))
                         showRenameFile = true
                     },
                     onArtistDetails = { target ->
@@ -263,7 +267,7 @@ fun ArtistPosterFoldersScreen(navigator: DestinationsNavigator) {
             ItemMenuAction(
                 icon = LucideIcons.Pencil, tone = PreferenceIconTone.Appearance,
                 title = stringResource(R.string.action_rename), enabled = !state.isEditing, onClick = {
-                renameStem = file?.name?.substringBeforeLast('.').orEmpty()
+                renameState.setTextAndPlaceCursorAtEnd(file?.name?.substringBeforeLast('.').orEmpty())
                 showFileMenu = false; showRenameFile = true
             })
             if (file?.name?.substringAfterLast('.')?.lowercase() in listOf("jpg", "jpeg", "png", "webp")) {
@@ -318,7 +322,7 @@ fun ArtistPosterFoldersScreen(navigator: DestinationsNavigator) {
                 com.moriafly.salt.ui.RoundedColumn(paddingValues = PaddingValues(0.dp)) {
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                         Box(Modifier.weight(1f)) {
-                            SaltTextInput(text = renameStem, onChange = { renameStem = it })
+                            SaltTextInput(state = renameState)
                         }
                         if (fileExtension.isNotEmpty()) com.moriafly.salt.ui.Text(
                             "." + fileExtension, style = com.moriafly.salt.ui.SaltTheme.textStyles.main,
@@ -405,10 +409,12 @@ fun ArtistPosterFoldersScreen(navigator: DestinationsNavigator) {
                     }
                 } },
                 content = {
-                    TextField(value = renameStem, onValueChange = { renameStem = it }, maxLines = 1,
+                    TextField(state = renameState,
                         modifier = Modifier.fillMaxWidth(), trailingIcon = {
                             Text("." + file?.name?.substringAfterLast('.').orEmpty(), modifier = Modifier.padding(horizontal = 12.dp))
-                        })
+                        },
+                        lineLimits = TextFieldLineLimits.SingleLine,
+                    )
                     Text(stringResource(R.string.poster_rename_hint), style = MiuixTheme.textStyles.footnote1,
                         color = MiuixTheme.colorScheme.onSurfaceVariantSummary, modifier = Modifier.padding(top = 8.dp))
                     if (proposedName == null) Text(stringResource(R.string.poster_rename_invalid),

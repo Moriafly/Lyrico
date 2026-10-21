@@ -2,6 +2,7 @@ package com.lonx.lyrico.ui.components.salt
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.LocalBringIntoViewSpec
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.*
@@ -14,6 +15,7 @@ import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.TextObfuscationMode
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -22,14 +24,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.lonx.lyrico.ui.components.editor.rememberEditorTextFieldState
 import com.moriafly.salt.ui.SaltTheme
 import com.moriafly.salt.ui.Text
+import com.lonx.lyrico.ui.components.editor.TextFieldBringIntoViewSpec
 
 /** A stable input decoration; Compose owns text, selection, composition, and password editing. */
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
 internal fun SaltTextInput(
     state: TextFieldState,
@@ -46,6 +50,7 @@ internal fun SaltTextInput(
     passwordVisible: Boolean = false,
     inputTransformation: InputTransformation? = null,
     backgroundColor: Color = Color.Transparent,
+    textStyle: TextStyle = SaltTheme.textStyles.main,
 ) {
     val interaction = remember { MutableInteractionSource() }
     val focused by interaction.collectIsFocusedAsState()
@@ -98,7 +103,7 @@ internal fun SaltTextInput(
                         Text(
                             hint,
                             color = SaltTheme.colors.subText,
-                            style = SaltTheme.textStyles.main,
+                            style = textStyle,
                             maxLines = when (lineLimits) {
                                 is TextFieldLineLimits.MultiLine -> if (secure) 1 else lineLimits.maxHeightInLines
                                 else -> 1
@@ -136,70 +141,35 @@ internal fun SaltTextInput(
         modifier.fillMaxWidth().semantics {
             if (label != null) contentDescription = label
         }
-    val textStyle = SaltTheme.textStyles.main.copy(color = SaltTheme.colors.text)
+    val resolvedTextStyle = textStyle.copy(color = SaltTheme.colors.text)
     val cursor = SolidColor(SaltTheme.colors.highlight)
-    if (secure) {
-        BasicSecureTextField(
-            state = state,
-            modifier = fieldModifier,
-            readOnly = readOnly,
-            textStyle = textStyle,
-            cursorBrush = cursor,
-            interactionSource = interaction,
-            inputTransformation = inputTransformation,
-            decorator = decorator,
-            textObfuscationMode =
-                if (passwordVisible) TextObfuscationMode.Visible else TextObfuscationMode.Hidden,
-        )
-    } else {
-        BasicTextField(
-            state = state,
-            modifier = fieldModifier,
-            readOnly = readOnly,
-            keyboardOptions = keyboardOptions,
-            lineLimits = lineLimits,
-            textStyle = textStyle,
-            cursorBrush = cursor,
-            interactionSource = interaction,
-            inputTransformation = inputTransformation,
-            decorator = decorator,
-        )
+    CompositionLocalProvider(LocalBringIntoViewSpec provides TextFieldBringIntoViewSpec) {
+        if (secure) {
+            BasicSecureTextField(
+                state = state,
+                modifier = fieldModifier,
+                readOnly = readOnly,
+                textStyle = resolvedTextStyle,
+                cursorBrush = cursor,
+                interactionSource = interaction,
+                inputTransformation = inputTransformation,
+                decorator = decorator,
+                textObfuscationMode =
+                    if (passwordVisible) TextObfuscationMode.Visible else TextObfuscationMode.Hidden,
+            )
+        } else {
+            BasicTextField(
+                state = state,
+                modifier = fieldModifier,
+                readOnly = readOnly,
+                keyboardOptions = keyboardOptions,
+                lineLimits = lineLimits,
+                textStyle = resolvedTextStyle,
+                cursorBrush = cursor,
+                interactionSource = interaction,
+                inputTransformation = inputTransformation,
+                decorator = decorator,
+            )
+        }
     }
-}
-
-/** Compatibility with existing drafts; their echoes never recreate the editing state. */
-@Composable
-internal fun SaltTextInput(
-    text: String,
-    onChange: (String) -> Unit,
-    modifier: Modifier = Modifier,
-    hint: String? = null,
-    readOnly: Boolean = false,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-    actionContent: (@Composable () -> Unit)? = null,
-    label: String? = null,
-    summary: String? = null,
-    error: String? = null,
-    lineLimits: TextFieldLineLimits = TextFieldLineLimits.SingleLine,
-    secure: Boolean = false,
-    passwordVisible: Boolean = false,
-    inputTransformation: InputTransformation? = null,
-    backgroundColor: Color = Color.Transparent,
-) {
-    SaltTextInput(
-        state = rememberEditorTextFieldState(text, onChange),
-        modifier = modifier,
-        hint = hint,
-        readOnly = readOnly,
-        keyboardOptions = keyboardOptions,
-        actionContent = actionContent,
-        label = label,
-        summary = summary,
-        error = error,
-        lineLimits = lineLimits,
-        secure = secure,
-        passwordVisible = passwordVisible,
-        inputTransformation = inputTransformation,
-        backgroundColor = backgroundColor,
-    )
 }

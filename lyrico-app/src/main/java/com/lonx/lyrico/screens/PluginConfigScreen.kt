@@ -18,6 +18,7 @@ import androidx.compose.foundation.rememberOverscrollEffect
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.input.InputTransformation
 import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.OutputTransformation
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -40,8 +41,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -53,6 +52,7 @@ import com.lonx.lyrico.ui.components.icons.LucideIcons
 import com.lonx.lyrico.ui.components.library.EmptyStateKind
 import com.lonx.lyrico.ui.components.library.IllustratedEmptyState
 import com.lonx.lyrico.ui.components.library.LibraryDetailPage
+import com.lonx.lyrico.ui.components.editor.rememberEditorTextFieldState
 import com.lonx.lyrico.data.model.plugin.PluginConfigField
 import com.lonx.lyrico.data.model.plugin.PluginConfigFieldType
 import com.lonx.lyrico.data.model.plugin.PluginSourceType
@@ -461,31 +461,30 @@ private fun PluginConfigFormItem(
             } else {
                 KeyboardOptions.Default
             }
-            val sanitize: (String) -> String = { input ->
-                if (field.type == PluginConfigFieldType.NUMBER) input.filter(Char::isDigit) else input
-            }
+            val inputState = rememberEditorTextFieldState(value, onValueChange)
+            val lineLimits = if (field.type == PluginConfigFieldType.TEXTAREA) {
+                TextFieldLineLimits.MultiLine(minHeightInLines = 2, maxHeightInLines = 8)
+            } else TextFieldLineLimits.SingleLine
+            val numberInputTransformation = if (field.type == PluginConfigFieldType.NUMBER) {
+                InputTransformation {
+                    val digits = asCharSequence().filter(Char::isDigit)
+                    if (digits.length != length) replace(0, length, digits)
+                }
+            } else null
 
             if (salt) {
                 SaltTextInput(
-                    text = value,
+                    state = inputState,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                     backgroundColor = com.moriafly.salt.ui.SaltTheme.colors.background,
-                    onChange = onValueChange,
                     label = field.title,
                     summary = field.summary,
                     error = error,
                     keyboardOptions = keyboardOptions,
-                    lineLimits = if (field.type == PluginConfigFieldType.TEXTAREA) {
-                        TextFieldLineLimits.MultiLine(minHeightInLines = 2, maxHeightInLines = 8)
-                    } else TextFieldLineLimits.SingleLine,
+                    lineLimits = lineLimits,
                     secure = isPassword,
                     passwordVisible = passwordVisible,
-                    inputTransformation = if (field.type == PluginConfigFieldType.NUMBER) {
-                        InputTransformation {
-                            val digits = asCharSequence().filter(Char::isDigit)
-                            if (digits.length != length) replace(0, length, digits)
-                        }
-                    } else null,
+                    inputTransformation = numberInputTransformation,
                     actionContent = if (isPassword) {
                         {
                             SaltIconButton(
@@ -505,16 +504,14 @@ private fun PluginConfigFormItem(
                 ) {
                     TextField(
                         modifier = Modifier.fillMaxWidth(),
-                        value = value,
+                        state = inputState,
                         label = field.title,
-                        singleLine = field.type != PluginConfigFieldType.TEXTAREA,
-                        minLines = if (field.type != PluginConfigFieldType.TEXTAREA) 1 else 2,
-                        maxLines = if (field.type != PluginConfigFieldType.TEXTAREA) 1 else 8,
-                        visualTransformation = if (isPassword && !passwordVisible) {
-                            PasswordVisualTransformation()
-                        } else {
-                            VisualTransformation.None
-                        },
+                        outputTransformation = if (isPassword && !passwordVisible) {
+                            OutputTransformation {
+                                // Keep each character boundary available to cursor/selection mapping.
+                                for (index in 0 until length) replace(index, index + 1, "•")
+                            }
+                        } else null,
                         keyboardOptions = keyboardOptions,
                         trailingIcon = if (isPassword) {
                             {
@@ -540,9 +537,8 @@ private fun PluginConfigFormItem(
                         } else {
                             null
                         },
-                        onValueChange = { input ->
-                            onValueChange(sanitize(input))
-                        }
+                        lineLimits = lineLimits,
+                        inputTransformation = numberInputTransformation,
                     )
 
                     error?.let {

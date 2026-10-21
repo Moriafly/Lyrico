@@ -80,6 +80,9 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.preference.RadioButtonPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import androidx.compose.foundation.text.input.InputTransformation
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.TextFieldState
 
 @SuppressLint("LocalContextGetResourceValueCall")
 @Composable
@@ -692,10 +695,12 @@ private fun ReplayGainTargetLoudnessSheet(
     var customSelected by remember(show, currentLoudness) {
         mutableStateOf(currentLoudness !in presets)
     }
-    var customText by remember(show, currentLoudness) {
-        mutableStateOf(if (currentLoudness in presets) "" else formatLoudnessNumber(currentLoudness))
+    val customState = remember(show, currentLoudness) {
+        TextFieldState(if (currentLoudness in presets) "" else formatLoudnessNumber(currentLoudness))
     }
+    val customText = customState.text.toString()
     var invalid by remember(show) { mutableStateOf(false) }
+    val clearInputError = InputTransformation { invalid = false }
 
     if (LocalUiEngine.current == UiEngine.SALT) {
         com.lonx.lyrico.ui.components.salt.SaltConfirmDialog(
@@ -728,8 +733,9 @@ private fun ReplayGainTargetLoudnessSheet(
                     if (customSelected) SaltTextInput(
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                         backgroundColor = com.moriafly.salt.ui.SaltTheme.colors.background,
-                        text = customText, hint = stringResource(R.string.replay_gain_target_custom_hint),
-                        onChange = { customText = it; invalid = false },
+                        state = customState,
+                        inputTransformation = clearInputError,
+                        hint = stringResource(R.string.replay_gain_target_custom_hint),
                         keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
                             keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal),
                     )
@@ -793,14 +799,11 @@ private fun ReplayGainTargetLoudnessSheet(
                         )
                     ) {
                         TextField(
-                            value = customText,
-                            onValueChange = {
-                                customText = it
-                                invalid = false
-                            },
+                            state = customState,
+                            inputTransformation = clearInputError,
                             label = stringResource(R.string.replay_gain_target_custom_hint),
-                            maxLines = 1,
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
+                            lineLimits = TextFieldLineLimits.SingleLine,
                         )
                         if (invalid) {
                             Spacer(modifier = Modifier.height(6.dp))
