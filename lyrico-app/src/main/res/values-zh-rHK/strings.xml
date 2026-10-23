@@ -140,6 +140,7 @@
     <string name="about_title">關於</string>
 
     <!-- 應用程式資訊 -->
+    <string name="user_guide">使用指南</string>
     <string name="about_app_info">應用程式資訊</string>
     <string name="about_app_version">應用程式版本</string>
     <string name="about_project_url">GitHub</string>
