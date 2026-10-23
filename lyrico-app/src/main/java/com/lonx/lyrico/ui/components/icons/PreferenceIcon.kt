@@ -32,14 +32,14 @@ internal enum class PreferenceIconTone {
         val dark = if (salt) SaltTheme.colors.background.luminance() < 0.5f
         else MiuixTheme.colorScheme.surface.luminance() < 0.5f
         return when (this) {
-            Appearance -> if (dark) Color(0xFFC4A7FF) else Color(0xFF7952B3)
-            Library -> if (dark) Color(0xFFF3BF75) else Color(0xFF99600C)
-            Lyrics -> if (dark) Color(0xFF7DD6AB) else Color(0xFF23784F)
-            Tools -> if (dark) Color(0xFF91BEFF) else Color(0xFF3264B4)
-            Teal -> if (dark) Color(0xFF75D5CE) else Color(0xFF16776F)
-            Orange -> if (dark) Color(0xFFFFB78A) else Color(0xFFAC571E)
-            Pink -> if (dark) Color(0xFFF3A6CF) else Color(0xFFA64278)
-            Gold -> if (dark) Color(0xFFE9C76D) else Color(0xFF946D18)
+            Appearance -> if (dark) Color(0xFFBF9AFF) else Color(0xFF8950E6)
+            Library -> if (dark) Color(0xFFF3B85E) else Color(0xFFC47B08)
+            Lyrics -> if (dark) Color(0xFF65D8A0) else Color(0xFF189965)
+            Tools -> if (dark) Color(0xFF7DB5FF) else Color(0xFF2979E8)
+            Teal -> if (dark) Color(0xFF5AD5CB) else Color(0xFF08998F)
+            Orange -> if (dark) Color(0xFFFFAC76) else Color(0xFFDB741F)
+            Pink -> if (dark) Color(0xFFF393C5) else Color(0xFFD94C91)
+            Gold -> if (dark) Color(0xFFE9C157) else Color(0xFFAF850A)
             Danger -> if (salt) SaltTheme.colors.error else MiuixTheme.colorScheme.error
         }
     }
