@@ -852,4 +852,5 @@
     <string name="plugin_action_cannot_open">無法開啟所選檔案</string>
     <string name="plugin_action_none_installable">找不到可安裝的外掛</string>
     <string name="plugin_action_remove_failed">無法刪除外掛檔案</string>
+    <string name="rating_stars_value">%1$d 星</string>
 </resources>

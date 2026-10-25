@@ -852,4 +852,5 @@
     <string name="plugin_action_cannot_open">无法打开所选文件</string>
     <string name="plugin_action_none_installable">未找到可安装的插件</string>
     <string name="plugin_action_remove_failed">无法删除插件文件</string>
+    <string name="rating_stars_value">%1$d 星</string>
 </resources>

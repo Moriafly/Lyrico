@@ -847,4 +847,5 @@
     <string name="plugin_action_cannot_open">Cannot open the selected file</string>
     <string name="plugin_action_none_installable">No installable plugins found</string>
     <string name="plugin_action_remove_failed">Cannot delete plugin files</string>
+    <string name="rating_stars_value">%1$d out of 5 stars</string>
 </resources>

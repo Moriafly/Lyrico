@@ -46,7 +46,6 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -2407,53 +2406,34 @@ private fun PictureBadgeText(text: String, color: Color, fontSize: TextUnit = 10
 private fun RatingField(rating: Int?, onRatingChange: (Int) -> Unit) {
     if (LocalUiEngine.current == UiEngine.SALT) {
         RoundedColumn {
-            Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                com.moriafly.salt.ui.Text(stringResource(R.string.label_rating), style = SaltTheme.textStyles.sub,
-                    color = SaltTheme.colors.subText)
-                Row {
-                    for (i in 1..5) SaltIconButton(LucideIcons.Star, "$i", { onRatingChange(if (rating == i) 0 else i) },
-                        tint = if (rating != null && i <= rating) SaltTheme.colors.highlight else SaltTheme.colors.subText.copy(alpha = 0.4f),
-                        size = 40.dp, iconSize = 24.dp)
-                }
+            Column(
+                Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                com.moriafly.salt.ui.Text(
+                    stringResource(R.string.label_rating),
+                    style = SaltTheme.textStyles.sub.copy(fontSize = 14.sp, lineHeight = 20.sp),
+                    color = SaltTheme.colors.subText,
+                )
+                com.lonx.lyrico.ui.components.editor.RatingStars(rating, onRatingChange)
             }
         }
-        return
-    }
-    Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
+    } else {
+        Card(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp),
+            colors = CardDefaults.defaultColors(color = MiuixTheme.colorScheme.secondaryContainer),
         ) {
-            Text(stringResource(R.string.label_rating))
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(2.dp),
-                verticalAlignment = Alignment.CenterVertically
+            Column(
+                Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
-                for (i in 1..5) {
-                    val isFilled = rating?.let { i <= it }
-                    Icon(
-                        painter = painterResource(
-                            if (isFilled == true) R.drawable.ic_filled_star_24dp
-                            else R.drawable.ic_outline_star_24dp
-                        ),
-                        contentDescription = null,
-                        tint = if (isFilled == true)
-                            MiuixTheme.colorScheme.primary
-                        else
-                            MiuixTheme.colorScheme.onSurfaceVariantSummary.copy(alpha = 0.4f),
-                        modifier = Modifier
-                            .size(24.dp)
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null
-                            ) {
-                                onRatingChange(
-                                    if (rating == i) 0 else i
-                                )
-                            }
-                    )
-                }
+                Text(
+                    stringResource(R.string.label_rating),
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = TextFieldDefaults.textFieldColors().labelColor,
+                )
+                com.lonx.lyrico.ui.components.editor.RatingStars(rating, onRatingChange)
             }
         }
     }
