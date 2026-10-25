@@ -839,4 +839,17 @@
     <string name="common_edit">編輯</string>
     <string name="batch_edit_unchanged_field_label">%1$s（無修改）</string>
     <string name="action_clear_search">清空搜尋</string>
+    <string name="plugin_action_scanned">外掛套件已掃描</string>
+    <string name="plugin_action_imported">外掛已安裝</string>
+    <string name="plugin_action_deleted">外掛已刪除</string>
+    <string name="plugin_action_name_saved">外掛名稱已儲存</string>
+    <string name="plugin_action_no_pending">沒有待安裝的外掛</string>
+    <string name="plugin_action_no_selection">請選擇外掛</string>
+    <string name="plugin_action_busy">請等待目前的外掛操作完成</string>
+    <string name="plugin_action_working">正在處理…</string>
+    <string name="plugin_action_timeout">外掛操作逾時</string>
+    <string name="plugin_action_failed">外掛操作失敗：%1$s</string>
+    <string name="plugin_action_cannot_open">無法開啟所選檔案</string>
+    <string name="plugin_action_none_installable">找不到可安裝的外掛</string>
+    <string name="plugin_action_remove_failed">無法刪除外掛檔案</string>
 </resources>

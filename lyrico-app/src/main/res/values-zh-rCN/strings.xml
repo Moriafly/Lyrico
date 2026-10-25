@@ -839,4 +839,17 @@
     <string name="common_edit">编辑</string>
     <string name="batch_edit_unchanged_field_label">%1$s（无修改）</string>
     <string name="action_clear_search">清空搜索</string>
+    <string name="plugin_action_scanned">插件包已扫描</string>
+    <string name="plugin_action_imported">插件已安装</string>
+    <string name="plugin_action_deleted">插件已删除</string>
+    <string name="plugin_action_name_saved">插件名称已保存</string>
+    <string name="plugin_action_no_pending">没有待安装的插件</string>
+    <string name="plugin_action_no_selection">请选择插件</string>
+    <string name="plugin_action_busy">请等待当前插件操作完成</string>
+    <string name="plugin_action_working">正在处理…</string>
+    <string name="plugin_action_timeout">插件操作超时</string>
+    <string name="plugin_action_failed">插件操作失败：%1$s</string>
+    <string name="plugin_action_cannot_open">无法打开所选文件</string>
+    <string name="plugin_action_none_installable">未找到可安装的插件</string>
+    <string name="plugin_action_remove_failed">无法删除插件文件</string>
 </resources>

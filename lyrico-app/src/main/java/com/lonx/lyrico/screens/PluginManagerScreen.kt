@@ -96,6 +96,7 @@ import com.lonx.lyrico.ui.components.scaffoldTopHorizontalPadding
 import com.lonx.lyrico.ui.theme.LocalUiEngine
 import com.lonx.lyrico.ui.theme.isDarkTheme
 import com.lonx.lyrico.viewmodel.PluginViewModel
+import com.lonx.lyrico.viewmodel.PluginMessage
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.PluginConfigDestination
@@ -134,6 +135,25 @@ import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 import top.yukonga.miuix.kmp.window.WindowDialog
 import java.io.File
+
+@Composable
+private fun PluginMessage.localizedText(): String = when (this) {
+    is PluginMessage.Failure -> stringResource(R.string.plugin_action_failed, reason)
+    is PluginMessage.Status -> stringResource(when (this) {
+        PluginMessage.Status.PACKAGE_SCANNED -> R.string.plugin_action_scanned
+        PluginMessage.Status.INSTALLED -> R.string.plugin_action_imported
+        PluginMessage.Status.DELETED -> R.string.plugin_action_deleted
+        PluginMessage.Status.NAME_SAVED -> R.string.plugin_action_name_saved
+        PluginMessage.Status.NO_PENDING_IMPORT -> R.string.plugin_action_no_pending
+        PluginMessage.Status.NO_SELECTION -> R.string.plugin_action_no_selection
+        PluginMessage.Status.BUSY -> R.string.plugin_action_busy
+        PluginMessage.Status.WORKING -> R.string.plugin_action_working
+        PluginMessage.Status.TIMED_OUT -> R.string.plugin_action_timeout
+        PluginMessage.Status.CANNOT_OPEN_FILE -> R.string.plugin_action_cannot_open
+        PluginMessage.Status.NO_INSTALLABLE_PLUGIN -> R.string.plugin_action_none_installable
+        PluginMessage.Status.CANNOT_DELETE_FILES -> R.string.plugin_action_remove_failed
+    })
+}
 
 private enum class PluginTypeTab(
     val sourceType: PluginSourceType,
@@ -203,9 +223,10 @@ fun PluginManagerScreen(
     ) { uri ->
         uri?.let { viewModel.importPlugin(context, it) }
     }
+    val operationMessage = uiState.message?.localizedText()
     LaunchedEffect(uiState.messageVersion) {
-        if (uiState.message.isNotBlank()) {
-            Toast.makeText(context, uiState.message, Toast.LENGTH_SHORT).show()
+        operationMessage?.takeIf { it.isNotBlank() }?.let { message ->
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
         }
     }
     var showUninstallDialog by rememberSaveable { mutableStateOf(false) }

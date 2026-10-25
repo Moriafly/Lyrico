@@ -37,9 +37,18 @@ import com.lonx.lyrico.plugin.i18n.PluginStrings
 import com.lonx.lyrico.data.model.plugin.PluginManifest
 import kotlinx.serialization.json.Json
 
+sealed interface PluginMessage {
+    enum class Status : PluginMessage {
+        PACKAGE_SCANNED, INSTALLED, DELETED, NAME_SAVED, NO_PENDING_IMPORT, NO_SELECTION,
+        BUSY, WORKING, TIMED_OUT, CANNOT_OPEN_FILE, NO_INSTALLABLE_PLUGIN, CANNOT_DELETE_FILES
+    }
+
+    data class Failure(val reason: String) : PluginMessage
+}
+
 data class PluginUiState(
     val isBusy: Boolean = false,
-    val message: String = "",
+    val message: PluginMessage? = null,
     val messageVersion: Long = 0,
     val smokeResult: String = "",
     val pendingImport: PluginImportSession? = null,
@@ -80,11 +89,11 @@ class PluginViewModel(
     }
 
     fun importPlugin(context: Context, uri: Uri) {
-        runBusy("Plugin package scanned") {
+        runBusy(PluginMessage.Status.PACKAGE_SCANNED) {
             _uiState.value.pendingImport?.let { installer.discardImport(it) }
             val installRoot = File(context.filesDir, "plugins/sources")
             val input = context.contentResolver.openInputStream(uri)
-                ?: error("Cannot open selected file")
+                ?: throw PluginActionFailure(PluginMessage.Status.CANNOT_OPEN_FILE)
             input.use {
                 val session = installer.prepareImport(
                     input = it,
@@ -94,7 +103,7 @@ class PluginViewModel(
                     installer.discardImport(session)
                     val failureReason = session.failed.firstOrNull()?.reason ?: "No installable plugin found"
                     logPluginError("Import failed", failureReason, session.failed.joinToString("\n") { "${it.rootPath}: ${it.reason}" })
-                    error(failureReason)
+                    throw PluginActionFailure(PluginMessage.Status.NO_INSTALLABLE_PLUGIN, failureReason)
                 }
                 _uiState.update { state ->
                     state.copy(
@@ -122,13 +131,13 @@ class PluginViewModel(
 
     fun installPendingImport() {
         val session = _uiState.value.pendingImport ?: run {
-            publishMessage("No pending plugin import")
+            publishMessage(PluginMessage.Status.NO_PENDING_IMPORT)
             return
         }
 
         val selectedRoots = _uiState.value.selectedImportRoots
         if (selectedRoots.isEmpty()) {
-            publishMessage("No plugin selected")
+            publishMessage(PluginMessage.Status.NO_SELECTION)
             return
         }
 
@@ -137,7 +146,7 @@ class PluginViewModel(
                     candidate.versionConflict == PluginVersionConflict.DOWNGRADE
         }
 
-        runBusy("Plugin imported") {
+        runBusy(PluginMessage.Status.INSTALLED) {
             val result = installer.installPrepared(
                 session = session,
                 enabled = true,
@@ -152,7 +161,7 @@ class PluginViewModel(
                     detail = failureReason,
                     fullDetail = result.failed.joinToString("\n") { "${it.rootPath}: ${it.reason}" }
                 )
-                error(failureReason)
+                throw PluginActionFailure(PluginMessage.Status.NO_INSTALLABLE_PLUGIN, failureReason)
             }
         }
     }
@@ -194,21 +203,21 @@ class PluginViewModel(
     fun setCustomName(id: String, name: String) {
         viewModelScope.launch {
             repository.updateCustomName(id, name)
-            publishMessage("Plugin name saved")
+            publishMessage(PluginMessage.Status.NAME_SAVED)
         }
     }
 
 
-    private fun runBusy(successMessage: String, block: suspend () -> Unit) {
+    private fun runBusy(successMessage: PluginMessage.Status, block: suspend () -> Unit) {
         viewModelScope.launch {
             if (actionMutex.isLocked) {
-                publishMessage("Another plugin debug action is still running")
+                publishMessage(PluginMessage.Status.BUSY)
                 return@launch
             }
             _uiState.update {
                 it.copy(
                     isBusy = true,
-                    message = "Working...",
+                    message = PluginMessage.Status.WORKING,
                     messageVersion = System.nanoTime()
                 )
             }
@@ -236,12 +245,13 @@ class PluginViewModel(
                 _uiState.update {
                     it.copy(
                         isBusy = false,
-                        message = "Plugin debug action timed out",
+                        message = PluginMessage.Status.TIMED_OUT,
                         messageVersion = System.nanoTime(),
                         smokeResult = "Timed out after ${ACTION_TIMEOUT_MS / 1000}s"
                     )
                 }
             } catch (e: Exception) {
+                if (e is kotlinx.coroutines.CancellationException) throw e
                 val message = e.message ?: e.javaClass.simpleName
                 logPluginError(
                     message = "Plugin action failed",
@@ -251,7 +261,7 @@ class PluginViewModel(
                 _uiState.update {
                     it.copy(
                         isBusy = false,
-                        message = message,
+                        message = if (e is PluginActionFailure) e.feedback else PluginMessage.Failure(message),
                         messageVersion = System.nanoTime(),
                         smokeResult = message
                     )
@@ -260,7 +270,7 @@ class PluginViewModel(
         }
     }
 
-    private fun publishMessage(message: String) {
+    private fun publishMessage(message: PluginMessage) {
         _uiState.update {
             it.copy(
                 message = message,
@@ -270,15 +280,18 @@ class PluginViewModel(
     }
 
     fun uninstallPlugin(id: String) {
-        runBusy("Plugin deleted") {
+        runBusy(PluginMessage.Status.DELETED) {
             val plugin = repository.getPlugin(id)
             if (plugin != null) {
                 pluginManager.invalidate(plugin.id)
                 settingsRepository.removePluginSettings(plugin.id)
                 val pluginDir = File(plugin.pluginDir)
                 if (pluginDir.exists()) {
-                    require(pluginDir.deleteRecursively()) {
-                        "Failed to remove plugin files: ${pluginDir.absolutePath}"
+                    if (!pluginDir.deleteRecursively()) {
+                        throw PluginActionFailure(
+                            PluginMessage.Status.CANNOT_DELETE_FILES,
+                            "Failed to remove plugin files: ${pluginDir.absolutePath}",
+                        )
                     }
                 }
                 repository.uninstallPlugin(id)
@@ -305,3 +318,6 @@ class PluginViewModel(
         const val TAG = "PluginViewModel"
     }
 }
+
+private class PluginActionFailure(val feedback: PluginMessage.Status, detail: String? = null) :
+    IllegalStateException(detail)

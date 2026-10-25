@@ -834,4 +834,17 @@
     <string name="ui_engine_salt">SaltUI</string>
     <string name="batch_edit_unchanged_field_label">%1$s (Unchanged)</string>
     <string name="action_clear_search">Clear search</string>
+    <string name="plugin_action_scanned">Plugin package scanned</string>
+    <string name="plugin_action_imported">Plugins installed</string>
+    <string name="plugin_action_deleted">Plugin deleted</string>
+    <string name="plugin_action_name_saved">Plugin name saved</string>
+    <string name="plugin_action_no_pending">No pending plugin import</string>
+    <string name="plugin_action_no_selection">Select a plugin</string>
+    <string name="plugin_action_busy">Wait for the current plugin action to finish</string>
+    <string name="plugin_action_working">Working…</string>
+    <string name="plugin_action_timeout">Plugin action timed out</string>
+    <string name="plugin_action_failed">Plugin action failed: %1$s</string>
+    <string name="plugin_action_cannot_open">Cannot open the selected file</string>
+    <string name="plugin_action_none_installable">No installable plugins found</string>
+    <string name="plugin_action_remove_failed">Cannot delete plugin files</string>
 </resources>
