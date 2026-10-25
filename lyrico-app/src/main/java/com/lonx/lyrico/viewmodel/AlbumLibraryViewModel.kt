@@ -47,12 +47,12 @@ class AlbumLibraryViewModel(
                 )
                 AlbumSortBy.YEAR -> {
                     val comparator = if (sort.order == SortOrder.ASC) {
-                        compareBy<AlbumEntity> { it.year?.toIntOrNull() ?: Int.MAX_VALUE }
+                        compareBy<AlbumEntity> { it.year.sortableAlbumYear() ?: Int.MAX_VALUE }
                             .thenBy { it.sortKey }
                             .thenBy { it.name }
                     } else {
-                        compareBy<AlbumEntity> { it.year?.toIntOrNull() == null }
-                            .thenByDescending { it.year?.toIntOrNull() ?: Int.MIN_VALUE }
+                        compareBy<AlbumEntity> { it.year.sortableAlbumYear() == null }
+                            .thenByDescending { it.year.sortableAlbumYear() ?: Int.MIN_VALUE }
                             .thenBy { it.sortKey }
                             .thenBy { it.name }
                     }
@@ -84,5 +84,13 @@ class AlbumLibraryViewModel(
             libraryIndexRepository.rebuildAlbumIndex()
         }
     }
+}
+
+// 专辑年份来自歌曲日期标签，既可能只有年份，也可能包含月日。
+internal fun String?.sortableAlbumYear(): Int? {
+    val date = this?.trim() ?: return null
+    if (date.length < 4 || date.take(4).any { it !in '0'..'9' }) return null
+    if (date.length > 4 && date[4] !in "-/.") return null
+    return date.take(4).toIntOrNull()?.takeIf { it > 0 }
 }
 
