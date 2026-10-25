@@ -42,6 +42,7 @@ import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -154,31 +155,16 @@ fun SearchResultsScreen(
         keyword?.let { viewModel.performSearch(it) }
     }
 
-    /**
-     * ViewModel → Pager 同步
-     */
-    LaunchedEffect(uiState.selectedSearchSource) {
-        val selectedSource = uiState.selectedSearchSource
-        val index = if (selectedSource == null) {
-            0
-        } else {
-            uiState.availableSources.indexOf(selectedSource) + 1
-        }
-        if (index >= 0 && pagerState.currentPage != index) {
-            pagerState.animateScrollToPage(index)
-        }
-    }
-
-    /**
-     * Pager → ViewModel 同步
-     */
+    // 手势停稳后再切换来源；读取最新列表，避免初始化时捕获空来源。
+    val currentSources by rememberUpdatedState(uiState.availableSources)
     LaunchedEffect(pagerState) {
-        snapshotFlow { pagerState.currentPage }
-            .collectLatest { page ->
+        snapshotFlow { pagerState.settledPage to currentSources }
+            .collectLatest { (page, sources) ->
+                if (sources.isEmpty()) return@collectLatest
                 if (page == 0) {
                     viewModel.onAllSourcesSelected()
                 } else {
-                    val source = uiState.availableSources.getOrNull(page - 1)
+                    val source = sources.getOrNull(page - 1)
                     source?.let { viewModel.onSearchSourceSelected(it) }
                 }
             }
@@ -460,6 +446,8 @@ private fun SearchResultsContent(
                     }
                 val isLoadingMore = pageSourceIds.any { it in uiState.loadingMoreSourceIds }
                 val canLoadMore = pageSourceIds.any { uiState.hasMoreBySource[it] == true }
+                val isPageSearching = pageSourceIds.any { it in uiState.searchingSourceIds } ||
+                    (uiState.isSearching && uiState.searchingSourceIds.isEmpty())
                 val searchError = if (page == 0) {
                     uiState.searchErrors.values.firstOrNull()
                 } else {
@@ -467,7 +455,7 @@ private fun SearchResultsContent(
                 }
 
                 when {
-                    uiState.isSearching && (page == 0 || source == uiState.selectedSearchSource) -> {
+                    isPageSearching && results.isEmpty() -> {
                         Box(Modifier.fillMaxSize(), Alignment.Center) {
                             if (salt) SaltResultsProgress() else CircularProgressIndicator()
                         }
