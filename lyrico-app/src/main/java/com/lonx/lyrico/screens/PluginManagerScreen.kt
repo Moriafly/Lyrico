@@ -18,6 +18,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -60,6 +61,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -103,7 +105,11 @@ import com.ramcosta.composedestinations.generated.destinations.PluginConfigDesti
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.moriafly.salt.ui.Item
 import com.moriafly.salt.ui.ItemArrowType
-import com.moriafly.salt.ui.ItemCheck
+import com.moriafly.salt.ui.icons.SaltIcons
+import com.moriafly.salt.ui.icons.Check
+import com.moriafly.salt.ui.icons.Uncheck
+import com.moriafly.salt.ui.ItemOuterTitle
+import com.moriafly.salt.ui.RoundedColumn
 import com.moriafly.salt.ui.ItemDivider
 import com.moriafly.salt.ui.ItemTip
 import com.moriafly.salt.ui.SaltTheme
@@ -588,6 +594,7 @@ fun PluginManagerScreen(
             showImportPreviewSheet = false
         },
         confirmText = stringResource(R.string.plugin_import_install),
+        confirmEnabled = !uiState.isBusy && uiState.selectedImportRoots.isNotEmpty(),
         onConfirm = {
             viewModel.installPendingImport()
             showImportPreviewSheet = false
@@ -599,14 +606,11 @@ fun PluginManagerScreen(
                         .fillMaxWidth(),
                 ) {
                     if (session.candidates.isNotEmpty()) {
-                        if (salt) com.moriafly.salt.ui.Text(
+                        if (salt) ItemOuterTitle(
                             text = stringResource(
                                 R.string.plugin_import_installable_title,
                                 session.candidates.size
                             ),
-                            style = SaltTheme.textStyles.sub,
-                            color = SaltTheme.colors.subText,
-                            modifier = Modifier.innerPadding(vertical = false)
                         )
                         else SmallTitle(
                             text = stringResource(
@@ -631,19 +635,16 @@ fun PluginManagerScreen(
                                 )
                             }
                         )
-                        if (salt) ItemDivider() else Spacer(modifier = Modifier.height(8.dp))
+                        if (!salt) Spacer(modifier = Modifier.height(8.dp))
                     }
                 }
 
                 if (session.failed.isNotEmpty()) {
-                    if (salt) com.moriafly.salt.ui.Text(
+                    if (salt) ItemOuterTitle(
                         text = stringResource(
                             R.string.plugin_import_failed_title,
                             session.failed.size
                         ),
-                        style = SaltTheme.textStyles.sub,
-                        color = SaltTheme.colors.error,
-                        modifier = Modifier.innerPadding(vertical = false)
                     )
                     else SmallTitle(
                         text = stringResource(
@@ -655,7 +656,7 @@ fun PluginManagerScreen(
 
                     session.failed.forEach { failed ->
                         PluginImportFailedItem(failed = failed)
-                        if (salt) ItemDivider() else Spacer(modifier = Modifier.height(8.dp))
+                        if (!salt) Spacer(modifier = Modifier.height(8.dp))
                     }
                 }
 
@@ -697,28 +698,56 @@ private fun PluginImportCandidateItem(
         .joinToString(" / ")
 
     if (LocalUiEngine.current == UiEngine.SALT) {
-        // Salt 的复选行只有文本槽位，图标改由元数据行承载，冲突状态保留在首行。
-        val summary = buildString {
-            append(conflictText)
-            append(" · ")
-            append(stringResource(R.string.plugin_import_version, versionText))
-            append("\n")
-            append(manifest.id)
-            append("\n")
-            append(stringResource(R.string.plugin_type_with_value, pluginTypeText))
-            append("\n")
-            append(stringResource(R.string.plugin_import_path, locationText))
-            if (manifest.description.isNotBlank()) {
-                append("\n")
-                append(stringResource(R.string.plugin_import_description, manifest.description))
+        RoundedColumn {
+            Column(
+                Modifier.fillMaxWidth().toggleable(
+                    value = selected,
+                    role = Role.Checkbox,
+                    onValueChange = onCheckedChange,
+                )
+            ) {
+                Row(
+                    Modifier.fillMaxWidth().heightIn(min = SaltTheme.dimens.item)
+                        .innerPadding(vertical = false),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    com.moriafly.salt.ui.Icon(
+                        painter = rememberVectorPainter(if (selected) SaltIcons.Check else SaltIcons.Uncheck),
+                        contentDescription = null,
+                        modifier = Modifier.size(SaltTheme.dimens.itemIcon),
+                        tint = SaltTheme.colors.highlight,
+                    )
+                    Spacer(Modifier.width(SaltTheme.dimens.subPadding))
+                    Column(Modifier.weight(1f).innerPadding(horizontal = false)) {
+                        com.moriafly.salt.ui.Text(manifest.name)
+                        Spacer(Modifier.height(2.dp))
+                        com.moriafly.salt.ui.Text(
+                            manifest.id,
+                            style = SaltTheme.textStyles.sub,
+                            color = SaltTheme.colors.subText,
+                        )
+                    }
+                    Spacer(Modifier.width(16.dp))
+                    PluginIcon(
+                        iconPath = iconPath,
+                        contentDescription = null,
+                        size = 34.dp,
+                    )
+                }
+                Column(
+                    Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, bottom = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    ImportStatusBadge(conflictText, conflictColor)
+                    SaltPluginSubText(stringResource(R.string.plugin_import_version, versionText))
+                    SaltPluginSubText(stringResource(R.string.plugin_type_with_value, pluginTypeText))
+                    SaltPluginSubText(stringResource(R.string.plugin_import_path, locationText))
+                    if (manifest.description.isNotBlank()) {
+                        SaltPluginSubText(stringResource(R.string.plugin_import_description, manifest.description))
+                    }
+                }
             }
         }
-        ItemCheck(
-            state = selected,
-            onChange = { onCheckedChange(it) },
-            text = manifest.name,
-            sub = summary
-        )
         return
     }
 
@@ -857,33 +886,35 @@ private fun PluginImportFailedItem(
     }
 
     if (LocalUiEngine.current == UiEngine.SALT) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-            Item(
-                onClick = { expanded = !expanded },
-                text = title,
-                sub = subtitle.ifBlank { null },
-                textColor = SaltTheme.colors.error,
-                subColor = SaltTheme.colors.error.copy(alpha = 0.82f),
-                tag = if (expanded) stringResource(R.string.plugin_import_collapse)
-                else stringResource(R.string.plugin_import_expand),
-                arrowType = ItemArrowType.None,
-            )
-            if (versionChange.isNotBlank()) com.moriafly.salt.ui.Text(
-                text = versionChange,
-                style = SaltTheme.textStyles.sub,
-                color = SaltTheme.colors.error.copy(alpha = 0.82f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.innerPadding(vertical = false)
-            )
-            com.moriafly.salt.ui.Text(
-                text = failed.reason,
-                style = SaltTheme.textStyles.sub,
-                color = SaltTheme.colors.error,
-                maxLines = if (expanded) Int.MAX_VALUE else 2,
-                overflow = if (expanded) TextOverflow.Clip else TextOverflow.Ellipsis,
-                modifier = Modifier.innerPadding(vertical = false)
-            )
+        RoundedColumn {
+            Column(modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)) {
+                Item(
+                    onClick = { expanded = !expanded },
+                    text = title,
+                    sub = subtitle.ifBlank { null },
+                    textColor = SaltTheme.colors.error,
+                    subColor = SaltTheme.colors.error.copy(alpha = 0.82f),
+                    tag = if (expanded) stringResource(R.string.plugin_import_collapse)
+                    else stringResource(R.string.plugin_import_expand),
+                    arrowType = ItemArrowType.None,
+                )
+                if (versionChange.isNotBlank()) com.moriafly.salt.ui.Text(
+                    text = versionChange,
+                    style = SaltTheme.textStyles.sub,
+                    color = SaltTheme.colors.error.copy(alpha = 0.82f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.innerPadding(vertical = false)
+                )
+                com.moriafly.salt.ui.Text(
+                    text = failed.reason,
+                    style = SaltTheme.textStyles.sub,
+                    color = SaltTheme.colors.error,
+                    maxLines = if (expanded) Int.MAX_VALUE else 2,
+                    overflow = if (expanded) TextOverflow.Clip else TextOverflow.Ellipsis,
+                    modifier = Modifier.innerPadding(vertical = false)
+                )
+            }
         }
         return
     }
@@ -974,6 +1005,18 @@ private fun ImportStatusBadge(
     text: String,
     color: Color
 ) {
+    if (LocalUiEngine.current == UiEngine.SALT) {
+        com.moriafly.salt.ui.Text(
+            text = text,
+            style = SaltTheme.textStyles.sub.copy(fontSize = 11.sp, fontWeight = FontWeight.Bold),
+            color = color,
+            maxLines = 1,
+            modifier = Modifier.clip(SaltTheme.shapes.small)
+                .background(color.copy(alpha = 0.14f))
+                .padding(horizontal = 6.dp, vertical = 2.dp),
+        )
+        return
+    }
     Text(
         text = text,
         fontSize = 11.sp,
@@ -989,6 +1032,13 @@ private fun ImportStatusBadge(
 
 @Composable
 private fun PluginVersionConflict.toImportConflictColor(): Color {
+    if (LocalUiEngine.current == UiEngine.SALT) {
+        return when (this) {
+            PluginVersionConflict.NONE, PluginVersionConflict.UPDATE -> SaltTheme.colors.highlight
+            PluginVersionConflict.OVERWRITE -> SaltTheme.colors.subText
+            PluginVersionConflict.DOWNGRADE -> SaltTheme.colors.error
+        }
+    }
     return when (this) {
         PluginVersionConflict.NONE -> colorScheme.primary
         PluginVersionConflict.UPDATE -> colorScheme.primary
